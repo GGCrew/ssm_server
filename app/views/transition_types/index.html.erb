@@ -1,0 +1,21 @@
+<h1>Listing transition_types</h1>
+
+<table>
+  <tr>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @transition_types.each do |transition_type| %>
+  <tr>
+    <td><%= link_to 'Show', transition_type %></td>
+    <td><%= link_to 'Edit', edit_transition_type_path(transition_type) %></td>
+    <td><%= link_to 'Destroy', transition_type, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Transition type', new_transition_type_path %>
