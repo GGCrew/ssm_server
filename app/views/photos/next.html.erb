@@ -1,0 +1,24 @@
+<table>
+	<tbody>
+		<tr>
+			<td>id</td>
+			<td><%= @photo.id -%></td>
+		</tr>
+		<tr>
+			<td>camera_id</td>
+			<td><%= @photo.camera_id -%></td>
+		</tr>
+		<tr>
+			<td>date</td>
+			<td><%= @photo.date.strftime("%-m-%-d-%Y") -%></td>
+		</tr>
+		<tr>
+			<td>filename</td>
+			<td><%= @photo.filename -%></td>
+		</tr>
+		<tr>
+			<td>img</td>
+			<td><img src="/photos/eye-fi/<%= @photo.path -%>" height="100" /></td>
+		</tr>
+	</tbody>
+</table>

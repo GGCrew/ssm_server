@@ -61,6 +61,17 @@ class PhotosController < ApplicationController
     end
   end
 
+
+	def next
+		index = (rand * Photo.count).to_i
+		@photo =  Photo.all[index]
+		respond_to do |format|
+			format.html {}
+			format.json {}
+		end
+	end
+
+
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_photo
