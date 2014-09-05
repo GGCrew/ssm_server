@@ -1,0 +1,28 @@
+program_states:
+	need_photo
+	hold
+	transition
+	
+
+if(need_photo)
+	unload old photo (free memory)
+	request next photo from server
+	parse json response
+	if(local copy of photo does not exist)
+		download a local copy of photo
+	load local copy of photo
+	set upcoming transition variables (type, duration)
+	set upcoming hold variables (duration)
+	set program state to "hold"
+
+if(hold)
+	sleep for remainder of hold duration
+	set program state to "transition"
+
+if(transition)
+	transition from current photo to next photo
+	set "next photo" as "current photo"
+	draw current photo
+	start hold duration timer
+	set program state to "need photo"
+	
