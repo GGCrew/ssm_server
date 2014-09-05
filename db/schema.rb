@@ -11,7 +11,20 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140903182258) do
+ActiveRecord::Schema.define(version: 20140905000002) do
+
+  create_table "client_photos", force: true do |t|
+    t.integer  "client_id"
+    t.integer  "photo_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "clients", force: true do |t|
+    t.string   "ip_address"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
 
   create_table "photos", force: true do |t|
     t.integer  "camera_id"

@@ -75,10 +75,33 @@ class PhotosController < ApplicationController
 
 	def next
 		# Identify clients by IP address
-		@client_ip = request.env['REMOTE_ADDR']
+		client_ip = request.env['REMOTE_ADDR']
+		client = Client.where({ip_address: client_ip}).first
+		client = Client.create({ip_address: client_ip}) if client.nil?
 
-		index = (rand * Photo.count).to_i
-		@photo =  Photo.all[index]
+		# Get history of client photos to identify any new photos
+		client_photo_ids = client.photos.map(&:id)
+		if client_photo_ids.empty?
+			conditions = []
+		else
+			conditions = ["id NOT IN (:client_photo_ids)", {client_photo_ids: client_photo_ids.uniq}]
+		end
+		@photo = Photo.where(conditions).order('created_at ASC').first
+
+		if @photo.nil?
+			# Get random old photo, preferably one that hasn't been shown recently
+			recent_photo_count = (Photo.count / 2).floor
+			#recent_client_photo_ids = client.client_photos.order('created_at DESC').limit(recent_photo_count).map(&:photo_id)
+			recent_client_photo_ids = client_photo_ids[-recent_photo_count..-1]
+			photos = Photo.where(["id NOT IN (:recent_client_photo_ids)", {recent_client_photo_ids: recent_client_photo_ids}])
+
+			index = (rand * photos.count).floor
+			@photo =  photos[index]
+		end
+
+		# Add the selected photo to the client_photos list (aka "client photo history")
+		client.client_photos.create({photo_id: @photo.id})
+
 		respond_to do |format|
 			format.html {}
 			format.json {}

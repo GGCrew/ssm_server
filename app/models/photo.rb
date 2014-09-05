@@ -9,6 +9,13 @@ class Photo < ActiveRecord::Base
 	#..#
 
 
+	has_many	:client_photos
+	has_many	:clients,	:through => :client_photos
+
+
+	#..#
+
+
 	after_create	:create_rotated_copy
 	after_create	:create_1920_1080_copy
 
