@@ -1,9 +1,9 @@
 <%=
 	{
-		:server_path => "/photos/eye-fi/",
+		:server_path => Photo::RESIZED_FOLDER,
 		:camera_folder => "#{@photo.camera_folder}",
 		:date_folder => "#{@photo.date_folder}",
 		:filename => "#{@photo.filename}",
-		:full_path => "/photos/eye-fi/#{@photo.full_path}",
+		:full_path => "#{Photo::RESIZED_FOLDER + @photo.path}",
 	}.to_json.html_safe
 -%>
