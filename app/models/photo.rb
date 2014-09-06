@@ -1,9 +1,9 @@
 class Photo < ActiveRecord::Base
 
 
-	SOURCE_FOLDER = 'photos/eye-fi/'
-	ROTATED_FOLDER = 'photos/rotated/'
-	RESIZED_FOLDER = 'photos/1920x1080/'
+	SOURCE_FOLDER = '/photos/eye-fi/'
+	ROTATED_FOLDER = '/photos/rotated/'
+	RESIZED_FOLDER = '/photos/1920x1080/'
 
 
 	#..#
@@ -39,8 +39,8 @@ class Photo < ActiveRecord::Base
 
 
 	def create_rotated_copy
-		source_folder = 'public/' + SOURCE_FOLDER
-		rotated_folder = 'public/' + ROTATED_FOLDER
+		source_folder = 'public' + SOURCE_FOLDER
+		rotated_folder = 'public' + ROTATED_FOLDER
 
 		img = Magick::Image.read(source_folder + path)[0]
 		#rot = img.auto_orient
@@ -58,8 +58,8 @@ class Photo < ActiveRecord::Base
 
 
 	def create_1920_1080_copy
-		rotated_folder = 'public/' + ROTATED_FOLDER
-		resized_folder = 'public/' + RESIZED_FOLDER
+		rotated_folder = 'public' + ROTATED_FOLDER
+		resized_folder = 'public' + RESIZED_FOLDER
 
 		begin
 			img = Magick::Image.read(rotated_folder + path)[0]

@@ -2,23 +2,75 @@
 	<tbody>
 		<tr>
 			<td>id</td>
-			<td><%= @photo.id -%></td>
+			<td id="id"><%= @photo.id -%></td>
 		</tr>
 		<tr>
-			<td>camera_id</td>
-			<td><%= @photo.camera_id -%></td>
+			<td>camera_folder</td>
+			<td id="camera_folder"><%= @photo.camera_folder -%></td>
 		</tr>
 		<tr>
-			<td>date</td>
-			<td><%= @photo.date.strftime("%-m-%-d-%Y") -%></td>
+			<td>date_folder</td>
+			<td id="date_folder"><%= @photo.date_folder -%></td>
 		</tr>
 		<tr>
 			<td>filename</td>
-			<td><%= @photo.filename -%></td>
+			<td id="filename"><%= @photo.filename -%></td>
 		</tr>
 		<tr>
 			<td>img</td>
-			<td><img src="<%= Photo::RESIZED_FOLDER + @photo.path -%>" height="100" /></td>
+			<td><img id="photo" src="<%= Photo::RESIZED_FOLDER + @photo.path -%>" height="100" /></td>
 		</tr>
 	</tbody>
 </table>
+
+
+<button type="button" onclick="get_next_photo();">Test</button>
+
+<%= javascript_tag do -%>
+	function process_json(json_text)
+	{
+		var dom;
+		
+		var json = JSON.parse(json_text);
+
+		dom = document.getElementById('id');
+		dom.innerHTML = json.id;
+
+		dom = document.getElementById('camera_folder');
+		dom.innerHTML = json.camera_folder;
+
+		dom = document.getElementById('date_folder');
+		dom.innerHTML = json.date_folder;
+
+		dom = document.getElementById('filename');
+		dom.innerHTML = json.filename;
+
+		dom = document.getElementById('photo');
+		dom.src = json.full_path;
+	}
+
+	function get_next_photo()
+	{
+		var xmlhttp;
+
+		if (window.XMLHttpRequest)
+			{// code for IE7+, Firefox, Chrome, Opera, Safari
+			xmlhttp=new XMLHttpRequest();
+			}
+		else
+			{// code for IE6, IE5
+			xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+			}
+
+		xmlhttp.onreadystatechange=function()
+			{
+			if (xmlhttp.readyState==4 && xmlhttp.status==200)
+				{
+				process_json(xmlhttp.responseText);
+				}
+			}
+
+		xmlhttp.open("GET","/photos/next.json",true);
+		xmlhttp.send();
+	}
+<%- end -%>
