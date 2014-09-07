@@ -17,37 +17,14 @@
 
 			function process_json(json_text)
 			{
-				console.log('process_json: ' + json_text);
-
 				var json = JSON.parse(json_text);
 
-				//dom = document.getElementById('id');
-				//dom.innerHTML = json.id;
-        //
-				//dom = document.getElementById('camera_folder');
-				//dom.innerHTML = json.camera_folder;
-        //
-				//dom = document.getElementById('date_folder');
-				//dom.innerHTML = json.date_folder;
-        //
-				//dom = document.getElementById('filename');
-				//dom.innerHTML = json.filename;
-        //
-				//dom = document.getElementById('photo');
-				//dom.src = json.full_path;
-				
-				//alert(json.full_path);
-
-				console.log("\ttextureCurrent: " + textureCurrent);
 				var textureNext = ((textureCurrent + 1) % IMAGE_COUNT);  // Next texture
-				console.log("\ttextureNext: " + textureNext);
 				egl_load_texture(textureNext, SERVER + json.full_path);
 			}
 
 			function get_next_photo()
 			{
-				console.log('get_next_photo()');
-
 				var xmlhttp;
 
 				if (window.XMLHttpRequest)
@@ -320,8 +297,6 @@ gl_FragColor = vec4(pixel.rgb, alpha);\n\
 				// Compile the shaders
 				var shader_vertex=egl_compile_shader(shader_vertex_source, GL.VERTEX_SHADER);
 				var shader_fragment=egl_compile_shader(shader_fragment_source, GL.FRAGMENT_SHADER);
-				console.log("shader_vertex: " + shader_vertex);
-				console.log("shader_fragment: " + shader_fragment);
 
 				//  Creation of the shader program
 				var SHADER_PROGRAM=GL.createProgram();
@@ -407,14 +382,11 @@ gl_FragColor = vec4(pixel.rgb, alpha);\n\
 			function egl_get_texture(image_URL) {
 				// A function to make a webgl texture from an image URL
 
-				console.log("egl_get_texture()")
-				console.log("\timage_URL: " + image_URL);
-
 				// Create a new javascript image object
 				var image=new Image();
 
-				// Enable CORS for the image (only needed for WebGL if images are coming from another site)
-				image.crossOrigin = "anonymous";
+				//// Enable CORS for the image (only needed for WebGL if images are coming from another site)
+				//image.crossOrigin = "anonymous";
 				
 				// Store the webgl texture as a property of the image
 				image.src=image_URL;
@@ -484,7 +456,6 @@ gl_FragColor = vec4(pixel.rgb, alpha);\n\
 				switch(program_state)
 				{
 					case 'need_photo', 'hold':
-						console.log('egl_render -- need_photo, hold');
 						// Compute and set the scaling matrix
 						LIBS.scale_I4(SCALEMATRIX, CANVAS.width, CANVAS.height, square_textures[textureCurrent].width, square_textures[textureCurrent].height);
 						GL.uniformMatrix4fv(_Smatrix, false, SCALEMATRIX);
@@ -585,40 +556,26 @@ gl_FragColor = vec4(pixel.rgb, alpha);\n\
 				switch(program_state)
 				{
 					case 'need photo':
-						console.log('need photo');
-						//imageCounter = (++imageCounter % imageTotal);  // Next image
-						//var textureNext = ((textureCurrent + 1) % IMAGE_COUNT);  // Next texture
-						//console.log('\ttextureNext: ' + textureNext + 
-						//						'\timageCounter: ' + imageCounter + 
-						//						'\tfilename: ' + images[imageCounter]);
-						//egl_load_texture(textureNext, images[imageCounter]);
-						
 						get_next_photo();
 
 						program_state = 'hold';
-						if(!terminate) {window.requestAnimationFrame(animate);}
+						window.requestAnimationFrame(animate);  // Javascript-specific call to keep the animate() loop going.
 						break;
-						
-					case 'hold':
-						console.log('hold');
-						console.log('\ttextureCurrent: ' + textureCurrent);
-						console.log('\twebglTexture: ' + square_textures[0].webglTexture);
-						console.log('\twebglTexture: ' + square_textures[1].webglTexture);
 
+					case 'hold':
 						egl_render();
 
 						frameCounter = 0;
 						transition_complete = false;
 						program_state = 'transition';
-						sleep(5000, animate);
+						sleep(5000, animate);  // Javascript-specific version to restart the animate() loop after the delay.
 						break;
-				
+
 					case 'transition':
-						//console.log('transition');
 						egl_render();
 
 						frameCounter++;
-						
+
 						if(transition_complete)
 						{
 							textureCurrent = (++textureCurrent % IMAGE_COUNT);  // specify the active texture
@@ -626,11 +583,9 @@ gl_FragColor = vec4(pixel.rgb, alpha);\n\
 						}
 
 						// Redraws the scene as soon as ready
-						if(!terminate) {window.requestAnimationFrame(animate);}
+						window.requestAnimationFrame(animate);
 						break;
 				}
-				
-				if(imageCounter > (imageTotal * 5)) {terminate = true;}
 			}
 
 
@@ -640,15 +595,11 @@ gl_FragColor = vec4(pixel.rgb, alpha);\n\
 				egl_init_model();
 				egl_init_matrices();
 
-				frameCounter = 0;
+				// Load starting textures
 				textureCounter = 0;
-				console.log('\timageCounter: ' + imageCounter);
-				
-				//egl_load_texture(0, images[imageCounter++]);
-				//egl_load_texture(1, images[imageCounter++]);
-				egl_load_texture(0, "/photos/black.png");
+				egl_load_texture(textureCounter, "/photos/black.png");
 				get_next_photo();
-				terminate = false;
+
 				frameCounter = 0;
 				transition_complete = false;
 				program_state = 'transition';
