@@ -195,15 +195,6 @@
 			// Variables that are localized in main()
 			var imageCounter = 0;
 			var textureCurrent = 0;
-			// Array of test images
-			var images = [
-				"images/1.jpg",
-				"images/2.jpg",
-				"images/1_portrait.jpg",
-				"images/1_landscape.jpg",
-				"images/2_200x200.jpg"
-			];
-			var imageTotal = 5;
 
 			// Constants
 			var IMAGE_COUNT = 2;
@@ -530,6 +521,69 @@ gl_FragColor = vec4(pixel.rgb, alpha);\n\
 							GL.drawElements(GL.TRIANGLES, 1*2*3, GL.UNSIGNED_SHORT, 0);
 						}
 						break;
+						
+					case 'zoom':
+						for(var textureCounter = 0; textureCounter < square_textures.length; textureCounter++) {
+							// Determine which texture should remain after the transition
+							var textureActive = (textureCurrent + textureCounter) % IMAGE_COUNT;
+
+
+							// Compute and set the scaling matrix
+							LIBS.scale_I4(SCALEMATRIX, CANVAS.width, CANVAS.height, square_textures[textureCounter].width, square_textures[textureCounter].height);
+							GL.uniformMatrix4fv(_Smatrix, false, SCALEMATRIX);
+
+
+							// Reset, compute, and set the object's movement matrix
+							LIBS.reset_I4(MOVEMATRIX);
+							//if(textureCounter == textureCurrent) {LIBS.translateZ(MOVEMATRIX, (frameCounter / (INTERVAL + 0.0)));}
+							LIBS.translateZ(MOVEMATRIX, (frameCounter / (INTERVAL + 0.0)));
+							GL.uniformMatrix4fv(_Mmatrix, false, MOVEMATRIX);
+
+
+							// Send texture data before drawing the square
+							// Check if webgl texture is loaded
+							if (square_textures[textureCounter].webglTexture) {
+								// Specify sampler texture 0
+								GL.activeTexture(GL.TEXTURE0);
+
+								GL.bindTexture(GL.TEXTURE_2D, square_textures[textureCounter].webglTexture);
+							}
+
+
+							// Compute and set the texture's alpha level
+							var modAlpha = 1.;
+							var modCounter = 0;
+							modCounter = (frameCounter % (INTERVAL * 4));
+							switch(textureActive) {
+								case 0:
+									if(modCounter < (INTERVAL * 1)) {
+										modAlpha = (INTERVAL - (frameCounter % INTERVAL)) / (INTERVAL + 0.0);
+									} else if(modCounter < (INTERVAL * 2)) {
+										modAlpha = 0.;
+										transition_complete = true;
+									}
+									break;
+
+								case 1:
+									if(modCounter < (INTERVAL * 1)) {
+										modAlpha = (frameCounter % INTERVAL) / (INTERVAL + 0.0);
+									} else if(modCounter < (INTERVAL * 2)) {
+										modAlpha = 1.;
+										transition_complete = true;
+									}
+									break;
+							}
+							GL.enable(GL.BLEND);
+							GL.blendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
+							GL.uniform1f(_alpha, modAlpha);
+
+
+							// Draw the square
+							GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, SQUARE_FACES);
+							// Number of elements is calculated by faces * triangles * coordinates (2 for 2D, 3 for 3D)
+							GL.drawElements(GL.TRIANGLES, 1*2*3, GL.UNSIGNED_SHORT, 0);
+						}
+						break;
 				}
 			}
 
@@ -553,6 +607,7 @@ gl_FragColor = vec4(pixel.rgb, alpha);\n\
 						
 					case 'transition':
 						egl_render_transition('dissolve');
+						//egl_render_transition('zoom');
 						break;
 				}
 
