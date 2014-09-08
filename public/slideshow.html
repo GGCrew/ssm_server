@@ -442,51 +442,39 @@ gl_FragColor = vec4(pixel.rgb, alpha);\n\
 			}
 
 
-			function egl_render() {
-				// set the drawing area on the canvas and clear it
-				GL.viewport(0.0, 0.0, CANVAS.width, CANVAS.height);
-				GL.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);
-
-				// Set projection matrix. PROJMATRIX is a javascript array of 1 dimension with 16 floats.
-				GL.uniformMatrix4fv(_Pmatrix, false, PROJMATRIX);
-
-				// Set the view matrix
-				GL.uniformMatrix4fv(_Vmatrix, false, VIEWMATRIX);
-
-				switch(program_state)
-				{
-					case 'need_photo', 'hold':
-						// Compute and set the scaling matrix
-						LIBS.scale_I4(SCALEMATRIX, CANVAS.width, CANVAS.height, square_textures[textureCurrent].width, square_textures[textureCurrent].height);
-						GL.uniformMatrix4fv(_Smatrix, false, SCALEMATRIX);
+			function egl_render_current() {
+				// Compute and set the scaling matrix
+				LIBS.scale_I4(SCALEMATRIX, CANVAS.width, CANVAS.height, square_textures[textureCurrent].width, square_textures[textureCurrent].height);
+				GL.uniformMatrix4fv(_Smatrix, false, SCALEMATRIX);
 
 
-						// Reset, compute, and set the object's movement matrix
-						LIBS.reset_I4(MOVEMATRIX);
-						GL.uniformMatrix4fv(_Mmatrix, false, MOVEMATRIX);
-					
-						// Send texture data before drawing the square
-						// Check if webgl texture is loaded
-						if (square_textures[textureCurrent].webglTexture) {
-							// Specify sampler texture 0
-							GL.activeTexture(GL.TEXTURE0);
+				// Reset, compute, and set the object's movement matrix
+				LIBS.reset_I4(MOVEMATRIX);
+				GL.uniformMatrix4fv(_Mmatrix, false, MOVEMATRIX);
 
-							GL.bindTexture(GL.TEXTURE_2D, square_textures[textureCurrent].webglTexture);
-						}
+				// Send texture data before drawing the square
+				// Check if webgl texture is loaded
+				if (square_textures[textureCurrent].webglTexture) {
+					// Specify sampler texture 0
+					GL.activeTexture(GL.TEXTURE0);
 
-						GL.disable(GL.BLEND);
+					GL.bindTexture(GL.TEXTURE_2D, square_textures[textureCurrent].webglTexture);
+				}
+
+				GL.disable(GL.BLEND);
 
 
-						// Draw the square
-						GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, SQUARE_FACES);
-						// Number of elements is calculated by faces * triangles * coordinates (2 for 2D, 3 for 3D)
-						GL.drawElements(GL.TRIANGLES, 1*2*3, GL.UNSIGNED_SHORT, 0);
-					
-						break;
-						
-					case 'transition':
-						for(var textureCounter = 0; textureCounter < square_textures.length; textureCounter++)
-						{
+				// Draw the square
+				GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, SQUARE_FACES);
+				// Number of elements is calculated by faces * triangles * coordinates (2 for 2D, 3 for 3D)
+				GL.drawElements(GL.TRIANGLES, 1*2*3, GL.UNSIGNED_SHORT, 0);
+			}
+
+
+			function egl_render_transition(transition_type) {
+				switch(transition_type) {
+					case 'dissolve':
+						for(var textureCounter = 0; textureCounter < square_textures.length; textureCounter++) {
 							// Compute and set the scaling matrix
 							LIBS.scale_I4(SCALEMATRIX, CANVAS.width, CANVAS.height, square_textures[textureCounter].width, square_textures[textureCounter].height);
 							GL.uniformMatrix4fv(_Smatrix, false, SCALEMATRIX);
@@ -514,8 +502,7 @@ gl_FragColor = vec4(pixel.rgb, alpha);\n\
 							modCounter = (frameCounter % (INTERVAL * 4));
 							switch(textureActive) {
 								case 0:
-									if(modCounter < (INTERVAL * 1))
-									{
+									if(modCounter < (INTERVAL * 1)) {
 										modAlpha = (INTERVAL - (frameCounter % INTERVAL)) / (INTERVAL + 0.0);
 									} else if(modCounter < (INTERVAL * 2)) {
 										modAlpha = 0.;
@@ -524,8 +511,7 @@ gl_FragColor = vec4(pixel.rgb, alpha);\n\
 									break;
 
 								case 1:
-									if(modCounter < (INTERVAL * 1))
-									{
+									if(modCounter < (INTERVAL * 1)) {
 										modAlpha = (frameCounter % INTERVAL) / (INTERVAL + 0.0);
 									} else if(modCounter < (INTERVAL * 2)) {
 										modAlpha = 1.;
@@ -543,6 +529,31 @@ gl_FragColor = vec4(pixel.rgb, alpha);\n\
 							// Number of elements is calculated by faces * triangles * coordinates (2 for 2D, 3 for 3D)
 							GL.drawElements(GL.TRIANGLES, 1*2*3, GL.UNSIGNED_SHORT, 0);
 						}
+						break;
+				}
+			}
+
+
+			function egl_render() {
+				// set the drawing area on the canvas and clear it
+				GL.viewport(0.0, 0.0, CANVAS.width, CANVAS.height);
+				GL.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);
+
+				// Set projection matrix. PROJMATRIX is a javascript array of 1 dimension with 16 floats.
+				GL.uniformMatrix4fv(_Pmatrix, false, PROJMATRIX);
+
+				// Set the view matrix
+				GL.uniformMatrix4fv(_Vmatrix, false, VIEWMATRIX);
+
+				switch(program_state)
+				{
+					case 'need_photo', 'hold':
+						egl_render_current();
+						break;
+						
+					case 'transition':
+						egl_render_transition('dissolve');
+						break;
 				}
 
 				// Drawing is finished. Show the render
