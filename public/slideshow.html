@@ -193,8 +193,7 @@
 			var transition_complete;
 
 			// Variables that are localized in main()
-			var imageCounter = 0;
-			var textureCurrent = 0;
+			var textureCurrent;
 
 			// Constants
 			var IMAGE_COUNT = 2;
@@ -490,12 +489,12 @@ gl_FragColor = vec4(pixel.rgb, alpha);\n\
 							var textureActive = (textureCurrent + textureCounter) % IMAGE_COUNT;
 							var modAlpha = 1.;
 							var modCounter = 0;
-							modCounter = (frameCounter % (INTERVAL * 4));
+							modCounter = (frameCounter % INTERVAL);
 							switch(textureActive) {
 								case 0:
 									if(modCounter < (INTERVAL * 1)) {
-										modAlpha = (INTERVAL - (frameCounter % INTERVAL)) / (INTERVAL + 0.0);
-									} else if(modCounter < (INTERVAL * 2)) {
+										modAlpha = (INTERVAL - modCounter) / (INTERVAL + 0.0);
+									} else {
 										modAlpha = 0.;
 										transition_complete = true;
 									}
@@ -503,8 +502,8 @@ gl_FragColor = vec4(pixel.rgb, alpha);\n\
 
 								case 1:
 									if(modCounter < (INTERVAL * 1)) {
-										modAlpha = (frameCounter % INTERVAL) / (INTERVAL + 0.0);
-									} else if(modCounter < (INTERVAL * 2)) {
+										modAlpha = modCounter / (INTERVAL + 0.0);
+									} else {
 										modAlpha = 1.;
 										transition_complete = true;
 									}
@@ -666,9 +665,13 @@ gl_FragColor = vec4(pixel.rgb, alpha);\n\
 				egl_load_texture(textureCounter, "/photos/black.png");
 				get_next_photo();
 
+				// Set initial variables
 				frameCounter = 0;
+				textureCurrent = 0;
 				transition_complete = false;
 				program_state = 'transition';
+				
+				// Go!
 				animate();  // This represents the primary loop in main()
 			}
 		</script>
