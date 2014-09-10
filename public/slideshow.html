@@ -488,27 +488,24 @@ gl_FragColor = vec4(pixel.rgb, alpha);\n\
 							// Compute and set the texture's alpha level
 							var textureActive = (textureCurrent + textureCounter) % IMAGE_COUNT;
 							var modAlpha = 1.;
-							var modCounter = 0;
-							modCounter = (frameCounter % INTERVAL);
 							switch(textureActive) {
 								case 0:
-									if(modCounter < (INTERVAL * 1)) {
-										modAlpha = (INTERVAL - modCounter) / (INTERVAL + 0.0);
+									if(frameCounter < INTERVAL) {
+										modAlpha = (INTERVAL - frameCounter) / (INTERVAL + 0.0);
 									} else {
 										modAlpha = 0.;
-										transition_complete = true;
 									}
 									break;
 
 								case 1:
-									if(modCounter < (INTERVAL * 1)) {
-										modAlpha = modCounter / (INTERVAL + 0.0);
+									if(frameCounter < INTERVAL) {
+										modAlpha = frameCounter / (INTERVAL + 0.0);
 									} else {
 										modAlpha = 1.;
-										transition_complete = true;
 									}
 									break;
 							}
+
 							GL.enable(GL.BLEND);
 							GL.blendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
 							GL.uniform1f(_alpha, modAlpha);
@@ -519,6 +516,10 @@ gl_FragColor = vec4(pixel.rgb, alpha);\n\
 							// Number of elements is calculated by faces * triangles * coordinates (2 for 2D, 3 for 3D)
 							GL.drawElements(GL.TRIANGLES, 1*2*3, GL.UNSIGNED_SHORT, 0);
 						}
+						
+						// Check exit condition
+						if(frameCounter >= INTERVAL) {transition_complete = true;}
+
 						break;
 						
 					case 'zoom':
