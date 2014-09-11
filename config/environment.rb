@@ -5,4 +5,5 @@ require File.expand_path('../application', __FILE__)
 Rails.application.initialize!
 
 # Explicitly adding assorted libraries
-require 'RMagick'
+#require 'RMagick'
+require 'free-image'

@@ -39,4 +39,7 @@ gem 'spring',        group: :development
 # gem 'debugger', group: [:development, :test]
 
 # Use RMagick
-gem 'rmagick'
+#gem 'rmagick'
+
+# Use FreeImage
+gem 'free-image'
