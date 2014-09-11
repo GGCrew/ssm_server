@@ -83,40 +83,41 @@ class Photo < ActiveRecord::Base
 		# Load source
 		FreeImage::Bitmap.open(source_folder + path) do |img|
 
-		# Rotate
-		# To-do: use EXIF to determine orientation
-		rotated_image = image.rotate(90, nil)
+			# Rotate
+			# To-do: use EXIF to determine orientation
+			rotated_image = image.rotate(90, nil)
 
-		# Save rotated copy
-		begin
-			rotated_image.save(rotated_folder + path, :jpeg, FreeImage::AbstractSource::Encoder::JPEG_QUALITYSUPERB)
-		rescue
-			Dir.mkdir(rotated_folder) unless Dir.exists?(rotated_folder)
-			Dir.mkdir(rotated_folder + camera_folder) unless Dir.exists?(rotated_folder + camera_folder)
-			Dir.mkdir(rotated_folder + camera_folder + '/' + date_folder) unless Dir.exists?(rotated_folder + camera_folder + '/' + date_folder)
-			rotated_image.save(rotated_folder + path, :jpeg, FreeImage::AbstractSource::Encoder::JPEG_QUALITYSUPERB)			
-		end
+			# Save rotated copy
+			begin
+				rotated_image.save(rotated_folder + path, :jpeg, FreeImage::AbstractSource::Encoder::JPEG_QUALITYSUPERB)
+			rescue
+				Dir.mkdir(rotated_folder) unless Dir.exists?(rotated_folder)
+				Dir.mkdir(rotated_folder + camera_folder) unless Dir.exists?(rotated_folder + camera_folder)
+				Dir.mkdir(rotated_folder + camera_folder + '/' + date_folder) unless Dir.exists?(rotated_folder + camera_folder + '/' + date_folder)
+				rotated_image.save(rotated_folder + path, :jpeg, FreeImage::AbstractSource::Encoder::JPEG_QUALITYSUPERB)			
+			end
 
-		# Scale
-		width_scale = rotated_image.width / 1920.0
-		height_scale = rotated_image.height / 1080.0
-		if(width_scale > height_scale)
-			new_width = (rotated_image.width / width_scale).to_i
-			new_height = (rotated_image.height / width_scale).to_i
-		else
-			new_width = (rotated_image.width / height_scale).to_i
-			new_height = (rotated_image.height / height_scale).to_i
-		end
-		scaled_image = rotated_image.rescale(new_width, new_height, :bilinear)
+			# Scale
+			width_scale = rotated_image.width / 1920.0
+			height_scale = rotated_image.height / 1080.0
+			if(width_scale > height_scale)
+				new_width = (rotated_image.width / width_scale).to_i
+				new_height = (rotated_image.height / width_scale).to_i
+			else
+				new_width = (rotated_image.width / height_scale).to_i
+				new_height = (rotated_image.height / height_scale).to_i
+			end
+			scaled_image = rotated_image.rescale(new_width, new_height, :bilinear)
 
-		# Save rotated & scaled copy
-		begin
-			scaled_image.save(resized_folder + path, :jpeg, FreeImage::AbstractSource::Encoder::JPEG_QUALITYSUPERB)
-		rescue
-			Dir.mkdir(resized_folder) unless Dir.exists?(resized_folder)
-			Dir.mkdir(resized_folder + camera_folder) unless Dir.exists?(resized_folder + camera_folder)
-			Dir.mkdir(resized_folder + camera_folder + '/' + date_folder) unless Dir.exists?(resized_folder + camera_folder + '/' + date_folder)
-			scaled_image.save(resized_folder + path, :jpeg, FreeImage::AbstractSource::Encoder::JPEG_QUALITYSUPERB)			
+			# Save rotated & scaled copy
+			begin
+				scaled_image.save(resized_folder + path, :jpeg, FreeImage::AbstractSource::Encoder::JPEG_QUALITYSUPERB)
+			rescue
+				Dir.mkdir(resized_folder) unless Dir.exists?(resized_folder)
+				Dir.mkdir(resized_folder + camera_folder) unless Dir.exists?(resized_folder + camera_folder)
+				Dir.mkdir(resized_folder + camera_folder + '/' + date_folder) unless Dir.exists?(resized_folder + camera_folder + '/' + date_folder)
+				scaled_image.save(resized_folder + path, :jpeg, FreeImage::AbstractSource::Encoder::JPEG_QUALITYSUPERB)			
+			end
 		end
 	end
 
