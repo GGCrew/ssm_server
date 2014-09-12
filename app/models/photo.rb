@@ -83,11 +83,19 @@ class Photo < ActiveRecord::Base
 		resized_folder = 'public' + RESIZED_FOLDER
 
 		# Load source
-		FreeImage::Bitmap.open(source_folder + path) do |image|
-
+		#FreeImage::Bitmap.open(source_folder + path, FreeImage::AbstractSource::Decoder::JPEG_EXIFROTATE) do |image|
+		FreeImage::Bitmap.new(
+			FreeImage.FreeImage_Load(
+				FreeImage::FreeImage_GetFIFFromFilename(source_folder + path),
+				source_folder + path,
+				FreeImage::AbstractSource::Decoder::JPEG_EXIFROTATE
+			)
+		) do |rotated_image|
+=begin
 			# Rotate
 			# To-do: use EXIF to determine orientation
 			rotated_image = image.rotate(90, nil)
+=end
 
 =begin
 			# Save rotated copy
