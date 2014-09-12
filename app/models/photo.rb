@@ -82,6 +82,8 @@ class Photo < ActiveRecord::Base
 		rotated_folder = 'public' + ROTATED_FOLDER
 		resized_folder = 'public' + RESIZED_FOLDER
 
+		save_flags =  FreeImage::AbstractSource::Encoder::JPEG_QUALITYSUPERB | FreeImage::AbstractSource::Encoder::JPEG_BASELINE
+
 		# Load source
 		#FreeImage::Bitmap.open(source_folder + path, FreeImage::AbstractSource::Decoder::JPEG_EXIFROTATE) do |image|
 		FreeImage::Bitmap.new(
@@ -100,12 +102,12 @@ class Photo < ActiveRecord::Base
 =begin
 			# Save rotated copy
 			begin
-				rotated_image.save(rotated_folder + path, :jpeg, FreeImage::AbstractSource::Encoder::JPEG_QUALITYSUPERB)
+				rotated_image.save(rotated_folder + path, :jpeg, save_flags)
 			rescue
 				Dir.mkdir(rotated_folder) unless Dir.exists?(rotated_folder)
 				Dir.mkdir(rotated_folder + camera_folder) unless Dir.exists?(rotated_folder + camera_folder)
 				Dir.mkdir(rotated_folder + camera_folder + '/' + date_folder) unless Dir.exists?(rotated_folder + camera_folder + '/' + date_folder)
-				rotated_image.save(rotated_folder + path, :jpeg, FreeImage::AbstractSource::Encoder::JPEG_QUALITYSUPERB)			
+				rotated_image.save(rotated_folder + path, :jpeg, save_flags)			
 			end
 =end
 
@@ -123,12 +125,12 @@ class Photo < ActiveRecord::Base
 
 			# Save rotated & scaled copy
 			begin
-				scaled_image.save(resized_folder + path, :jpeg, FreeImage::AbstractSource::Encoder::JPEG_QUALITYSUPERB)
+				scaled_image.save(resized_folder + path, :jpeg, save_flags)
 			rescue
 				Dir.mkdir(resized_folder) unless Dir.exists?(resized_folder)
 				Dir.mkdir(resized_folder + camera_folder) unless Dir.exists?(resized_folder + camera_folder)
 				Dir.mkdir(resized_folder + camera_folder + '/' + date_folder) unless Dir.exists?(resized_folder + camera_folder + '/' + date_folder)
-				scaled_image.save(resized_folder + path, :jpeg, FreeImage::AbstractSource::Encoder::JPEG_QUALITYSUPERB)			
+				scaled_image.save(resized_folder + path, :jpeg, save_flags)
 			end
 		end
 	end
