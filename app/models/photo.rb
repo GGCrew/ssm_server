@@ -44,32 +44,32 @@ class Photo < ActiveRecord::Base
 		resized_folder = 'public' + RESIZED_FOLDER
 
 		# Load source
-		img = Magick::Image.read(source_folder + path)[0]
+		image = Magick::Image.read(source_folder + path)[0]
 
 		# Rotate
-		img.auto_orient!
+		image.auto_orient!
 
 		# Save rotated copy
 		begin
-			img.write(rotated_folder + path)
+			image.write(rotated_folder + path)
 		rescue
 			Dir.mkdir(rotated_folder) unless Dir.exists?(rotated_folder)
 			Dir.mkdir(rotated_folder + camera_folder) unless Dir.exists?(rotated_folder + camera_folder)
 			Dir.mkdir(rotated_folder + camera_folder + '/' + date_folder) unless Dir.exists?(rotated_folder + camera_folder + '/' + date_folder)
-			img.write(rotated_folder + path)			
+			image.write(rotated_folder + path)			
 		end
 
 		# Scale
-		img.resize_to_fit!(1920, 1080)
+		image.resize_to_fit!(1920, 1080)
 
 		# Save rotated & scaled copy
 		begin
-			img.write(resized_folder + path)
+			image.write(resized_folder + path)
 		rescue
 			Dir.mkdir(resized_folder) unless Dir.exists?(resized_folder)
 			Dir.mkdir(resized_folder + camera_folder) unless Dir.exists?(resized_folder + camera_folder)
 			Dir.mkdir(resized_folder + camera_folder + '/' + date_folder) unless Dir.exists?(resized_folder + camera_folder + '/' + date_folder)
-			img.write(resized_folder + path)			
+			image.write(resized_folder + path)			
 		end
 	end
 =end
@@ -81,7 +81,7 @@ class Photo < ActiveRecord::Base
 		resized_folder = 'public' + RESIZED_FOLDER
 
 		# Load source
-		FreeImage::Bitmap.open(source_folder + path) do |img|
+		FreeImage::Bitmap.open(source_folder + path) do |image|
 
 			# Rotate
 			# To-do: use EXIF to determine orientation
