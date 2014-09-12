@@ -22,6 +22,37 @@ class Photo < ActiveRecord::Base
 	#..#
 
 
+	def self.scan_for_new_photos
+		path = 'public' + SOURCE_FOLDER
+		files = Dir.glob(path + '**/*.{JPG,PNG}')
+		for file in files
+			photo_hash = path_to_hash(file[path.size..-1])
+			Photo.create!(photo_hash) if Photo.where(photo_hash).blank?
+		end
+	end
+
+
+	def self.path_to_hash(path)
+		hash = {}
+		path_components = path.split('/')
+
+		if path_components.count == 3
+			camera_id = path_components[0][-2..-1].to_i
+			date = Date.strptime(path_components[1], '%m-%d-%Y')
+			filename = path_components[2]
+
+			hash.merge!(camera_id: camera_id)
+			hash.merge!(date: date)
+			hash.merge!(filename: filename)
+		end
+
+		return hash
+	end
+
+
+	#..#
+
+
 	def path
 		return "#{camera_folder}/#{date_folder}/#{self.filename}"
 	end
@@ -36,6 +67,15 @@ class Photo < ActiveRecord::Base
 		return self.date.strftime("%-m-%-d-%Y")
 	end
 
+
+=begin
+	# Optimization test code (to be run in console)
+	photo = {:camera_id => 1, :date => '9-4-2014', :filename => 'IMG_4690.JPG'}
+	start_time = Time.now
+	Photo.create!(:camera_id => photo[:camera_id], :date => Date.strptime(photo[:date], '%m-%d-%Y'), :filename => photo[:filename])
+	end_time = Time.now
+	run_time = end_time - start_time
+=end
 
 =begin
 	# This block requires RMagick
@@ -93,23 +133,6 @@ class Photo < ActiveRecord::Base
 				FreeImage::AbstractSource::Decoder::JPEG_EXIFROTATE
 			)
 		) do |rotated_image|
-=begin
-			# Rotate
-			# To-do: use EXIF to determine orientation
-			rotated_image = image.rotate(90, nil)
-=end
-
-=begin
-			# Save rotated copy
-			begin
-				rotated_image.save(rotated_folder + path, :jpeg, save_flags)
-			rescue
-				Dir.mkdir(rotated_folder) unless Dir.exists?(rotated_folder)
-				Dir.mkdir(rotated_folder + camera_folder) unless Dir.exists?(rotated_folder + camera_folder)
-				Dir.mkdir(rotated_folder + camera_folder + '/' + date_folder) unless Dir.exists?(rotated_folder + camera_folder + '/' + date_folder)
-				rotated_image.save(rotated_folder + path, :jpeg, save_flags)			
-			end
-=end
 
 			# Scale
 			width_scale = rotated_image.width / 1920.0
