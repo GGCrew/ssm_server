@@ -38,6 +38,7 @@ class Photo < ActiveRecord::Base
 
 
 =begin
+	# This block requires RMagick
 	def create_rotated_and_scaled_copy
 		source_folder = 'public' + SOURCE_FOLDER
 		rotated_folder = 'public' + ROTATED_FOLDER
@@ -75,6 +76,7 @@ class Photo < ActiveRecord::Base
 =end
 
 
+	# This block requires FreeImage
 	def create_rotated_and_scaled_copy
 		source_folder = 'public' + SOURCE_FOLDER
 		rotated_folder = 'public' + ROTATED_FOLDER
@@ -87,6 +89,7 @@ class Photo < ActiveRecord::Base
 			# To-do: use EXIF to determine orientation
 			rotated_image = image.rotate(90, nil)
 
+=begin
 			# Save rotated copy
 			begin
 				rotated_image.save(rotated_folder + path, :jpeg, FreeImage::AbstractSource::Encoder::JPEG_QUALITYSUPERB)
@@ -96,6 +99,7 @@ class Photo < ActiveRecord::Base
 				Dir.mkdir(rotated_folder + camera_folder + '/' + date_folder) unless Dir.exists?(rotated_folder + camera_folder + '/' + date_folder)
 				rotated_image.save(rotated_folder + path, :jpeg, FreeImage::AbstractSource::Encoder::JPEG_QUALITYSUPERB)			
 			end
+=end
 
 			# Scale
 			width_scale = rotated_image.width / 1920.0
