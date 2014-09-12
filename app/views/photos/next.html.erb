@@ -2,23 +2,23 @@
 	<tbody>
 		<tr>
 			<td>id</td>
-			<td id="id"><%= @photo.id -%></td>
+			<td id="id"><%= @photo.id if @photo -%></td>
 		</tr>
 		<tr>
 			<td>camera_folder</td>
-			<td id="camera_folder"><%= @photo.camera_folder -%></td>
+			<td id="camera_folder"><%= @photo.camera_folder if @photo -%></td>
 		</tr>
 		<tr>
 			<td>date_folder</td>
-			<td id="date_folder"><%= @photo.date_folder -%></td>
+			<td id="date_folder"><%= @photo.date_folder if @photo -%></td>
 		</tr>
 		<tr>
 			<td>filename</td>
-			<td id="filename"><%= @photo.filename -%></td>
+			<td id="filename"><%= @photo.filename if @photo -%></td>
 		</tr>
 		<tr>
 			<td>img</td>
-			<td><img id="photo" src="<%= Photo::RESIZED_FOLDER + @photo.path -%>" height="100" /></td>
+			<td><img id="photo" src="<%= (Photo::RESIZED_FOLDER + @photo.path) if @photo -%>" height="100" /></td>
 		</tr>
 	</tbody>
 </table>

@@ -9,7 +9,8 @@ class PhotosController < ApplicationController
   # GET /photos
   # GET /photos.json
   def index
-    @photos = Photo.all
+    #@photos = Photo.all
+		approved
   end
 
 
@@ -82,28 +83,58 @@ class PhotosController < ApplicationController
 		# Get history of client photos to identify any new photos
 		client_photo_ids = client.photos.map(&:id)
 		if client_photo_ids.empty?
-			conditions = []
+			conditions_new = []
 		else
-			conditions = ["id NOT IN (:client_photo_ids)", {client_photo_ids: client_photo_ids.uniq}]
+			conditions_new = ["id NOT IN (:client_photo_ids)", {client_photo_ids: client_photo_ids.uniq}]
 		end
-		@photo = Photo.where(conditions).order('created_at ASC').first
+		@photo = Photo.approved.where(conditions_new).order('created_at ASC').first
 
 		if @photo.nil?
 			# Get random old photo, preferably one that hasn't been shown recently
-			recent_photo_count = (Photo.count / 2).floor
-			#recent_client_photo_ids = client.client_photos.order('created_at DESC').limit(recent_photo_count).map(&:photo_id)
-			recent_client_photo_ids = client_photo_ids[-recent_photo_count..-1]
-			photos = Photo.where(["id NOT IN (:recent_client_photo_ids)", {recent_client_photo_ids: recent_client_photo_ids}])
+			recent_photo_count = (Photo.approved.count / 2).floor
+			recent_client_photo_ids = (recent_photo_count == 0 ? [-1] : client_photo_ids[-recent_photo_count..-1])
+			conditions_not_recent = ["id NOT IN (:recent_client_photo_ids)", {recent_client_photo_ids: recent_client_photo_ids}]
+			old_photos = Photo.approved.where(conditions_not_recent)
 
-			index = (rand * photos.count).floor
-			@photo =  photos[index]
+			index = (rand * old_photos.count).floor
+			@photo =  old_photos[index]
 		end
 
 		# Add the selected photo to the client_photos list (aka "client photo history")
-		client.client_photos.create({photo_id: @photo.id})
+		client.client_photos.create({photo_id: @photo.id}) if @photo
 
 		respond_to do |format|
 			format.html {}
+			format.json {}
+		end
+	end
+
+
+	def pending
+		@photos = Photo.pending
+
+		respond_to do |format|
+			format.html {render('index')}
+			format.json {}
+		end
+	end
+
+
+	def approved
+		@photos = Photo.approved
+
+		respond_to do |format|
+			format.html {render('index')}
+			format.json {}
+		end
+	end
+
+
+	def denied
+		@photos = Photo.denied
+
+		respond_to do |format|
+			format.html {render('index')}
 			format.json {}
 		end
 	end

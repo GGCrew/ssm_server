@@ -2,6 +2,9 @@ Rails.application.routes.draw do
   resources :photos do
 		collection do
 			get 'next'
+			get 'pending'
+			get 'approved'
+			get 'denied'
 		end
 	end
 

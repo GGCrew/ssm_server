@@ -1,10 +1,10 @@
 <%=
 	{
-		:id => @photo.id,
+		:id => (@photo.id if @photo),
 		:server_path => Photo::RESIZED_FOLDER,
-		:camera_folder => "#{@photo.camera_folder}",
-		:date_folder => "#{@photo.date_folder}",
-		:filename => "#{@photo.filename}",
-		:full_path => "#{Photo::RESIZED_FOLDER + @photo.path}",
+		:camera_folder => "#{@photo.camera_folder if @photo}",
+		:date_folder => "#{@photo.date_folder if @photo}",
+		:filename => "#{@photo.filename if @photo}",
+		:full_path => "#{(Photo::RESIZED_FOLDER + @photo.path) if @photo}",
 	}.to_json.html_safe
 -%>

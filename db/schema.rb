@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140905000002) do
+ActiveRecord::Schema.define(version: 20140912000001) do
 
   create_table "client_photos", force: true do |t|
     t.integer  "client_id"
@@ -32,6 +32,7 @@ ActiveRecord::Schema.define(version: 20140905000002) do
     t.string   "filename"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.string   "approval_state", default: "pending"
   end
 
 end
