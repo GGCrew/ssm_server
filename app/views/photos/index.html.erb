@@ -11,20 +11,26 @@
 <div class="photo_section">
 	<div class="sidebar">
 		<div class="buttons">
-			<%= link_to('Approve', '#', class: 'approve') -%></li>
+			<%= link_to('Approve', '#', {class: 'approve', onclick: "approve_photo(this, #{@photos.first.id}); return false;"}) -%></li>
 			<%= link_to('Deny', '#', class: 'deny') -%></li>
 		</div>
 				
 		<div class="filenames">
 			<%- @photos.each do |photo| -%>
-				<%= link_to(format_filename(photo).html_safe, photo_path(photo.id)) -%><br>
+				<%= link_to(
+					format_filename(photo).html_safe, 
+					"#",
+					{
+						id: photo.id,
+						onclick: "show_photo(this, #{photo.id}, '#{photo.path}', '#{Photo::RESIZED_FOLDER + photo.path}'); return false;"
+					}
+				) -%><br>
 			<%- end -%>
 		</div>
 	</div>
 	
 	<div class="preview">
 		<img src="<%= Photo::RESIZED_FOLDER + @photos.first.path -%>">
-		<br>
 		<p class="caption"><%= @photos.first.path -%></p>
 	</div>
 	
