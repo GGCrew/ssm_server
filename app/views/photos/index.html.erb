@@ -1,24 +1,33 @@
-<h1>Listing photos</h1>
+<%- if false -%>
+<ul class="menu_bar">
+	<li>Pending</li>
+	<li>Approved</li>
+	<li>Denied</li>
+</ul>
 
-<table>
-  <thead>
-    <tr>
-      <th colspan="4"></th>
-    </tr>
-  </thead>
+<div class="clear_float"></div>
+<%- end -%>
 
-  <tbody>
-    <% @photos.each do |photo| %>
-      <tr>
-				<td><img src="<%= Photo::RESIZED_FOLDER + photo.path -%>" height="50" /></td>
-        <td><%= link_to 'Show', photo %></td>
-        <td><%= link_to 'Edit', edit_photo_path(photo) %></td>
-        <td><%= link_to 'Destroy', photo, method: :delete, data: { confirm: 'Are you sure?' } %></td>
-      </tr>
-    <% end %>
-  </tbody>
-</table>
-
-<br>
-
-<%= link_to 'New Photo', new_photo_path %>
+<div class="photo_section">
+	<div class="sidebar">
+		<div class="buttons">
+			<%= link_to('Approve', '#', class: 'approve') -%></li>
+			<%= link_to('Deny', '#', class: 'deny') -%></li>
+		</div>
+				
+		<div class="filenames">
+			<%- @photos.each do |photo| -%>
+				<%= link_to(format_filename(photo).html_safe, photo_path(photo.id)) -%><br>
+			<%- end -%>
+		</div>
+	</div>
+	
+	<div class="preview">
+		<img src="<%= Photo::RESIZED_FOLDER + @photos.first.path -%>">
+		<br>
+		<p class="caption"><%= @photos.first.path -%></p>
+	</div>
+	
+	<div class="clear_float">
+	</div>
+</div>

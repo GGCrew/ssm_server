@@ -1,9 +1,16 @@
+html {
+	height: 100%;
+}
+
 body {
-  background-color: #fff;
-  color: #333;
+  background-color: #000000;
+  color: #FFFFFF;
   font-family: verdana, arial, helvetica, sans-serif;
   font-size: 13px;
   line-height: 18px;
+	width: 100%;
+	margin: 0;
+	height: 95%;
 }
 
 p, ol, ul, td {
@@ -19,13 +26,13 @@ pre {
 }
 
 a {
-  color: #000;
+  color: #FFFFFF;
   &:visited {
-    color: #666;
+    color: #FFFFFF;
   }
   &:hover {
-    color: #fff;
-    background-color: #000;
+    color: #FFFFFF;
+    background-color: #000000;
   }
 }
 
@@ -66,4 +73,18 @@ div {
     font-size: 12px;
     list-style: square;
   }
+}
+
+
+ul.menu_bar {
+	li {
+		float: left;
+		padding: .5em 1em;
+		list-style: none;
+	}
+}
+
+
+.clear_float {
+	clear: both;
 }
