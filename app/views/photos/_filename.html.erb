@@ -1,0 +1,9 @@
+<%= link_to(
+	format_filename(filename).html_safe, 
+	"#",
+	{
+		id: filename.id,
+		onclick: "show_photo(this, #{filename.id}, '#{filename.path}', '#{Photo::RESIZED_FOLDER + filename.path}'); return false;"
+	}
+) -%>
+<br>

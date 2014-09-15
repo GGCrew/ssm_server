@@ -6,16 +6,7 @@
 		</div>
 				
 		<div class="filenames">
-			<%- photo_section.each do |photo| -%>
-				<%= link_to(
-					format_filename(photo).html_safe, 
-					"#",
-					{
-						id: photo.id,
-						onclick: "show_photo(this, #{photo.id}, '#{photo.path}', '#{Photo::RESIZED_FOLDER + photo.path}'); return false;"
-					}
-				) -%><br>
-			<%- end -%>
+			<%= render(partial: 'filename', collection: photo_section) -%>
 		</div>
 	</div>
 	

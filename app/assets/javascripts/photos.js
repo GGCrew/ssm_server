@@ -15,7 +15,7 @@ function show_photo(list_item_element, id, short_path, full_path) {
 	$(image).attr('src', full_path);
 	$(caption).text(short_path);
 
-	update_buttons(list_item_element, id);
+	update_buttons(photo_section, id);
 }
 
 
@@ -28,8 +28,10 @@ function clear_photo(photo_section) {
 }
 
 
-function update_buttons(list_item_element, id) {
-	var buttons = $(list_item_element).parent().siblings('.buttons').children('a');
+function update_buttons(photo_section, id) {
+	//var buttons = $(list_item_element).parent().siblings('.buttons').children('a');
+	var buttons = $(photo_section).find('.sidebar .buttons').children('a');
+
 	buttons.each( function() {
 		var url_components = $(this).attr('href').match(/(.*\/photos\/).*(\/.*)/);
 		$(this).attr('href', url_components[1] + id + url_components[2]);			
@@ -46,7 +48,7 @@ $(document).ready(function() {
 					$(this).css('background-color', 'darkgreen');
 				}
 			})
-		})
+		});
 
 	$('.deny')
 		.on('ajax:beforeSend', function(evt, xhr, settings) {
@@ -56,5 +58,14 @@ $(document).ready(function() {
 					$(this).css('background-color', 'darkred');
 				}
 			})
-		})
+		});
+
+	$('ul.menu_bar li a')
+		.on('ajax:beforeSend', function(evt, xhr, settings) {
+			var photo_section = $('.photo_section');
+			var filenames = $(photo_section).find('.sidebar .filenames');
+			clear_photo(photo_section);
+			update_buttons(photo_section);
+			filenames.text('');			
+		});
 })

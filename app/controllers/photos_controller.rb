@@ -78,7 +78,7 @@ class PhotosController < ApplicationController
 		logger.debug('PhotosController.approve')
 		@photo.approve!
     respond_to do |format|
-			format.js { render('update_lists') }
+			format.js { render('update_list') }
       #format.html { redirect_to(photos_path, notice: 'Photo was successfully approved.') }
       #format.json { head :no_content }
 		end
@@ -88,7 +88,7 @@ class PhotosController < ApplicationController
 	def deny
 		@photo.deny!
     respond_to do |format|
-			format.js { render('update_lists') }
+			format.js { render('update_list') }
       format.html { redirect_to(photos_path, notice: 'Photo was successfully denied.') }
       format.json { head :no_content }
 		end
@@ -135,6 +135,7 @@ class PhotosController < ApplicationController
 		@photos = Photo.pending
 
 		respond_to do |format|
+			format.js { render('reload_list') }
 			format.html {render('index')}
 			format.json {}
 		end
@@ -145,6 +146,7 @@ class PhotosController < ApplicationController
 		@photos = Photo.approved
 
 		respond_to do |format|
+			format.js { render('reload_list') }
 			format.html {render('index')}
 			format.json {}
 		end
@@ -155,6 +157,7 @@ class PhotosController < ApplicationController
 		@photos = Photo.denied
 
 		respond_to do |format|
+			format.js { render('reload_list') }
 			format.html {render('index')}
 			format.json {}
 		end

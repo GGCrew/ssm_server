@@ -1,0 +1,6 @@
+var photo_section = $('.photo_section');
+var filenames = $(photo_section).find('.sidebar .filenames');
+
+clear_photo(photo_section);
+update_buttons(photo_section, -1);
+$(filenames).html("<%= escape_javascript(render(partial: 'filename', collection: @photos)) -%>");

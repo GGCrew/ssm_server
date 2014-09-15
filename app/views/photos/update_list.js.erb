@@ -5,8 +5,9 @@ if(next_element.length == 0) { // We're at the end of the list!
 	var siblings = $(list_item_element).siblings('a');
 	next_element = $(siblings).last();
 	if(next_element.length == 0) { // Nothing else in the list!
-		clear_photo($(list_item_element).parents('.photo_section'));
-		update_buttons(list_item_element, -1);
+		var photo_section = $(list_item_element).parents('.photo_section');
+		clear_photo(photo_section);
+		update_buttons(photo_section, -1);
 	}
 }
 
