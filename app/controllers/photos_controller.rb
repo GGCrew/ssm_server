@@ -1,6 +1,6 @@
 class PhotosController < ApplicationController
 
-  before_action :set_photo, only: [:show, :edit, :update, :destroy]
+  before_action :set_photo, only: [:show, :edit, :update, :destroy, :approve, :deny]
 
 
 	#..#
@@ -72,6 +72,27 @@ class PhotosController < ApplicationController
       format.json { head :no_content }
     end
   end
+
+
+	def approve
+		logger.debug('PhotosController.approve')
+		@photo.approve!
+    respond_to do |format|
+			format.js { render('update_lists') }
+      #format.html { redirect_to(photos_path, notice: 'Photo was successfully approved.') }
+      #format.json { head :no_content }
+		end
+	end
+
+
+	def deny
+		@photo.deny!
+    respond_to do |format|
+			format.js { render('update_lists') }
+      format.html { redirect_to(photos_path, notice: 'Photo was successfully denied.') }
+      format.json { head :no_content }
+		end
+	end
 
 
 	def next

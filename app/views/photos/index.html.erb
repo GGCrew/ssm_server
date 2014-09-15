@@ -8,32 +8,4 @@
 <div class="clear_float"></div>
 <%- end -%>
 
-<div class="photo_section">
-	<div class="sidebar">
-		<div class="buttons">
-			<%= link_to('Approve', '#', {class: 'approve'}) -%></li>
-			<%= link_to('Deny', '#', {class: 'deny'}) -%></li>
-		</div>
-				
-		<div class="filenames">
-			<%- @photos.each do |photo| -%>
-				<%= link_to(
-					format_filename(photo).html_safe, 
-					"#",
-					{
-						id: photo.id,
-						onclick: "show_photo(this, #{photo.id}, '#{photo.path}', '#{Photo::RESIZED_FOLDER + photo.path}'); return false;"
-					}
-				) -%><br>
-			<%- end -%>
-		</div>
-	</div>
-	
-	<div class="preview">
-		<img src="/photos/black.png">
-		<p class="caption">&nbsp;</p>
-	</div>
-	
-	<div class="clear_float">
-	</div>
-</div>
+<%= render(partial: 'photo_section', object: @photos) -%>

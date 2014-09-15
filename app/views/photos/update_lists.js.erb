@@ -1,0 +1,15 @@
+var list_item_element = $('#<%= @photo.id -%>');
+var associated_elements = $(list_item_element).nextUntil('a');
+var next_element = $(associated_elements).next('a');
+if(next_element.length == 0) { // We're at the end of the list!
+	var siblings = $(list_item_element).siblings('a');
+	next_element = $(siblings).last();
+	if(next_element.length == 0) { // Nothing else in the list!
+		clear_photo($(list_item_element).parents('.photo_section'));
+		update_buttons(list_item_element, -1);
+	}
+}
+
+$(list_item_element).remove();
+$(associated_elements).remove();
+$(next_element).click();

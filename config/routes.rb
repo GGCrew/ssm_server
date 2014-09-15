@@ -1,5 +1,10 @@
 Rails.application.routes.draw do
   resources :photos do
+		member do
+			get 'approve'
+			get 'deny'
+		end
+
 		collection do
 			get 'next'
 			get 'pending'
