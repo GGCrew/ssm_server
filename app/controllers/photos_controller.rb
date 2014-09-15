@@ -102,7 +102,7 @@ class PhotosController < ApplicationController
 		client = Client.create({ip_address: client_ip}) if client.nil?
 
 		# Get history of client photos to identify any new photos
-		client_photo_ids = client.photos.map(&:id)
+		client_photo_ids = client.photos(true).map(&:id)
 		if client_photo_ids.empty?
 			conditions_new = []
 		else
@@ -112,7 +112,12 @@ class PhotosController < ApplicationController
 
 		if @photo.nil?
 			# Get random old photo, preferably one that hasn't been shown recently
-			recent_photo_count = (Photo.approved.count / 2).floor
+			approved_photo_count = Photo.approved.count
+			if approved_photo_count < 2
+				recent_photo_count = 0
+			else
+				recent_photo_count = (Photo.approved.count / 2.0).ceil
+			end
 			recent_client_photo_ids = (recent_photo_count == 0 ? [-1] : client_photo_ids[-recent_photo_count..-1])
 			conditions_not_recent = ["id NOT IN (:recent_client_photo_ids)", {recent_client_photo_ids: recent_client_photo_ids}]
 			old_photos = Photo.approved.where(conditions_not_recent)
