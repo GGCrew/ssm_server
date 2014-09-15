@@ -12,7 +12,6 @@
 		</script>
 
 		<script type='text/javascript'>
-			//var SERVER = "http://192.168.199.51:3000";
 			var SERVER = "";
 
 			function process_json(json_text)
@@ -44,7 +43,6 @@
 						}
 					}
 
-				//xmlhttp.open("GET","/photos/next.json",true);
 				xmlhttp.open("GET", SERVER + "/photos/next.json",true);
 				xmlhttp.send();
 			}
@@ -629,6 +627,10 @@ gl_FragColor = vec4(pixel.rgb, alpha);\n\
 						break;
 
 					case 'hold':
+						// Resize the Canvas to full browser size
+						CANVAS.width=window.innerWidth;
+						CANVAS.height=window.innerHeight;
+
 						egl_render();
 
 						frameCounter = 0;
