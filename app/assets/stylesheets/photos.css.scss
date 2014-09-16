@@ -73,19 +73,29 @@
 				margin-bottom: .25em;
 			}
 			
-			.camera_id {
+			span {
+				height: 1.25em;
 				display: inline-block;
-				width: 2em;
-				height: 1em;
-				text-align: right;
-				margin-right: .5em;
-			}
-
-			.filename {
 				overflow: hidden;
-				width: 10em;
-				height: 1em;
-				text-align: left;
+				padding: 0 0 .25em 0;
+				vertical-align: middle;
+
+				&.client_id {
+					width: 1.5em;
+					text-align: right;
+					margin-right: 0;
+				}
+
+				&.camera_id {					
+					width: 1.5em;
+					text-align: right;
+					margin-right: .5em;
+				}
+
+				&.filename {
+					width: 10em;
+					text-align: left;
+				}
 			}
 		}
 	}

@@ -5,6 +5,7 @@
  pending_photos GET    /photos/pending(.:format)     photos#pending
 approved_photos GET    /photos/approved(.:format)    photos#approved
   denied_photos GET    /photos/denied(.:format)      photos#denied
+  recent_photos GET    /photos/recent(.:format)      photos#recent
          photos GET    /photos(.:format)             photos#index
                 POST   /photos(.:format)             photos#create
       new_photo GET    /photos/new(.:format)         photos#new

@@ -116,7 +116,7 @@ class PhotosController < ApplicationController
 			if approved_photo_count < 2
 				recent_photo_count = 0
 			else
-				recent_photo_count = (Photo.approved.count / 2.0).ceil
+				recent_photo_count = (approved_photo_count / 2.0).ceil
 			end
 			recent_client_photo_ids = (recent_photo_count == 0 ? [-1] : client_photo_ids[-recent_photo_count..-1])
 			conditions_not_recent = ["id NOT IN (:recent_client_photo_ids)", {recent_client_photo_ids: recent_client_photo_ids}]
@@ -161,6 +161,20 @@ class PhotosController < ApplicationController
 	def denied
 		@photos = Photo.denied
 
+		respond_to do |format|
+			format.js { render('reload_list') }
+			format.html {render('index')}
+			format.json {}
+		end
+	end
+
+
+	def recent
+		client_count = Client.count
+		photo_approved_count = Photo.approved.count
+		
+		recent_photo_count = client_count * (photo_approved_count / 2.0).ceil
+		@photos = Photo.select('photos.*, client_photos.client_id').joins(:client_photos).order('client_photos.created_at DESC').limit(recent_photo_count)
 		respond_to do |format|
 			format.js { render('reload_list') }
 			format.html {render('index')}
