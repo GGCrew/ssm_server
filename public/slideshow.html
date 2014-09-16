@@ -617,10 +617,6 @@ gl_FragColor = vec4(pixel.rgb, alpha);\n\
 
 
 			function animate() {
-				// Resize the Canvas to full browser size
-				CANVAS.width=window.innerWidth;
-				CANVAS.height=window.innerHeight;
-
 				switch(program_state)
 				{
 					case 'need photo':
@@ -631,6 +627,10 @@ gl_FragColor = vec4(pixel.rgb, alpha);\n\
 						break;
 
 					case 'hold':
+						// Resize the Canvas to full browser size
+						CANVAS.width=window.innerWidth;
+						CANVAS.height=window.innerHeight;
+
 						egl_render();
 
 						frameCounter = 0;
