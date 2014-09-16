@@ -1,6 +1,29 @@
 var photo_section = $('.photo_section');
 var filenames = $(photo_section).find('.sidebar .filenames');
 
-clear_photo(photo_section);
-update_buttons(photo_section, -1);
 $(filenames).html("<%= escape_javascript(render(partial: 'filename', collection: @photos)) -%>");
+
+// Automatically select first item in the list (if any items)
+var items = $(filenames).children('a')
+if(items.length != 0) { items[0].click(); }
+
+<%-
+	# set defaults
+	approve_button_css = ''
+	deny_button_css = ''
+	
+	case params[:action]
+		when 'pending'
+			# nothing needed
+			
+		when 'approved'
+			approve_button_css = 'none'
+			
+		when 'denied'
+			deny_button_css = 'none'
+	end
+-%>
+
+$(photo_section).find('.sidebar .buttons .approve').css('display', '<%= approve_button_css -%>');
+$(photo_section).find('.sidebar .buttons .deny').css('display', '<%= deny_button_css -%>');
+

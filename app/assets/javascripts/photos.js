@@ -64,8 +64,10 @@ $(document).ready(function() {
 		.on('ajax:beforeSend', function(evt, xhr, settings) {
 			var photo_section = $('.photo_section');
 			var filenames = $(photo_section).find('.sidebar .filenames');
+			var buttons = $(photo_section).find('.sidebar .buttons a');
 			clear_photo(photo_section);
 			update_buttons(photo_section);
+			buttons.css('display', 'none');
 			filenames.text('');			
 		});
 })
