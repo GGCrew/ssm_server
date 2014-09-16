@@ -62,6 +62,8 @@ $(document).ready(function() {
 
 	$('ul.menu_bar li a')
 		.on('ajax:beforeSend', function(evt, xhr, settings) {
+			$(this).parents('ul.menu_bar').find('li a').removeClass('selected');
+			$(this).addClass('selected');
 			var photo_section = $('.photo_section');
 			var filenames = $(photo_section).find('.sidebar .filenames');
 			var buttons = $(photo_section).find('.sidebar .buttons a');

@@ -1,9 +1,7 @@
 <ul class="menu_bar">
-	<li><%= link_to('Pending',	pending_photos_path,	{remote: true})	-%></li>
-	<li><%= link_to('Approved',	approved_photos_path,	{remote: true})	-%></li>
-	<li><%= link_to('Denied',		denied_photos_path,		{remote: true})	-%></li>
+	<li><%= link_to('Pending',	pending_photos_path,	{remote: true, class: (['index', 'pending'].include?(params[:action]) ? 'selected' : nil)})	-%></li>
+	<li><%= link_to('Approved',	approved_photos_path,	{remote: true, class: ('selected' if params[:action] == 'approved')})	-%></li>
+	<li><%= link_to('Denied',		denied_photos_path,		{remote: true, class: ('selected' if params[:action] == 'denied')})	-%></li>
 </ul>
-
-<div class="clear_float"></div>
 
 <%= render(partial: 'photo_section', object: @photos) -%>

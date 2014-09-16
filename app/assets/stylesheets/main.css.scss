@@ -77,10 +77,35 @@ div {
 
 
 ul.menu_bar {
+	padding: 0;
+	margin: 1em 0 0 2em;
+	list-style: none;
+	
 	li {
 		float: left;
-		padding: .5em 1em;
-		list-style: none;
+		position: relative;
+		height: 2em;
+		
+		
+		a {
+			padding: .5em 1.5em .4em 1.5em;
+			border-radius: 1em 1em 0 0;
+			border: 1px solid yellow;
+			border-bottom: none;
+			background-color: #444400;
+			font-weight: bold;
+			text-decoration: none;
+			line-height: 2em;
+			margin: 0 .25em;
+			
+			&.selected {
+				background-color: black;
+				border-bottom: 1px solid black;
+				padding-top: 1em;
+				padding-bottom: .75em;
+				line-height: 1em;
+			}
+		}
 	}
 }
 

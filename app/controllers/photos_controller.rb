@@ -10,7 +10,7 @@ class PhotosController < ApplicationController
   # GET /photos.json
   def index
     #@photos = Photo.all
-		approved
+		pending
   end
 
 

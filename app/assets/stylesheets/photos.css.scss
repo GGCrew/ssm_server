@@ -7,7 +7,7 @@
 	width: 100%;
 	padding: 0;
 	margin: 0;
-	height: 100%;
+	height: calc(100% - 3em);
 
 	.preview {
 		border: 1px solid yellow;
