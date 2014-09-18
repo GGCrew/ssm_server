@@ -33,8 +33,9 @@ class Photo < ActiveRecord::Base
 	def self.scan_for_new_photos
 		path = 'public' + SOURCE_FOLDER
 		files = Dir.glob(path + '**/*.{JPG,PNG}')
-		for file in files
+		files.each_with_index do |file, index|
 			photo_hash = path_to_hash(file[path.size..-1])
+			logger.debug("#{index}/#{files.count} - #{photo_hash.to_s}")
 			Photo.create!(photo_hash) if Photo.where(photo_hash).blank?
 		end
 	end
@@ -138,6 +139,8 @@ class Photo < ActiveRecord::Base
 
 	# This block requires FreeImage
 	def create_rotated_and_scaled_copy
+		logger.info("create_rotated_and_scaled_copy")
+
 		source_folder = 'public' + SOURCE_FOLDER
 		rotated_folder = 'public' + ROTATED_FOLDER
 		resized_folder = 'public' + RESIZED_FOLDER
@@ -146,6 +149,7 @@ class Photo < ActiveRecord::Base
 
 		# Load source
 		#FreeImage::Bitmap.open(source_folder + path, FreeImage::AbstractSource::Decoder::JPEG_EXIFROTATE) do |image|
+		logger.info("\tLoading #{source_folder + path}")
 		FreeImage::Bitmap.new(
 			FreeImage.FreeImage_Load(
 				FreeImage::FreeImage_GetFIFFromFilename(source_folder + path),
@@ -155,6 +159,7 @@ class Photo < ActiveRecord::Base
 		) do |rotated_image|
 
 			# Scale
+			logger.info("\tScaling #{source_folder + path}")
 			width_scale = rotated_image.width / 1920.0
 			height_scale = rotated_image.height / 1080.0
 			if(width_scale > height_scale)
@@ -167,6 +172,7 @@ class Photo < ActiveRecord::Base
 			scaled_image = rotated_image.rescale(new_width, new_height, :bilinear)
 
 			# Save rotated & scaled copy
+			logger.info("\tSaving #{source_folder + path}")
 			begin
 				scaled_image.save(resized_folder + path, :jpeg, save_flags)
 			rescue
@@ -176,6 +182,7 @@ class Photo < ActiveRecord::Base
 				scaled_image.save(resized_folder + path, :jpeg, save_flags)
 			end
 		end
+		logger.info("\tDone #{source_folder + path}")
 	end
 
 end
