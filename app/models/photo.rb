@@ -9,7 +9,7 @@ class Photo < ActiveRecord::Base
 	#..#
 
 
-	has_many	:client_photos
+	has_many	:client_photos,	:dependent => :destroy
 	has_many	:clients,	:through => :client_photos
 
 

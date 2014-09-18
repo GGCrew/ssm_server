@@ -186,6 +186,21 @@ class PhotosController < ApplicationController
 	end
 
 
+	def reset_and_rescan
+		ClientPhoto.destroy_all
+		Photo.destroy_all
+		Client.destroy_all
+		
+		Photo.scan_for_new_photos
+		
+		@photos = Photo.pending
+		respond_to do |format|
+			format.js { render('reload_list') }
+			format.html {render('index')}
+			format.json {}
+		end
+	end
+
 	#..#
 
 
