@@ -24,7 +24,7 @@ class Photo < ActiveRecord::Base
 	#..#
 
 
-	after_create	:create_rotated_and_scaled_copy
+	before_create	:create_rotated_and_scaled_copy
 
 
 	#..#
