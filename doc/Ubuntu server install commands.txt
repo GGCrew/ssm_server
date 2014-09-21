@@ -1,0 +1,120 @@
+sudo apt-get install	build-essential
+sudo apt-get install	libfreeimage-dev
+sudo apt-get install	libcurl4-openssl-dev
+sudo apt-get install	nodejs
+sudo apt-get install	mysql-server
+sudo apt-get install	mysql-client
+sudo apt-get install	libmysqlclient-dev
+sudo apt-get install	apache2
+sudo apt-get install	apache2-dev
+sudo apt-get install	subversion
+sudo apt-get install	openssh-server
+
+
+
+\curl -sSL https://get.rvm.io | sudo bash -s stable
+sudo adduser snap rvm
+<log off and log on>
+rvm install ruby-2.1.2
+rvm --ruby-version use 2.1.2@snap_show_magic_trunk --create
+
+
+sudo mkdir /var/www/snap_show_magic
+sudo svn co svn://net-night.com/snapshowmagic/ServerApplication /var/www/snap_show_magic
+sudo chown -R snap /var/www/snap_show_magic
+sudo vim /var/www/snap_show_magic/.ruby-env
+	SECRET_KEY_BASE="53534D6e65115a6a19afdabca6b22b78a0c35bf7e169f056f7816031d8037aa309c0b0191a9051853aef106bfe027509306a8e74af7265e800e5da69229b287a"
+cd /var/www/snap_show_magic
+bundle install
+
+sudo mkdir /opt/passenger
+cd /opt/passenger
+sudo wget http://s3.amazonaws.com/phusion-passenger/releases/passenger-4.0.50.tar.gz
+sudo tar xzvf passenger-4.0.50.tar.gz
+cd /opt/passenger/passenger-4.0.50
+rvm use ruby-2.1.2@snap_show_magic_trunk
+rvmsudo ./bin/passenger-install-apache2-module
+
+sudo vim /etc/apache2/mods-available/passenger.load
+	LoadModule passenger_module /opt/passenger/passenger-4.0.50/buildout/apache2/mod_passenger.so
+sudo vim /etc/apache2/mods-available/passenger.conf
+	<IfModule mod_passenger.c>
+		PassengerRoot /opt/passenger/passenger-4.0.50
+		PassengerDefaultRuby /usr/local/rvm/gems/ruby-2.1.2@snap_show_magic_trunk/wrappers/ruby
+	</IfModule>
+sudo a2enmod passenger
+
+sudo a2dissite 000-default
+sudo vim /etc/apache2/sites-available/snap_show_magic.conf
+	<VirtualHost *:80>
+		# The ServerName directive sets the request scheme, hostname and port that
+		# the server uses to identify itself. This is used when creating
+		# redirection URLs. In the context of virtual hosts, the ServerName
+		# specifies what hostname must appear in the request's Host: header to
+		# match this virtual host. For the default virtual host (this file) this
+		# value is not decisive as it is used as a last resort host regardless.
+		# However, you must set it for any further virtual host explicitly.
+		#ServerName www.example.com
+
+		ServerAdmin webmaster@localhost
+		DocumentRoot /var/www/snap_show_magic/public
+
+		<Directory />
+			Options FollowSymLinks
+			AllowOverride None
+		</Directory>
+		<Directory /var/www/snap_show_magic/public/>
+			Options Indexes FollowSymLinks
+			Options -MultiViews
+			AllowOverride All
+			Order allow,deny
+						allow from all
+		</Directory>
+
+		# Available loglevels: trace8, ..., trace1, debug, info, notice, warn,
+		# error, crit, alert, emerg.
+		# It is also possible to configure the loglevel for particular
+		# modules, e.g.
+		#LogLevel info ssl:warn
+
+		ErrorLog ${APACHE_LOG_DIR}/error.log
+		CustomLog ${APACHE_LOG_DIR}/access.log combined
+
+		# For most configuration files from conf-available/, which are
+		# enabled or disabled at a global level, it is possible to
+		# include a line for only one particular virtual host. For example the
+		# following line enables the CGI configuration for this host only
+		# after it has been globally disabled with "a2disconf".
+		#Include conf-available/serve-cgi-bin.conf
+	</VirtualHost>
+sudo a2ensite snap_show_magic
+
+
+cd /var/www/snap_show_magic/
+rake db:create --trace RAILS_ENV=production
+rake db:migrate --trace RAILS_ENV=production
+rake assets:precompile
+
+sudo service apache2 restart
+
+
+sudo cp /etc/issue /etc/issue.default
+sudo vim /usr/local/bin/get-ip-address
+	ip address show eth0 | awk '/inet / {print $2}' | cut -d/ -f1
+sudo chmod +x /usr/local/bin/get-ip-address
+
+sudo vim /etc/network/if-up.d/show-ip-address
+	#!/bin/sh
+	if [ "$METHOD" = loopback ]; then
+			exit 0
+	fi
+
+	# Only run from ifup.
+	if [ "$MODE" != start ]; then
+			exit 0
+	fi
+
+	cp /etc/issue.default /etc/issue
+	/usr/local/bin/get-ip-address >> /etc/issue
+	echo "" >> /etc/issue
+sudo chmod +x /etc/network/if-up.d/show-ip-address
