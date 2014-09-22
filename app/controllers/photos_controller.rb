@@ -129,8 +129,19 @@ class PhotosController < ApplicationController
 			@photo =  old_photos[index]
 		end
 
+		@hold_duration = 5000 # milliseconds
+		@transition_type = "dissolve"
+		@transition_duration = 1000	# milliseconds
+
 		# Add the selected photo to the client_photos list (aka "client photo history")
-		client.client_photos.create({photo_id: @photo.id}) if @photo
+		client.client_photos.create(
+			{
+				photo_id: @photo.id,
+				hold_duration: @hold_duration,
+				transition_type: @transition_type,
+				transition_duration: @transition_duration
+			}
+		) if @photo
 
 		respond_to do |format|
 			format.html {}

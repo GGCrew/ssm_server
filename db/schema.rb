@@ -11,13 +11,16 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140912000001) do
+ActiveRecord::Schema.define(version: 20140922000001) do
 
   create_table "client_photos", force: true do |t|
     t.integer  "client_id"
     t.integer  "photo_id"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "hold_duration"
+    t.string   "transition_type"
+    t.integer  "transition_duration"
   end
 
   create_table "clients", force: true do |t|

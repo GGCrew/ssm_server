@@ -6,5 +6,8 @@
 		:date_folder => "#{@photo.date_folder if @photo}",
 		:filename => "#{@photo.filename if @photo}",
 		:full_path => "#{(Photo::RESIZED_FOLDER + @photo.path) if @photo}",
+		:hold_duration => @hold_duration,
+		:transition_type => "#{@transition_type}",
+		:transition_duration => @transition_duration
 	}.to_json.html_safe
 -%>
