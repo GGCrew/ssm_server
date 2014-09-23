@@ -7,6 +7,7 @@ Rails.application.routes.draw do
 
 		collection do
 			get 'next'
+			get 'controls'
 			get 'pending'
 			get 'approved'
 			get 'denied'

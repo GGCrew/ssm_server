@@ -2,6 +2,7 @@
           approve_photo GET    /photos/:id/approve(.:format)      photos#approve
              deny_photo GET    /photos/:id/deny(.:format)         photos#deny
             next_photos GET    /photos/next(.:format)             photos#next
+        controls_photos GET    /photos/controls(.:format)         photos#controls
          pending_photos GET    /photos/pending(.:format)          photos#pending
         approved_photos GET    /photos/approved(.:format)         photos#approved
           denied_photos GET    /photos/denied(.:format)           photos#denied

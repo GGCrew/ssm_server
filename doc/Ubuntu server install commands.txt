@@ -90,6 +90,13 @@ sudo vim /etc/apache2/sites-available/snap_show_magic.conf
 sudo a2ensite snap_show_magic
 
 
+sudo mkdir /media/Windows_Shared_Eye-Fi
+sudo mount.cifs //192.168.2.102/Eye-Fi /media/Windows_Shared_Eye-Fi -o user=SnapShowMagic
+cd /var/www/snap_show_magic/public/photos
+sudo mv eye-fi eye-fi.bak
+sudo ln -s /media/Windows_Shared_Eye-Fi eye-fi
+
+
 cd /var/www/snap_show_magic/
 rake db:create --trace RAILS_ENV=production
 rake db:migrate --trace RAILS_ENV=production

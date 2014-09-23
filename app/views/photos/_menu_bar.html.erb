@@ -1,0 +1,10 @@
+<ul class="menu_bar">
+	<li><%= link_to('Controls',	controls_photos_path,	{remote: true, class: selected_if_not([	'pending',
+																																														'approved',
+																																														'denied',
+																																														'recent'])})	-%></li>
+	<li><%= link_to('Pending',	pending_photos_path,	{remote: true, class: selected_if('pending')})	-%></li>
+	<li><%= link_to('Approved',	approved_photos_path,	{remote: true, class: selected_if('approved')})	-%></li>
+	<li><%= link_to('Denied',		denied_photos_path,		{remote: true, class: selected_if('denied')})	-%></li>
+	<li><%= link_to('Recent',		recent_photos_path,		{remote: true, class: selected_if('recent')})	-%></li>	
+</ul>

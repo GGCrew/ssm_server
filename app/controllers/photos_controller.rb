@@ -1,6 +1,7 @@
 class PhotosController < ApplicationController
 
   before_action :set_photo, only: [:show, :edit, :update, :destroy, :approve, :deny]
+	before_action :set_control,	only: [:next, :index, :controls, :pending, :approved, :denied, :recent]
 
 
 	#..#
@@ -10,7 +11,9 @@ class PhotosController < ApplicationController
   # GET /photos.json
   def index
     #@photos = Photo.all
-		pending
+		#pending
+		#redirect_to(controls_photos_path)
+		controls
   end
 
 
@@ -129,17 +132,17 @@ class PhotosController < ApplicationController
 			@photo =  old_photos[index]
 		end
 
-		@hold_duration = 5000 # milliseconds
-		@transition_type = "dissolve"
-		@transition_duration = 1000	# milliseconds
+#		@hold_duration = @control.hold_duration
+#		@transition_type = @control.transition_type
+#		@transition_duration = @control.transition_duration
 
 		# Add the selected photo to the client_photos list (aka "client photo history")
 		client.client_photos.create(
 			{
 				photo_id: @photo.id,
-				hold_duration: @hold_duration,
-				transition_type: @transition_type,
-				transition_duration: @transition_duration
+				hold_duration: @control.hold_duration,
+				transition_type: @control.transition_type,
+				transition_duration: @control.transition_duration
 			}
 		) if @photo
 
@@ -150,12 +153,23 @@ class PhotosController < ApplicationController
 	end
 
 
+	def controls
+		@photos = []
+
+		respond_to do |format|
+			format.js { render('reload_list') }
+			format.html {render('photos')}
+			format.json {}
+		end
+	end
+
+
 	def pending
 		@photos = Photo.pending
 
 		respond_to do |format|
 			format.js { render('reload_list') }
-			format.html {render('index')}
+			format.html {render('photos')}
 			format.json {}
 		end
 	end
@@ -166,7 +180,7 @@ class PhotosController < ApplicationController
 
 		respond_to do |format|
 			format.js { render('reload_list') }
-			format.html {render('index')}
+			format.html {render('photos')}
 			format.json {}
 		end
 	end
@@ -177,7 +191,7 @@ class PhotosController < ApplicationController
 
 		respond_to do |format|
 			format.js { render('reload_list') }
-			format.html {render('index')}
+			format.html {render('photos')}
 			format.json {}
 		end
 	end
@@ -191,7 +205,7 @@ class PhotosController < ApplicationController
 		@photos = Photo.select('photos.*, client_photos.client_id').joins(:client_photos).order('client_photos.created_at DESC').limit(recent_photo_count)
 		respond_to do |format|
 			format.js { render('reload_list') }
-			format.html {render('index')}
+			format.html {render('photos')}
 			format.json {}
 		end
 	end
@@ -207,7 +221,7 @@ class PhotosController < ApplicationController
 		@photos = Photo.pending
 		respond_to do |format|
 			format.js { render('reload_list') }
-			format.html {render('index')}
+			format.html {redirect_to(controls_photos_path)}
 			format.json {}
 		end
 	end
@@ -227,6 +241,14 @@ class PhotosController < ApplicationController
     def photo_params
       params[:photo]
     end
+
+
+		def set_control
+			@control = Control.last
+			@control = Control.create!(	hold_duration: 10 * 1000,
+																	transition_duration: 3 * 1000,
+																	transition_type: "dissolve" ) unless @control
+		end
 
 
 end

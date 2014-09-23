@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140922000001) do
+ActiveRecord::Schema.define(version: 20140923000001) do
 
   create_table "client_photos", force: true do |t|
     t.integer  "client_id"
@@ -25,6 +25,14 @@ ActiveRecord::Schema.define(version: 20140922000001) do
 
   create_table "clients", force: true do |t|
     t.string   "ip_address"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "controls", force: true do |t|
+    t.integer  "hold_duration"
+    t.integer  "transition_duration"
+    t.string   "transition_type"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
