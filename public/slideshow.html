@@ -18,6 +18,9 @@
 			{
 				var json = JSON.parse(json_text);
 
+				hold_duration = json.hold_duration;
+				transition_duration = json.transition_duration;
+
 				var textureNext = ((textureCurrent + 1) % IMAGE_COUNT);  // Next texture
 				egl_load_texture(textureNext, SERVER + json.full_path);
 			}
@@ -189,6 +192,9 @@
 			var transition_start_time;
 			var transition_duration;
 			var transition_complete;
+			var hold_duration;
+			var transition_duration;
+			var transition_type;
 
 			// Variables that are localized in main()
 			var textureCurrent;
@@ -450,6 +456,9 @@ gl_FragColor = vec4(pixel.rgb, alpha);\n\
 
 
 			function egl_render_transition(transition_type) {
+				// WebGL seems to render at 30fps.  Convert 1000msec (1sec) to 30 frames:
+				transitionDuration = (transition_duration * 30) / 1000;
+
 				switch(transition_type) {
 					case 'dissolve':
 						for(var textureCounter = 0; textureCounter < square_textures.length; textureCounter++) {
@@ -478,16 +487,16 @@ gl_FragColor = vec4(pixel.rgb, alpha);\n\
 							var modAlpha = 1.;
 							switch(textureActive) {
 								case 0:
-									if(frameCounter < INTERVAL) {
-										modAlpha = (INTERVAL - frameCounter) / (INTERVAL + 0.0);
+									if(frameCounter < transitionDuration) {
+										modAlpha = (transitionDuration - frameCounter) / (transitionDuration + 0.0);
 									} else {
 										modAlpha = 0.;
 									}
 									break;
 
 								case 1:
-									if(frameCounter < INTERVAL) {
-										modAlpha = frameCounter / (INTERVAL + 0.0);
+									if(frameCounter < transitionDuration) {
+										modAlpha = frameCounter / (transitionDuration + 0.0);
 									} else {
 										modAlpha = 1.;
 									}
@@ -506,7 +515,7 @@ gl_FragColor = vec4(pixel.rgb, alpha);\n\
 						}
 						
 						// Check exit condition
-						if(frameCounter >= INTERVAL) {transition_complete = true;}
+						if(frameCounter >= transitionDuration) {transition_complete = true;}
 
 						break;
 						
@@ -523,8 +532,8 @@ gl_FragColor = vec4(pixel.rgb, alpha);\n\
 
 							// Reset, compute, and set the object's movement matrix
 							LIBS.reset_I4(MOVEMATRIX);
-							//if(textureCounter == textureCurrent) {LIBS.translateZ(MOVEMATRIX, (frameCounter / (INTERVAL + 0.0)));}
-							LIBS.translateZ(MOVEMATRIX, (frameCounter / (INTERVAL + 0.0)));
+							//if(textureCounter == textureCurrent) {LIBS.translateZ(MOVEMATRIX, (frameCounter / (transitionDuration + 0.0)));}
+							LIBS.translateZ(MOVEMATRIX, (frameCounter / (transitionDuration + 0.0)));
 							GL.uniformMatrix4fv(_Mmatrix, false, MOVEMATRIX);
 
 
@@ -541,21 +550,21 @@ gl_FragColor = vec4(pixel.rgb, alpha);\n\
 							// Compute and set the texture's alpha level
 							var modAlpha = 1.;
 							var modCounter = 0;
-							modCounter = (frameCounter % (INTERVAL * 4));
+							modCounter = (frameCounter % (transitionDuration * 4));
 							switch(textureActive) {
 								case 0:
-									if(modCounter < (INTERVAL * 1)) {
-										modAlpha = (INTERVAL - (frameCounter % INTERVAL)) / (INTERVAL + 0.0);
-									} else if(modCounter < (INTERVAL * 2)) {
+									if(modCounter < (transitionDuration * 1)) {
+										modAlpha = (transitionDuration - (frameCounter % transitionDuration)) / (transitionDuration + 0.0);
+									} else if(modCounter < (transitionDuration * 2)) {
 										modAlpha = 0.;
 										transition_complete = true;
 									}
 									break;
 
 								case 1:
-									if(modCounter < (INTERVAL * 1)) {
-										modAlpha = (frameCounter % INTERVAL) / (INTERVAL + 0.0);
-									} else if(modCounter < (INTERVAL * 2)) {
+									if(modCounter < (transitionDuration * 1)) {
+										modAlpha = (frameCounter % transitionDuration) / (transitionDuration + 0.0);
+									} else if(modCounter < (transitionDuration * 2)) {
 										modAlpha = 1.;
 										transition_complete = true;
 									}
@@ -626,7 +635,7 @@ gl_FragColor = vec4(pixel.rgb, alpha);\n\
 						frameCounter = 0;
 						transition_complete = false;
 						program_state = 'transition';
-						sleep(5000, animate);  // Javascript-specific version to restart the animate() loop after the delay.
+						sleep(hold_duration, animate);  // Javascript-specific version to restart the animate() loop after the delay.
 						break;
 
 					case 'transition':
