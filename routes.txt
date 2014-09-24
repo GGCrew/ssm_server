@@ -16,3 +16,12 @@ reset_and_rescan_photos GET    /photos/reset_and_rescan(.:format) photos#reset_a
                         PATCH  /photos/:id(.:format)              photos#update
                         PUT    /photos/:id(.:format)              photos#update
                         DELETE /photos/:id(.:format)              photos#destroy
+         state_controls GET    /controls/state(.:format)          controls#state
+               controls GET    /controls(.:format)                controls#index
+                        POST   /controls(.:format)                controls#create
+            new_control GET    /controls/new(.:format)            controls#new
+           edit_control GET    /controls/:id/edit(.:format)       controls#edit
+                control GET    /controls/:id(.:format)            controls#show
+                        PATCH  /controls/:id(.:format)            controls#update
+                        PUT    /controls/:id(.:format)            controls#update
+                        DELETE /controls/:id(.:format)            controls#destroy

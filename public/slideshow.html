@@ -18,11 +18,20 @@
 			{
 				var json = JSON.parse(json_text);
 
-				hold_duration = json.hold_duration;
-				transition_duration = json.transition_duration;
+				switch(json.message_type)
+				{
+					case 'photo':
+						hold_duration = json.hold_duration;
+						transition_duration = json.transition_duration;
 
-				var textureNext = ((textureCurrent + 1) % IMAGE_COUNT);  // Next texture
-				egl_load_texture(textureNext, SERVER + json.full_path);
+						var textureNext = ((textureCurrent + 1) % IMAGE_COUNT);  // Next texture
+						egl_load_texture(textureNext, SERVER + json.full_path);
+						break;
+
+					case 'control':
+						play_state = json.play_state;
+						break;
+				}
 			}
 
 			function get_next_photo()
@@ -47,6 +56,31 @@
 					}
 
 				xmlhttp.open("GET", SERVER + "/photos/next.json",true);
+				xmlhttp.send();
+			}
+
+			function get_play_state()
+			{
+				var xmlhttp;
+
+				if (window.XMLHttpRequest)
+					{// code for IE7+, Firefox, Chrome, Opera, Safari
+					xmlhttp=new XMLHttpRequest();
+					}
+				else
+					{// code for IE6, IE5
+					xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+					}
+
+				xmlhttp.onreadystatechange=function()
+					{
+					if (xmlhttp.readyState==4 && xmlhttp.status==200)
+						{
+						process_json(xmlhttp.responseText);
+						}
+					}
+
+				xmlhttp.open("GET", SERVER + "/controls/state.json",true); // Synchronous call are no longer valid...
 				xmlhttp.send();
 			}
 		</script>
@@ -195,6 +229,8 @@
 			var hold_duration;
 			var transition_duration;
 			var transition_type;
+			var hold_until_time;
+			var play_state;
 
 			// Variables that are localized in main()
 			var textureCurrent;
@@ -616,12 +652,19 @@ gl_FragColor = vec4(pixel.rgb, alpha);\n\
 
 
 			function animate() {
+				var sleep_duration;
+
 				switch(program_state)
 				{
 					case 'need photo':
+						get_play_state();
 						get_next_photo();
 
 						program_state = 'hold';
+						hold_until_time = new Date(Date.now() + hold_duration);
+						console.log("            now: " + Date());
+						console.log("hold_until_time: " + hold_until_time);
+						
 						window.requestAnimationFrame(animate);  // Javascript-specific call to keep the animate() loop going.
 						break;
 
@@ -632,10 +675,37 @@ gl_FragColor = vec4(pixel.rgb, alpha);\n\
 
 						egl_render();
 
-						frameCounter = 0;
-						transition_complete = false;
-						program_state = 'transition';
-						sleep(hold_duration, animate);  // Javascript-specific version to restart the animate() loop after the delay.
+						// Check for play/pause/stop
+						switch(play_state)
+						{
+							case 'play':
+								sleep_duration = hold_until_time - Date.now();
+								console.log("sleep_duration: " + sleep_duration);
+								if(sleep_duration > 1000) {sleep_duration = 1000;}
+								break;
+								
+							case 'pause':
+								sleep_duration = 1000;
+								break;
+								
+							case 'stop':
+								sleep_duration = 1000;
+								break;
+						}
+
+						if(sleep_duration > 0)
+						{
+							get_play_state();
+							sleep(sleep_duration, animate); // Javascript-specific version to restart the animate() loop after the delay.
+						}
+						else
+						{
+							// Time for transition!						
+							frameCounter = 0;
+							transition_complete = false;
+							program_state = 'transition';
+							sleep(0, animate); // Javascript-specific version to restart the animate() loop after the delay.
+						}
 						break;
 
 					case 'transition':

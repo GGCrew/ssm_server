@@ -1,5 +1,6 @@
 <%=
 	{
+		:message_type => 'photo',
 		:id => (@photo.id if @photo),
 		:server_path => Photo::RESIZED_FOLDER,
 		:camera_folder => "#{@photo.camera_folder if @photo}",

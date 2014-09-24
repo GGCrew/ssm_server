@@ -1,6 +1,12 @@
 class ControlsController < ApplicationController
 
 
+	before_action	:set_control,	only:	[:state]
+
+
+	#..#
+
+
   def update
     respond_to do |format|
 			@control = Control.new(Control.default_attributes.merge(control_params))
@@ -17,15 +23,21 @@ class ControlsController < ApplicationController
   end
 
 
+	def state
+		@control = Control.last
+		respond_to do |format|
+			format.html {}
+			format.json {}
+		end
+	end
+
+
 	#..#
 
 
   private
 
     # Use callbacks to share common setup or constraints between actions.
-    #def set_control
-    #  @control = Photo.find(params[:id])
-    #end
 
 
     # Never trust parameters from the scary internet, only allow the white list through.

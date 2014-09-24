@@ -17,7 +17,9 @@ Rails.application.routes.draw do
 	end
 
 	resources :controls do
-		
+		collection do	
+			get 'state'
+		end
 	end
 
   # The priority is based upon order of creation: first created -> highest priority.

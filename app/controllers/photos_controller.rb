@@ -244,12 +244,4 @@ class PhotosController < ApplicationController
     end
 
 
-		def set_control
-			@control = Control.last
-			@control = Control.create!(	hold_duration: 10 * 1000,
-																	transition_duration: 3 * 1000,
-																	transition_type: "dissolve" ) unless @control
-		end
-
-
 end
