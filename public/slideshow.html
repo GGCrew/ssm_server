@@ -415,16 +415,6 @@ gl_FragColor = vec4(pixel.rgb, alpha);\n\
 			}
 
 
-/*
-			function egl_init_textures() {
-				// Create the texture from the image resource
-				square_textures = [];
-				square_textures[0] = egl_get_texture("resources/1_portrait.jpg");
-				square_textures[1] = egl_get_texture("resources/2.jpg");
-			}
-*/
-
-
 			function egl_load_texture(index, filename) {
 				square_textures[index] = egl_get_texture(filename);
 			}
