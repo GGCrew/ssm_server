@@ -1,0 +1,30 @@
+<table class="controls" style="display: <%= @preview_controls_css -%>;">
+	<thead>
+	</thead>
+	<tbody>
+		<tr>
+			<th>Hold Time</th>
+			<td>
+				<%= form_for(@control) do |form| -%>
+					<%= form.text_field(:hold_duration, class: 'numbers') -%>
+					milliseconds
+					<%= form.submit('Update', class: 'submit') -%>
+				<%- end -%>
+			</td>
+		</tr>
+		<tr>
+			<th>Transition Time</th>
+			<td>
+				<%= form_for(@control) do |form| -%>
+					<%= form.text_field(:transition_duration, class: 'numbers') -%>
+					milliseconds
+					<%= form.submit('Update', class: 'submit') -%>
+				<%- end -%>
+			</td>
+		</tr>
+		<tr>
+			<th>Transition Type</th>
+			<td><%= @control.transition_type -%></td>
+		</tr>
+	</tbody>
+</table>

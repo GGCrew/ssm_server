@@ -23,6 +23,19 @@
 		p.caption {
 			text-align: center;
 		}
+
+		table.controls {
+			margin: 1em;
+
+			td {
+				text-align: left;
+
+				input.numbers {
+					width: 3em;
+					text-align: center;
+				}
+			}
+		}
 	}
 
 	.sidebar{

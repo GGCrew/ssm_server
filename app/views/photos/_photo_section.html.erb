@@ -16,24 +16,7 @@
 		<img style="display: <%= @preview_img_css -%>;" src="/photos/black.png">
 		<p class="caption" style="display: <%= @preview_caption_css -%>;">&nbsp;</p>
 
-		<table class="controls" style="display: <%= @preview_controls_css -%>;">
-			<thead>
-			</thead>
-			<tbody>
-				<tr>
-					<th>Hold Time</th>
-					<td><%= @control.hold_duration / 1000.0 -%> seconds</td>
-				</tr>
-				<tr>
-					<th>Transition Time</th>
-					<td><%= @control.transition_duration / 1000.0 -%> seconds</td>
-				</tr>
-				<tr>
-					<th>Transition Type</th>
-					<td><%= @control.transition_type -%></td>
-				</tr>
-			</tbody>
-		</table>
+		<%= render(partial: 'controls') -%>
 	</div>
 
 	<div class="clear_float">
