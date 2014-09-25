@@ -649,7 +649,8 @@ gl_FragColor = vec4(pixel.rgb, alpha);\n\
 								break;
 
 							case 'stop':
-								egl_render_transition('dissolve');
+								egl_render_current();
+								//egl_render_transition('dissolve');
 								break;
 						}
 
@@ -703,7 +704,7 @@ gl_FragColor = vec4(pixel.rgb, alpha);\n\
 								break;
 								
 							case 'stop':
-								egl_load_texture((textureCurrent + 1) % IMAGE_COUNT, "/photos/black.png");
+								egl_load_texture(textureCurrent, "/photos/black.png");
 								sleep_duration = 1000;
 								break;
 						}
@@ -766,7 +767,7 @@ gl_FragColor = vec4(pixel.rgb, alpha);\n\
 		</script>
 	</head>
 
-	<body style='margin:0px' onload='main()'>
+	<body style='margin:0px; background-color: black;' onload='main()'>
 		<canvas id='your_canvas' style='position: absolute; background-color: black;'></canvas>
 	</body>
 </html>
