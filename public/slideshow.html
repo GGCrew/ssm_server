@@ -703,8 +703,17 @@ gl_FragColor = vec4(pixel.rgb, alpha);\n\
 								break;
 								
 							case 'stop':
-								egl_load_texture(textureCurrent, "/photos/black.png");
-								sleep_duration = 1000;
+								if(previous_play_state != 'stop')
+								{
+									// Prep for special transition
+									egl_load_texture((textureCurrent + 1) % IMAGE_COUNT, "/photos/black.png");
+									transition_duration = 500;
+									sleep_duration = 0;
+								}
+								else
+								{
+									sleep_duration = 1000;
+								}
 								break;
 						}
 
