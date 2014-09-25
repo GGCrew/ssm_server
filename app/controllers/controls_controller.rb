@@ -7,6 +7,12 @@ class ControlsController < ApplicationController
 	#..#
 
 
+	def create
+		logger.debug(params.inspect)
+		update
+	end
+
+
   def update
     respond_to do |format|
 			@control = Control.new(Control.default_attributes.merge(control_params))

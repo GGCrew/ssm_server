@@ -3,6 +3,12 @@
 	</thead>
 	<tbody>
 		<tr>
+			<td colspan="2">
+				<%= link_to('Play',		controls_path(control: {play_state: 'play'}),		{method: :post,	class: "#{selected_if_play_state('play')}"}) -%>
+				<%= link_to('Pause',	controls_path(control: {play_state: 'pause'}),	{method: :post,	class: "#{selected_if_play_state('pause')}"}) -%>
+			</td>
+		</tr>
+		<tr>
 			<th>Hold Time</th>
 			<td>
 				<%= form_for(@control) do |form| -%>

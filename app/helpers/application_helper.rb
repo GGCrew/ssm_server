@@ -30,4 +30,22 @@ module ApplicationHelper
 
 		return classname
 	end
+
+	
+	def selected_if_play_state(items)
+		classname = 'not_selected'	# set a default
+
+		case items.class.name
+			when 'String'
+				(classname = 'selected') if items == @control.play_state
+
+			when 'Array'
+				(classname = 'selected') if items.include?(@control.play_state)
+
+		end
+
+		return classname
+	end
+
+
 end
