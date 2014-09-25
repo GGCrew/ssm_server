@@ -26,13 +26,20 @@
 
 		table.controls {
 			margin: 1em;
+			
+			tbody {
+				th {
+					text-align: right;
+				}
+				
+				td {
+					text-align: left;
+					padding: .5em;
 
-			td {
-				text-align: left;
-
-				input.numbers {
-					width: 3em;
-					text-align: center;
+					input.numbers {
+						width: 3em;
+						text-align: center;
+					}
 				}
 			}
 		}
@@ -46,27 +53,21 @@
 
 		.buttons {
 			display: inline-block;
-			position: relative;
 			width: 100%;
 			height: 4em;
 
 			a {
-				padding: 1em;
-				text-decoration: none;
-				border-radius: .5em;
-				display: inline-block;
-				text-align: center;
-				width: 5em;
-				font-weight: bold;
 				position: absolute;
 				top: .25em;
 				
 				&.approve {
+					border-color: #00FF00;
 					background-color: green;
 					left: .25em;
 				}
 				
 				&.deny {
+					border-color: #FFAAAA;
 					background-color: red;
 					left: 7.75em;
 				}

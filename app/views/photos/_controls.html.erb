@@ -3,9 +3,10 @@
 	</thead>
 	<tbody>
 		<tr>
-			<td colspan="2">
+			<td colspan="2" class="buttons">
 				<%= link_to('Play',		controls_path(control: {play_state: 'play'}),		{method: :post,	class: "#{selected_if_play_state('play')}"}) -%>
 				<%= link_to('Pause',	controls_path(control: {play_state: 'pause'}),	{method: :post,	class: "#{selected_if_play_state('pause')}"}) -%>
+				<%= link_to('Stop',		controls_path(control: {play_state: 'stop'}),		{method: :post,	class: "#{selected_if_play_state('stop')}"}) -%>
 			</td>
 		</tr>
 		<tr>
