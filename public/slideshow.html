@@ -662,8 +662,6 @@ gl_FragColor = vec4(pixel.rgb, alpha);\n\
 
 						program_state = 'hold';
 						hold_until_time = new Date(Date.now() + hold_duration);
-						console.log("            now: " + Date());
-						console.log("hold_until_time: " + hold_until_time);
 						
 						window.requestAnimationFrame(animate);  // Javascript-specific call to keep the animate() loop going.
 						break;
@@ -680,7 +678,6 @@ gl_FragColor = vec4(pixel.rgb, alpha);\n\
 						{
 							case 'play':
 								sleep_duration = hold_until_time - Date.now();
-								console.log("sleep_duration: " + sleep_duration);
 								if(sleep_duration > 1000) {sleep_duration = 1000;}
 								break;
 								
@@ -737,7 +734,9 @@ gl_FragColor = vec4(pixel.rgb, alpha);\n\
 				egl_load_texture(textureCounter, "/photos/black.png");
 				get_next_photo();
 
+
 				// Set initial variables
+				play_state = 'play';
 				frameCounter = 0;
 				textureCurrent = 0;
 				transition_complete = false;
