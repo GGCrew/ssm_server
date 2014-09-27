@@ -20,7 +20,7 @@ module PhotosHelper
 		@preview_controls_css = 'none'
 
 		case params[:action]
-			when 'pending'
+			when 'pending', 'scan'
 				@scan_button_css = ''
 
 			when 'approved'

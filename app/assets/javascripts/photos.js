@@ -62,6 +62,11 @@ $(document).ready(function() {
 			})
 		});
 
+	$('.scan')
+		.on('ajax:beforeSend', function(evt, xhr, settings) {
+			$(this).text('Scanning...');
+		});
+
 	$('ul.menu_bar li a')
 		.on('ajax:beforeSend', function(evt, xhr, settings) {
 			$(this).parents('ul.menu_bar').find('li a').removeClass('selected');

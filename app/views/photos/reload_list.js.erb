@@ -11,6 +11,9 @@ if(items.length != 0) { items[0].click(); }
 
 $(photo_section).find('.sidebar .buttons .approve').css('display', '<%= @approve_button_css -%>');
 $(photo_section).find('.sidebar .buttons .deny').css('display', '<%= @deny_button_css -%>');
+$(photo_section).find('.sidebar .buttons .scan').css('display', '<%= @scan_button_css -%>');
 $(photo_section).find('.preview img').css('display', '<%= @preview_img_css -%>');
 $(photo_section).find('.preview .caption').css('display', '<%= @preview_caption_css -%>');
 $(photo_section).find('.preview .controls').css('display', '<%= @preview_controls_css -%>');
+
+$(photo_section).find('.sidebar .buttons .scan').text('Scan');
