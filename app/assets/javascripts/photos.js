@@ -34,7 +34,9 @@ function update_buttons(photo_section, id) {
 
 	buttons.each( function() {
 		var url_components = $(this).attr('href').match(/(.*\/photos\/).*(\/.*)/);
-		$(this).attr('href', url_components[1] + id + url_components[2]);			
+		if(url_components !== null) {
+			$(this).attr('href', url_components[1] + id + url_components[2]);
+		}
 	});
 }
 

@@ -12,6 +12,7 @@ Rails.application.routes.draw do
 			get 'approved'
 			get 'denied'
 			get 'recent'
+			get 'scan'
 			get 'reset_and_rescan'
 		end
 	end

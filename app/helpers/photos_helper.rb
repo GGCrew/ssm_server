@@ -14,13 +14,14 @@ module PhotosHelper
 		# set defaults
 		@approve_button_css = ''
 		@deny_button_css = ''
+		@scan_button_css = 'none'
 		@preview_img_css = ''
 		@preview_caption_css = ''
 		@preview_controls_css = 'none'
 
 		case params[:action]
 			when 'pending'
-				# nothing needed
+				@scan_button_css = ''
 
 			when 'approved'
 				@approve_button_css = 'none'

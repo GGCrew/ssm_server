@@ -29,7 +29,6 @@
 						break;
 
 					case 'control':
-						previous_play_state = play_state;
 						play_state = json.play_state;
 						break;
 				}
@@ -232,7 +231,6 @@
 			var transition_type;
 			var hold_until_time;
 			var play_state;
-			var previous_play_state;
 
 			// Variables that are localized in main()
 			var textureCurrent;

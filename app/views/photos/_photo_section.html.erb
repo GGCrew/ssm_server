@@ -10,6 +10,10 @@
 		<div class="filenames">
 			<%= render(partial: 'filename', collection: photo_section) -%>
 		</div>
+
+		<div class="buttons">
+			<%= link_to('Scan', scan_photos_path, {remote: true, class: 'scan', style: "display: #{@scan_button_css};"}) -%></li>
+		</div>
 	</div>
 	
 	<div class="preview">
