@@ -6,9 +6,10 @@ sudo apt-get install	mysql-server
 sudo apt-get install	mysql-client
 sudo apt-get install	libmysqlclient-dev
 sudo apt-get install	apache2
-sudo apt-get install	apache2-dev
+sudo apt-get install	apache2-threaded-dev
 sudo apt-get install	subversion
 sudo apt-get install	openssh-server
+sudo apt-get install	vim
 
 
 

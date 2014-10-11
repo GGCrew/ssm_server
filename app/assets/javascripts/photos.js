@@ -45,8 +45,13 @@ $(document).ready(function() {
 	$('.approve')
 		.on('ajax:beforeSend', function(evt, xhr, settings) {
 			var filenames = $(this).parent().siblings('.filenames');
-			$(filenames).children('a').each( function() { 
-				if($(this).css('background-color') != 'transparent') {
+			$(filenames).children('a').each( function() {
+				//console.log('background-color: ' + $(this).css('background-color'));
+				if(
+					$(this).css('background-color') != 'transparent' // Firefox
+					&&
+					$(this).css('background-color') != 'rgba(0, 0, 0, 0)' // Chrome
+				) {
 					$(this).css('background-color', 'darkgreen');
 				}
 			})
@@ -56,7 +61,12 @@ $(document).ready(function() {
 		.on('ajax:beforeSend', function(evt, xhr, settings) {
 			var filenames = $(this).parent().siblings('.filenames');
 			$(filenames).children('a').each( function() { 
-				if($(this).css('background-color') != 'transparent') {
+				//console.log('background-color: ' + $(this).css('background-color'));
+				if(
+					$(this).css('background-color') != 'transparent' // Firefox
+					&&
+					$(this).css('background-color') != 'rgba(0, 0, 0, 0)' // Chrome
+				) {
 					$(this).css('background-color', 'darkred');
 				}
 			})
