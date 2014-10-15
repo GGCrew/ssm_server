@@ -74,6 +74,56 @@ class Photo < ActiveRecord::Base
 	end
 
 
+	def rotate!(degrees)
+		logger.info("rotate!(#{degrees})")
+
+		source_folder = 'public' + SOURCE_FOLDER
+		rotated_folder = 'public' + ROTATED_FOLDER
+		resized_folder = 'public' + RESIZED_FOLDER
+
+		save_flags =  FreeImage::AbstractSource::Encoder::JPEG_QUALITYSUPERB | FreeImage::AbstractSource::Encoder::JPEG_BASELINE
+
+		logger.info("\tLoading #{source_folder + path}")
+		FreeImage::Bitmap.new(
+			FreeImage.FreeImage_Load(
+				FreeImage::FreeImage_GetFIFFromFilename(source_folder + path),
+				source_folder + path,
+				FreeImage::AbstractSource::Decoder::JPEG_EXIFROTATE
+			)
+		) do |image|
+
+			# Rotate
+			logger.info("\tRotating")
+			rotated_image = image.rotate(degrees.to_i)
+
+			# Scale
+			logger.info("\tScaling")
+			width_scale = rotated_image.width / 1920.0
+			height_scale = rotated_image.height / 1080.0
+			if(width_scale > height_scale)
+				new_width = (rotated_image.width / width_scale).to_i
+				new_height = (rotated_image.height / width_scale).to_i
+			else
+				new_width = (rotated_image.width / height_scale).to_i
+				new_height = (rotated_image.height / height_scale).to_i
+			end
+			scaled_image = rotated_image.rescale(new_width, new_height, :bilinear)
+
+			# Save
+			logger.info("\tSaving #{resized_folder + path}")
+			begin
+				scaled_image.save(resized_folder + path, :jpeg, save_flags)
+			rescue
+				Dir.mkdir(resized_folder) unless Dir.exists?(resized_folder)
+				Dir.mkdir(resized_folder + camera_folder) unless Dir.exists?(resized_folder + camera_folder)
+				Dir.mkdir(resized_folder + camera_folder + '/' + date_folder) unless Dir.exists?(resized_folder + camera_folder + '/' + date_folder)
+				scaled_image.save(resized_folder + path, :jpeg, save_flags)
+			end
+		end
+		logger.info("\tDone")
+	end
+
+
 	def path
 		return "#{camera_folder}/#{date_folder}/#{self.filename}"
 	end
@@ -159,7 +209,7 @@ class Photo < ActiveRecord::Base
 		) do |rotated_image|
 
 			# Scale
-			logger.info("\tScaling #{source_folder + path}")
+			logger.info("\tScaling")
 			width_scale = rotated_image.width / 1920.0
 			height_scale = rotated_image.height / 1080.0
 			if(width_scale > height_scale)
@@ -172,7 +222,7 @@ class Photo < ActiveRecord::Base
 			scaled_image = rotated_image.rescale(new_width, new_height, :bilinear)
 
 			# Save rotated & scaled copy
-			logger.info("\tSaving #{source_folder + path}")
+			logger.info("\tSaving #{resized_folder + path}")
 			begin
 				scaled_image.save(resized_folder + path, :jpeg, save_flags)
 			rescue
@@ -182,7 +232,7 @@ class Photo < ActiveRecord::Base
 				scaled_image.save(resized_folder + path, :jpeg, save_flags)
 			end
 		end
-		logger.info("\tDone #{source_folder + path}")
+		logger.info("\tDone")
 	end
 
 end

@@ -19,6 +19,14 @@
 	<div class="preview">
 		<img style="display: <%= @preview_img_css -%>;" src="/photos/black.png">
 		<p class="caption" style="display: <%= @preview_caption_css -%>;">&nbsp;</p>
+		<div class="buttons" style="position: absolute; bottom: .5em; right: .5em;">
+			<%= link_to('Reset', rotate_photo_path(-1, degrees: '0'), {remote: true, class: 'rotate'}) -%>
+			<br />
+			<%= link_to('CCW', rotate_photo_path(-1, degrees: '90'), {remote: true, class: 'rotate'}) -%>
+			<%= link_to('CW', rotate_photo_path(-1, degrees: '270'), {remote: true, class: 'rotate'}) -%>
+			<br />
+			<%= link_to('180', rotate_photo_path(-1, degrees: '180'), {remote: true, class: 'rotate'}) -%>
+		</div>
 
 		<%= render(partial: 'controls') -%>
 	</div>

@@ -11,7 +11,7 @@ function show_photo(list_item_element, id, short_path, full_path) {
 	$(list_item_element).siblings('a').css('background-color', '');
 	$(list_item_element).css('background-color', 'darkcyan');
 
-	// keep related item in sync
+	// keep related items in sync
 	$(image).attr('src', full_path);
 	$(caption).text(short_path);
 
@@ -29,9 +29,17 @@ function clear_photo(photo_section) {
 
 
 function update_buttons(photo_section, id) {
-	//var buttons = $(list_item_element).parent().siblings('.buttons').children('a');
-	var buttons = $(photo_section).find('.sidebar .buttons').children('a');
+	var buttons;
+	
+	buttons = $(photo_section).find('.sidebar .buttons').children('a');
+	buttons.each( function() {
+		var url_components = $(this).attr('href').match(/(.*\/photos\/).*(\/.*)/);
+		if(url_components !== null) {
+			$(this).attr('href', url_components[1] + id + url_components[2]);
+		}
+	});
 
+	buttons = $(photo_section).find('.preview .buttons').children('a.rotate');
 	buttons.each( function() {
 		var url_components = $(this).attr('href').match(/(.*\/photos\/).*(\/.*)/);
 		if(url_components !== null) {
@@ -75,6 +83,12 @@ $(document).ready(function() {
 	$('.scan')
 		.on('ajax:beforeSend', function(evt, xhr, settings) {
 			$(this).text('Scanning...');
+		});
+	
+	$('.rotate')
+		.on('ajax:beforeSend', function(evt, xhr, settings) {
+			$(this).parents('.preview').children('img').attr('src', '/photos/black.png');
+			$(this).parents('.preview').children('.caption').text('');
 		});
 
 	$('ul.menu_bar li a')

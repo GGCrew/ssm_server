@@ -1,6 +1,6 @@
 class PhotosController < ApplicationController
 
-  before_action :set_photo, only: [:show, :edit, :update, :destroy, :approve, :deny]
+  before_action :set_photo, only: [:show, :edit, :update, :destroy, :approve, :deny, :rotate]
 	before_action :set_control,	only: [:next, :index, :controls, :pending, :approved, :denied, :recent]
 
 
@@ -93,6 +93,16 @@ class PhotosController < ApplicationController
     respond_to do |format|
 			format.js { render('update_list') }
       format.html { redirect_to(photos_path, notice: 'Photo was successfully denied.') }
+      format.json { head :no_content }
+		end
+	end
+
+
+	def rotate
+		@photo.rotate!(params[:degrees])
+    respond_to do |format|
+			format.js { render('update_photo') }
+      format.html { redirect_to(photos_path, notice: 'Photo was successfully rotated.') }
       format.json { head :no_content }
 		end
 	end

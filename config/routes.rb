@@ -3,6 +3,7 @@ Rails.application.routes.draw do
 		member do
 			get 'approve'
 			get 'deny'
+			get 'rotate'
 		end
 
 		collection do
