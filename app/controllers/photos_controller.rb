@@ -147,7 +147,7 @@ class PhotosController < ApplicationController
 			@photo_updated = (photo_update_time > last_display_time)
 		end
 
-		# Assume photo has not been updated (if value was not already set to true)
+		# Assume photo has not been updated (if value isn't already set to true)
 		@photo_updated ||= false
 
 #		@hold_duration = @control.hold_duration

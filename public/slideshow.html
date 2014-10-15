@@ -25,7 +25,10 @@
 						transition_duration = json.transition_duration;
 
 						var textureNext = ((textureCurrent + 1) % IMAGE_COUNT);  // Next texture
-						egl_load_texture(textureNext, SERVER + json.full_path);
+						if(json.updated) {
+							window.URL.revokeObjectURL(SERVER + json.full_path);
+						}
+						egl_load_texture(textureNext, SERVER + json.full_path + '?t=' + json.updated_time);
 						break;
 
 					case 'control':
