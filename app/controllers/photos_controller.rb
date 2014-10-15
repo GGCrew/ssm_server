@@ -139,8 +139,16 @@ class PhotosController < ApplicationController
 			old_photos = Photo.approved.where(conditions_not_recent)
 
 			index = (rand * old_photos.count).floor
-			@photo =  old_photos[index]
+			@photo = old_photos[index]
+
+			# Check if photo has been updated since last displayed by client
+			photo_update_time = @photo.updated_at
+			last_display_time = ClientPhoto.where(client_id: client.id, photo_id: @photo.id).order(:id).last.created_at
+			@photo_updated = (photo_update_time > last_display_time)
 		end
+
+		# Assume photo has not been updated (if value was not already set to true)
+		@photo_updated ||= false
 
 #		@hold_duration = @control.hold_duration
 #		@transition_type = @control.transition_type

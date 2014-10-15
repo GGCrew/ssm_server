@@ -120,6 +120,7 @@ class Photo < ActiveRecord::Base
 				scaled_image.save(resized_folder + path, :jpeg, save_flags)
 			end
 		end
+		self.update_attributes(rotation: degrees)
 		logger.info("\tDone")
 	end
 

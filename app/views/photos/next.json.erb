@@ -7,6 +7,7 @@
 		:date_folder => "#{@photo.date_folder if @photo}",
 		:filename => "#{@photo.filename if @photo}",
 		:full_path => "#{(Photo::RESIZED_FOLDER + @photo.path) if @photo}",
+		:updated => @photo_updated,
 		:hold_duration => @control.hold_duration,
 		:transition_type => "#{@control.transition_type}",
 		:transition_duration => @control.transition_duration
