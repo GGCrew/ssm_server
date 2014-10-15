@@ -6,6 +6,7 @@ function show_photo(list_item_element, id, short_path, full_path) {
 
 	var image = $(photo_section).find('.preview img');
 	var caption = $(photo_section).find('.preview .caption');
+	var rotation_buttons = $(photo_section).find('.preview .buttons a.rotate').parent();
 
 	// highlight selected item
 	$(list_item_element).siblings('a').css('background-color', '');
@@ -14,6 +15,7 @@ function show_photo(list_item_element, id, short_path, full_path) {
 	// keep related items in sync
 	$(image).attr('src', full_path);
 	$(caption).text(short_path);
+	$(rotation_buttons).css('display', 'block');
 
 	update_buttons(photo_section, id);
 }
@@ -22,9 +24,11 @@ function show_photo(list_item_element, id, short_path, full_path) {
 function clear_photo(photo_section) {
 	var image = $(photo_section).find('.preview img');
 	var caption = $(photo_section).find('.preview .caption');
+	var rotation_buttons = $(photo_section).find('.preview .buttons a.rotate').parent();
 
 	$(image).attr('src', '/photos/black.png');
 	$(caption).text('');
+	$(rotation_buttons).css('display', 'none');
 }
 
 
