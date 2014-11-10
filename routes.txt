@@ -1,12 +1,15 @@
                  Prefix Verb   URI Pattern                        Controller#Action
           approve_photo GET    /photos/:id/approve(.:format)      photos#approve
              deny_photo GET    /photos/:id/deny(.:format)         photos#deny
+           rotate_photo GET    /photos/:id/rotate(.:format)       photos#rotate
+            queue_photo GET    /photos/:id/queue(.:format)        photos#queue
             next_photos GET    /photos/next(.:format)             photos#next
         controls_photos GET    /photos/controls(.:format)         photos#controls
          pending_photos GET    /photos/pending(.:format)          photos#pending
         approved_photos GET    /photos/approved(.:format)         photos#approved
           denied_photos GET    /photos/denied(.:format)           photos#denied
           recent_photos GET    /photos/recent(.:format)           photos#recent
+            scan_photos GET    /photos/scan(.:format)             photos#scan
 reset_and_rescan_photos GET    /photos/reset_and_rescan(.:format) photos#reset_and_rescan
                  photos GET    /photos(.:format)                  photos#index
                         POST   /photos(.:format)                  photos#create
@@ -25,3 +28,4 @@ reset_and_rescan_photos GET    /photos/reset_and_rescan(.:format) photos#reset_a
                         PATCH  /controls/:id(.:format)            controls#update
                         PUT    /controls/:id(.:format)            controls#update
                         DELETE /controls/:id(.:format)            controls#destroy
+                        GET    /                                  redirect(301, /slideshow)
