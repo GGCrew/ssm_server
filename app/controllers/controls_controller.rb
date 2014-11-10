@@ -8,7 +8,7 @@ class ControlsController < ApplicationController
 
 
 	def create
-		logger.debug(params.inspect)
+		#logger.debug(params.inspect)
 		update
 	end
 
@@ -17,6 +17,7 @@ class ControlsController < ApplicationController
     respond_to do |format|
 			@control = Control.new(Control.default_attributes.merge(control_params))
       if @control.save
+				format.js { render('update') }
         format.html { redirect_to(photos_path, notice: 'Setting was successfully updated.') }
         format.json { 
 					#render :show, status: :ok, location: @photo
