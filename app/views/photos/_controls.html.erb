@@ -18,6 +18,24 @@
 					<%= form.submit('Update', class: 'submit') -%>
 				<%- end -%>
 			</td>
+			<td rowspan="2">
+				<%= form_for(@control) do |form| -%>
+					<%= form.hidden_field(:hold_duration,				:value => 10000) -%>
+					<%= form.hidden_field(:transition_duration,	:value => 3000) -%>
+					<%= form.submit('Slow', class: 'submit') -%>
+				<%- end -%>
+				<%= form_for(@control) do |form| -%>
+					<%= form.hidden_field(:hold_duration,				:value => 5000) -%>
+					<%= form.hidden_field(:transition_duration,	:value => 2000) -%>
+					<%= form.submit('Medium', class: 'submit') -%>
+				<%- end -%>
+				<%= form_for(@control) do |form| -%>
+					<%= form.hidden_field(:hold_duration,				:value => 3000) -%>
+					<%= form.hidden_field(:transition_duration,	:value => 1000) -%>
+					<%= form.submit('Fast', class: 'submit') -%>
+				<%- end -%>
+				<br>
+			</td>
 		</tr>
 		<tr>
 			<th>Transition Time</th>
