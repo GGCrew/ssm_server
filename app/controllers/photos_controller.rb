@@ -38,7 +38,6 @@ class PhotosController < ApplicationController
   def create
     @photo = Photo.new(photo_params)
 
-
     respond_to do |format|
       if @photo.save
         format.html { redirect_to @photo, notice: 'Photo was successfully created.' }
@@ -114,16 +113,27 @@ class PhotosController < ApplicationController
 		client = Client.where({ip_address: client_ip}).first
 		client = Client.create({ip_address: client_ip}) if client.nil?
 
-		# Get history of client photos to identify any new photos
-		#client_photo_ids = client.photos(true).map(&:id)
-		#client_photo_ids = ClientPhoto.select(:photo_id).where(client_id: client.id).map(&:photo_id)
-		client_photo_ids = ClientPhoto.select(:photo_id).where(client_id: client.id).group(:photo_id).map(&:photo_id)
-		if client_photo_ids.empty?
-			conditions_new = []
+		# Check for any photos in the queue (these are manually added, and intended to override the normal display order)
+		queued_client_photo = ClientPhotoQueue.where(client_id: client.id).first
+		if queued_client_photo.nil?
+			@photo = nil
 		else
-			conditions_new = ["id NOT IN (:client_photo_ids)", {client_photo_ids: client_photo_ids}]
+			@photo = Photo.find(queued_client_photo.photo_id)
+			queued_client_photo.destroy
 		end
-		@photo = Photo.approved.where(conditions_new).order('created_at ASC').first
+
+		if @photo.nil?
+			# Check for new photos (compare list of displayed photos to list of all approved photos)
+			client_photo_ids = ClientPhoto.select(:photo_id).where(client_id: client.id).group(:photo_id).map(&:photo_id)
+			if client_photo_ids.empty?
+				# No photo history for this client!
+				conditions_new = []
+			else
+				# Get list of photo ID's that have already been displayed
+				conditions_new = ["id NOT IN (:client_photo_ids)", {client_photo_ids: client_photo_ids}]
+			end
+			@photo = Photo.approved.where(conditions_new).order('created_at ASC').first
+		end
 
 		if @photo.nil?
 			# Get random old photo, preferably one that hasn't been shown recently
@@ -133,7 +143,6 @@ class PhotosController < ApplicationController
 			else
 				recent_photo_count = (approved_photo_count / 2.0).ceil
 			end
-			#recent_client_photo_ids = (recent_photo_count == 0 ? [-1] : client_photo_ids[-recent_photo_count..-1])
 			recent_client_photo_ids = (recent_photo_count == 0 ? [-1] : ClientPhoto.select(:photo_id).where(client_id: client.id).order(created_at: :desc).limit(recent_photo_count).map(&:photo_id))
 			conditions_not_recent = ["id NOT IN (:recent_client_photo_ids)", {recent_client_photo_ids: recent_client_photo_ids}]
 			old_photos = Photo.approved.where(conditions_not_recent)
@@ -149,10 +158,6 @@ class PhotosController < ApplicationController
 
 		# Assume photo has not been updated (if value isn't already set to true)
 		@photo_updated ||= false
-
-#		@hold_duration = @control.hold_duration
-#		@transition_type = @control.transition_type
-#		@transition_duration = @control.transition_duration
 
 		# Add the selected photo to the client_photos list (aka "client photo history")
 		client.client_photos.create(

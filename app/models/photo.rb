@@ -12,6 +12,9 @@ class Photo < ActiveRecord::Base
 	has_many	:client_photos,	:dependent => :destroy
 	has_many	:clients,	:through => :client_photos
 
+	has_many	:client_photo_queues,	:dependent => :destroy
+	has_many	:queued_clients,	:through => :client_photo_queues
+
 
 	#..#
 
