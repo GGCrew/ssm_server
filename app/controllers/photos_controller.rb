@@ -1,6 +1,6 @@
 class PhotosController < ApplicationController
 
-  before_action :set_photo, only: [:show, :edit, :update, :destroy, :approve, :deny, :rotate]
+  before_action :set_photo, only: [:show, :edit, :update, :destroy, :approve, :deny, :rotate, :queue]
 	before_action :set_control,	only: [:next, :index, :controls, :pending, :approved, :denied, :recent]
 
 
@@ -256,6 +256,20 @@ class PhotosController < ApplicationController
 		@photos = Photo.pending
 		respond_to do |format|
 			format.js { render('reload_list') }
+			format.html {redirect_to(controls_photos_path)}
+			format.json {}
+		end
+	end
+
+
+	def queue
+		# Assuming queue for all clients because related client-specific stuffs not implemented yet
+		for client_id in Client.select(:id).map(&:id)
+			ClientPhotoQueue.create(client_id: client_id, photo_id: @photo.id)
+		end
+
+		respond_to do |format|
+			format.js {}
 			format.html {redirect_to(controls_photos_path)}
 			format.json {}
 		end

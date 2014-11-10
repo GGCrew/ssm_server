@@ -20,6 +20,8 @@
 		<img style="display: <%= @preview_img_css -%>;" src="/photos/black.png">
 		<p class="caption" style="display: <%= @preview_caption_css -%>;">&nbsp;</p>
 		<div class="buttons" style="position: absolute; bottom: .5em; right: .5em;">
+			<%= link_to('Queue', queue_photo_path(-1), {remote: true, class: 'manage'}) -%>
+			<br />
 			<%= link_to('Reset', rotate_photo_path(-1, degrees: '0'), {remote: true, class: 'rotate'}) -%>
 			<br />
 			<%= link_to('CCW', rotate_photo_path(-1, degrees: '90'), {remote: true, class: 'rotate'}) -%>

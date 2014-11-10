@@ -50,6 +50,14 @@ function update_buttons(photo_section, id) {
 			$(this).attr('href', url_components[1] + id + url_components[2]);
 		}
 	});
+
+	buttons = $(photo_section).find('.preview .buttons').children('a.manage');
+	buttons.each( function() {
+		var url_components = $(this).attr('href').match(/(.*\/photos\/).*(\/.*)/);
+		if(url_components !== null) {
+			$(this).attr('href', url_components[1] + id + url_components[2]);
+		}
+	});
 }
 
 

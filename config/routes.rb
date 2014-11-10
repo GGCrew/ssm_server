@@ -4,6 +4,7 @@ Rails.application.routes.draw do
 			get 'approve'
 			get 'deny'
 			get 'rotate'
+			get 'queue'
 		end
 
 		collection do
