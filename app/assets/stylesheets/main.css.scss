@@ -97,6 +97,7 @@ ul.menu_bar {
 			text-decoration: none;
 			line-height: 2em;
 			margin: 0 .25em;
+			position: relative;
 			
 			&.selected {
 				background-color: black;
@@ -104,6 +105,20 @@ ul.menu_bar {
 				padding-top: 1em;
 				padding-bottom: .75em;
 				line-height: 1em;
+			}
+
+			.badge {
+				background-color: sienna;
+				border: 1px solid yellow;
+				border-radius: 1em;
+				font-size: .8em;
+				position: absolute;
+				top: -.5em;
+				right: -0.25em;
+				text-align: right;
+				padding: .25em;
+				line-height: 1em;
+				font-weight: normal;
 			}
 		}
 	}

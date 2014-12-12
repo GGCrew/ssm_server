@@ -40,4 +40,25 @@ module PhotosHelper
 	end
 
 
+	def get_photo_counts
+		@photo_counts = {}
+		@photo_counts.merge!({
+			pending: Photo.pending.count,
+			approved: Photo.approved.count,
+			denied: Photo.denied.count,
+			recent: get_recent_photos_count
+		})
+	end
+
+
+	# This is redundantly repeated in photos_controller.  Best way to DRY?
+	# Thinking of crafting a nasty-looking scope to move this functionality to the Photo model
+	def get_recent_photos_count
+		client_count = Client.count
+		photo_approved_count = Photo.approved.count
+
+		return client_count * (photo_approved_count / 2.0).ceil
+	end
+
+
 end

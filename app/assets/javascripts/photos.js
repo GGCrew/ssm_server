@@ -61,6 +61,14 @@ function update_buttons(photo_section, id) {
 }
 
 
+function update_photo_counts(pending_count, approved_count, denied_count, recent_count) {
+	$('.menu_bar li[data-menuitem="pending"]	a .badge').text(pending_count);
+	$('.menu_bar li[data-menuitem="approved"]	a .badge').text(approved_count);
+	$('.menu_bar li[data-menuitem="denied"]		a .badge').text(denied_count);
+	$('.menu_bar li[data-menuitem="recent"]		a .badge').text(recent_count);
+}
+
+
 $(document).ready(function() {
 	$('.approve')
 		.on('ajax:beforeSend', function(evt, xhr, settings) {

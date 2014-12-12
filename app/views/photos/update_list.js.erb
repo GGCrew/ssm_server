@@ -17,3 +17,11 @@ if(next_element.length == 0) { // We're at the end of the list!
 $(list_item_element).remove();
 $(associated_elements).remove();
 $(next_element).click();
+
+<%- get_photo_counts -%>
+update_photo_counts(
+	<%= @photo_counts[:pending] -%>,
+	<%= @photo_counts[:approved] -%>,
+	<%= @photo_counts[:denied] -%>,
+	<%= @photo_counts[:recent] -%>
+);

@@ -16,7 +16,6 @@ if(items.length != 0) {
 }
 
 <%- set_per_action_css -%>
-
 $(photo_section).find('.sidebar .buttons .approve').css('display', '<%= @approve_button_css -%>');
 $(photo_section).find('.sidebar .buttons .deny').css('display', '<%= @deny_button_css -%>');
 $(photo_section).find('.sidebar .buttons .scan').css('display', '<%= @scan_button_css -%>');
@@ -25,3 +24,11 @@ $(photo_section).find('.preview .caption').css('display', '<%= @preview_caption_
 $(photo_section).find('.preview .controls').css('display', '<%= @preview_controls_css -%>');
 
 $(photo_section).find('.sidebar .buttons .scan').text('Scan');
+
+<%- get_photo_counts -%>
+update_photo_counts(
+	<%= @photo_counts[:pending] -%>,
+	<%= @photo_counts[:approved] -%>,
+	<%= @photo_counts[:denied] -%>,
+	<%= @photo_counts[:recent] -%>
+);

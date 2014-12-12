@@ -1,10 +1,12 @@
+<%- get_photo_counts -%>
+
 <ul class="menu_bar">
-	<li><%= link_to('Controls',	controls_photos_path,	{remote: true, class: selected_if_not([	'pending',
+	<li data-menuitem="controls"	><%= link_to('Controls',	controls_photos_path,	{remote: true, class: selected_if_not([	'pending',
 																																														'approved',
 																																														'denied',
 																																														'recent'])})	-%></li>
-	<li><%= link_to('Pending',	pending_photos_path,	{remote: true, class: selected_if('pending')})	-%></li>
-	<li><%= link_to('Approved',	approved_photos_path,	{remote: true, class: selected_if('approved')})	-%></li>
-	<li><%= link_to('Denied',		denied_photos_path,		{remote: true, class: selected_if('denied')})	-%></li>
-	<li><%= link_to('Recent',		recent_photos_path,		{remote: true, class: selected_if('recent')})	-%></li>	
+	<li data-menuitem="pending"		><%= link_to(raw("Pending		<div class='badge'>#{@photo_counts[:pending]	}</div>"),	pending_photos_path,	{remote: true, class: selected_if('pending')})	-%></li>
+	<li data-menuitem="approved"	><%= link_to(raw("Approved	<div class='badge'>#{@photo_counts[:approved]	}</div>"),	approved_photos_path,	{remote: true, class: selected_if('approved')})	-%></li>
+	<li data-menuitem="denied"		><%= link_to(raw("Denied		<div class='badge'>#{@photo_counts[:denied]		}</div>"),	denied_photos_path,		{remote: true, class: selected_if('denied')})		-%></li>
+	<li data-menuitem="recent"		><%= link_to(raw("Recent		<div class='badge'>#{@photo_counts[:recent]		}</div>"),	recent_photos_path,		{remote: true, class: selected_if('recent')})		-%></li>	
 </ul>

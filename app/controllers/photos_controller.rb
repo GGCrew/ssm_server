@@ -221,10 +221,7 @@ class PhotosController < ApplicationController
 
 
 	def recent
-		client_count = Client.count
-		photo_approved_count = Photo.approved.count
-		
-		recent_photo_count = client_count * (photo_approved_count / 2.0).ceil
+		recent_photo_count = get_recent_photos_count
 		@photos = Photo.select('photos.*, client_photos.client_id').joins(:client_photos).order('client_photos.created_at DESC').limit(recent_photo_count)
 		respond_to do |format|
 			format.js { render('reload_list') }
@@ -273,6 +270,16 @@ class PhotosController < ApplicationController
 			format.html {redirect_to(controls_photos_path)}
 			format.json {}
 		end
+	end
+
+
+	# This is redundantly repeated in photos_helper.  Best way to DRY?
+	# Thinking of crafting a nasty-looking scope to move this functionality to the Photo model
+	def get_recent_photos_count
+		client_count = Client.count
+		photo_approved_count = Photo.approved.count
+
+		return client_count * (photo_approved_count / 2.0).ceil
 	end
 
 
