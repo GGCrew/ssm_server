@@ -35,7 +35,7 @@ class Photo < ActiveRecord::Base
 
 	def self.scan_for_new_photos
 		path = 'public' + SOURCE_FOLDER
-		files = Dir.glob(path + '**/*.{JPG,PNG}')
+		files = Dir.glob(path + '**/*.{JPG,PNG}', File::FNM_CASEFOLD)
 		files.each_with_index do |file, index|
 			photo_hash = path_to_hash(file[path.size..-1])
 			logger.debug("#{index}/#{files.count} - #{photo_hash.to_s}")
