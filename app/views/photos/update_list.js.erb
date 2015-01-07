@@ -8,7 +8,7 @@ if(next_element.length == 0) { // We're at the end of the list!
 		var photo_section = $(list_item_element).parents('.photo_section');
 		clear_photo(photo_section);
 		update_buttons(photo_section, -1);
-		if($('.menu_bar .selected').text() == 'Pending') {
+		if($('.menu_bar .selected').clone().children().remove().end().text().trim() == 'Pending') {
 			$('.photo_section .sidebar .buttons .scan').click();
 		}
 	}
