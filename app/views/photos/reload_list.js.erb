@@ -4,13 +4,13 @@ var filenames = $(photo_section).find('.sidebar .filenames');
 $(filenames).html("<%= escape_javascript(render(partial: 'filename', collection: @photos)) -%>");
 
 // Automatically select first item in the list (if any items)
-var items = $(filenames).children('a')
+var items = $(filenames).children('a');
 if(items.length != 0) { 
 	items[0].click(); 
 } else {
 	// No items in the list.
 	// If we're on the "pending" tab, start a timer to rescan in a few seconds
-	if($('.menu_bar .selected').text() == 'Pending') {
+	if($('.menu_bar .selected').clone().children().remove().end().text().trim() == 'Pending') {
 		setTimeout(function(){$('.photo_section .sidebar .buttons .scan').click();}, 5000);
 	}
 }
