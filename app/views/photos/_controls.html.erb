@@ -51,5 +51,8 @@
 			<th>Transition Type</th>
 			<td><%= @control.transition_type -%></td>
 		</tr>
+		<tr>
+			<th></th>
+			<td><%= link_to('Reset Database and Rescan Photo Folders', reset_and_rescan_photos_path) -%></td>
 	</tbody>
 </table>
