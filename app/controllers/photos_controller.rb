@@ -150,10 +150,14 @@ class PhotosController < ApplicationController
 			index = (rand * old_photos.count).floor
 			@photo = old_photos[index]
 
-			# Check if photo has been updated since last displayed by client
-			photo_update_time = @photo.updated_at
-			last_display_time = ClientPhoto.where(client_id: client.id, photo_id: @photo.id).order(:id).last.created_at
-			@photo_updated = (photo_update_time > last_display_time)
+			if @photo.nil?
+				# Nothing
+			else
+				# Check if photo has been updated since last displayed by client
+				photo_update_time = @photo.updated_at
+				last_display_time = ClientPhoto.where(client_id: client.id, photo_id: @photo.id).order(:id).last.created_at
+				@photo_updated = (photo_update_time > last_display_time)
+			end
 		end
 
 		# Assume photo has not been updated (if value isn't already set to true)
@@ -244,9 +248,14 @@ class PhotosController < ApplicationController
 
 
 	def reset_and_rescan
-		ClientPhoto.destroy_all
+		# Delete database records
+		ClientPhoto.destroy_all	# Killing these first to prevent associations from triggering (causing massive slowdown)
 		Photo.destroy_all
 		Client.destroy_all
+
+		# Delete processed photo files
+		resized_folder = 'public' + Photo::RESIZED_FOLDER
+		## TODO: recursive folder scan and file delete
 		
 		Photo.scan_for_new_photos
 		
