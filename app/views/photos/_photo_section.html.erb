@@ -14,10 +14,17 @@
 		<div class="buttons">
 			<%= link_to('Scan', scan_photos_path, {remote: true, class: 'scan', style: "display: #{@scan_button_css};"}) -%>
 			<div class="option" style="position: absolute; left: 50%; top: 30%;">
+<%- if false -%>
 				<label>
 					<input type="checkbox" checked="false" id="autoapprove" name="autoapprove">
 					Auto Approve
 				</label>
+<%- else -%>
+				<label>
+					<%= check_box_tag('auto_approve', "1", false, {}) -%>
+					Auto Approve
+				</label>
+<%- end -%>
 			</div>
 		</div>
 	</div>

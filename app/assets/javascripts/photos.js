@@ -103,6 +103,10 @@ $(document).ready(function() {
 	$('.scan')
 		.on('ajax:beforeSend', function(evt, xhr, settings) {
 			$(this).text('Scanning...');
+			console.log(settings.data);
+			//settings.data = ('autocomplete=' + $('#autoapprove').is(':checked'));
+			settings.data = {autocomplete: $('#autoapprove').is(':checked')};
+			console.log(settings.data);
 		});
 	
 	$('.rotate')
@@ -122,5 +126,14 @@ $(document).ready(function() {
 			update_buttons(photo_section);
 			buttons.css('display', 'none');
 			filenames.text('');			
+		});
+
+	$('#auto_approve')
+		.on('click', function() {
+			//alert($(this).is(':checked'));
+			$.ajax({
+				url: 'auto_approve',
+				data: {auto_approve: $(this).is(':checked')}
+			});
 		});
 })

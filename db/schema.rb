@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20141110000001) do
+ActiveRecord::Schema.define(version: 20150116000001) do
 
   create_table "client_photo_queues", force: true do |t|
     t.integer  "client_id"
@@ -43,6 +43,7 @@ ActiveRecord::Schema.define(version: 20141110000001) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.string   "play_state"
+    t.boolean  "auto_approve",        default: false
   end
 
   create_table "photos", force: true do |t|

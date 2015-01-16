@@ -16,6 +16,7 @@ Rails.application.routes.draw do
 			get 'recent'
 			get 'scan'
 			get 'reset_and_rescan'
+			get 'auto_approve'
 		end
 	end
 

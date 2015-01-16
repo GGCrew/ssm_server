@@ -236,7 +236,7 @@ class PhotosController < ApplicationController
 
 
 	def scan
-		Photo.scan_for_new_photos
+		Photo.scan_for_new_photos(Control.last.auto_approve)
 
 		@photos = Photo.pending
 		respond_to do |format|
@@ -289,6 +289,17 @@ class PhotosController < ApplicationController
 		photo_approved_count = Photo.approved.count
 
 		return client_count * (photo_approved_count / 2.0).ceil
+	end
+
+
+	def auto_approve
+		control = Control.create!(Control.default_attributes.merge(auto_approve: (params[:auto_approve] == 'true')))
+
+		respond_to do |format|
+			format.js {render(nothing: true)}
+			format.html {redirect_to(controls_photos_path)}
+			format.json {}
+		end
 	end
 
 
