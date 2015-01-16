@@ -108,7 +108,8 @@ sudo service apache2 restart
 
 sudo cp /etc/issue /etc/issue.default
 sudo vim /usr/local/bin/get-ip-address
-	ip address show eth0 | awk '/inet / {print $2}' | cut -d/ -f1
+	#ip address show eth0 | awk '/inet / {print $2}' | cut -d/ -f1
+	/sbin/ifconfig | grep "inet addr" | grep -v "127.0.0.1" | awk '{ print $2 }' | awk -F: '{ print $2 }'
 sudo chmod +x /usr/local/bin/get-ip-address
 
 sudo vim /etc/network/if-up.d/show-ip-address

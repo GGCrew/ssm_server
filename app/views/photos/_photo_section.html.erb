@@ -3,8 +3,8 @@
 <div class="photo_section">
 	<div class="sidebar">
 		<div class="buttons">
-			<%= link_to('Approve', approve_photo_path(-1), {remote: true, class: 'approve', style: "display: #{@approve_button_css};"}) -%></li>
-			<%= link_to('Deny', deny_photo_path(-1), {remote: true, class: 'deny', style: "display: #{@deny_button_css};"}) -%></li>
+			<%= link_to('Approve', approve_photo_path(-1), {remote: true, class: 'approve', style: "display: #{@approve_button_css};"}) -%>
+			<%= link_to('Deny', deny_photo_path(-1), {remote: true, class: 'deny', style: "display: #{@deny_button_css};"}) -%>
 		</div>
 				
 		<div class="filenames">
@@ -12,7 +12,13 @@
 		</div>
 
 		<div class="buttons">
-			<%= link_to('Scan', scan_photos_path, {remote: true, class: 'scan', style: "display: #{@scan_button_css};"}) -%></li>
+			<%= link_to('Scan', scan_photos_path, {remote: true, class: 'scan', style: "display: #{@scan_button_css};"}) -%>
+			<div class="option" style="position: absolute; left: 50%; top: 30%;">
+				<label>
+					<input type="checkbox" checked="false" id="autoapprove" name="autoapprove">
+					Auto Approve
+				</label>
+			</div>
 		</div>
 	</div>
 	
