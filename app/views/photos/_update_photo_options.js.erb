@@ -1,0 +1,3 @@
+var options = $('.photo_section').find('.option');
+$(options).removeClass('selected');
+<%= raw("$(options).find('#auto_approve').parents('.option').addClass('selected');") if Control.last.auto_approve -%>

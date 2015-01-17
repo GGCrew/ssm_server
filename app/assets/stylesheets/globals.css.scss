@@ -1,0 +1,19 @@
+.option {
+	top: .5em;
+	width: 7em;
+	height: 3em;
+	padding: 0;
+	display: block;
+	position: relative;
+	border: 1px solid orange;
+	
+	&.selected {
+		color: black;
+		background-color: yellow;
+	}
+	
+	label {
+		text-align: center;
+		display: block;
+	}
+}

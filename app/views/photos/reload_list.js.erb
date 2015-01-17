@@ -19,11 +19,17 @@ if(items.length != 0) {
 $(photo_section).find('.sidebar .buttons .approve').css('display', '<%= @approve_button_css -%>');
 $(photo_section).find('.sidebar .buttons .deny').css('display', '<%= @deny_button_css -%>');
 $(photo_section).find('.sidebar .buttons .scan').css('display', '<%= @scan_button_css -%>');
+$(photo_section).find('#auto_approve').parents('.option').css('display', '<%= @scan_button_css -%>');
 $(photo_section).find('.preview img').css('display', '<%= @preview_img_css -%>');
 $(photo_section).find('.preview .caption').css('display', '<%= @preview_caption_css -%>');
 $(photo_section).find('.preview .controls').css('display', '<%= @preview_controls_css -%>');
 
 $(photo_section).find('.sidebar .buttons .scan').text('Scan');
+
+
+// update photo option buttons
+<%= render(partial: 'update_photo_options') -%>
+
 
 <%- get_photo_counts -%>
 update_photo_counts(

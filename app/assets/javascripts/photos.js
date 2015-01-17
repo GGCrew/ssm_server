@@ -108,7 +108,7 @@ $(document).ready(function() {
 			settings.data = {autocomplete: $('#autoapprove').is(':checked')};
 			console.log(settings.data);
 		});
-	
+
 	$('.rotate')
 		.on('ajax:beforeSend', function(evt, xhr, settings) {
 			$(this).parents('.preview').children('img').attr('src', '/photos/black.png');
@@ -122,9 +122,11 @@ $(document).ready(function() {
 			var photo_section = $('.photo_section');
 			var filenames = $(photo_section).find('.sidebar .filenames');
 			var buttons = $(photo_section).find('.sidebar .buttons a');
+			var options = $(photo_section).find('.sidebar').find('.option');
 			clear_photo(photo_section);
 			update_buttons(photo_section);
 			buttons.css('display', 'none');
+			options.css('display', 'none');
 			filenames.text('');			
 		});
 

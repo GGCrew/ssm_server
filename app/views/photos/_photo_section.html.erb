@@ -1,4 +1,5 @@
 <%- set_per_action_css -%>
+<%- auto_approve_enabled = Control.last.auto_approve -%>
 
 <div class="photo_section">
 	<div class="sidebar">
@@ -13,18 +14,12 @@
 
 		<div class="buttons">
 			<%= link_to('Scan', scan_photos_path, {remote: true, class: 'scan', style: "display: #{@scan_button_css};"}) -%>
-			<div class="option" style="position: absolute; left: 50%; top: 30%;">
-<%- if false -%>
+			<div class="option <%= auto_approve_enabled ? 'selected' : '' -%>" style="left: 7.75em;">
 				<label>
-					<input type="checkbox" checked="false" id="autoapprove" name="autoapprove">
+					<%= check_box_tag('auto_approve', "1", auto_approve_enabled, {}) -%>
+					<br />
 					Auto Approve
 				</label>
-<%- else -%>
-				<label>
-					<%= check_box_tag('auto_approve', "1", false, {}) -%>
-					Auto Approve
-				</label>
-<%- end -%>
 			</div>
 		</div>
 	</div>

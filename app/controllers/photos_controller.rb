@@ -296,7 +296,7 @@ class PhotosController < ApplicationController
 		control = Control.create!(Control.default_attributes.merge(auto_approve: (params[:auto_approve] == 'true')))
 
 		respond_to do |format|
-			format.js {render(nothing: true)}
+			format.js {render(partial: 'update_photo_options')}
 			format.html {redirect_to(controls_photos_path)}
 			format.json {}
 		end
