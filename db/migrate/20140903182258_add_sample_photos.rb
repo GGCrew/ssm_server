@@ -1,4 +1,12 @@
 class AddSamplePhotos < ActiveRecord::Migration
+
+=begin
+	2015-03-09
+	connr001
+	Obsolete migration.  The sample photos no longer exist as part of the repository, so any from-scratch migrations will fail.
+	Keeping the migration for historical reasons, but commented-out the line that actually processes the obsolete photo data.
+=end
+
   def change
 		reversible do |migration|
 			migration.up do
@@ -15,7 +23,7 @@ class AddSamplePhotos < ActiveRecord::Migration
 				say_with_time('Adding photos...') do
 					photos.each_with_index do |photo, index|
 						puts "#{index}/#{photos.count}"
-						Photo.create!(:camera_id => photo[:camera_id], :date => Date.strptime(photo[:date], '%m-%d-%Y'), :filename => photo[:filename])
+						#Photo.create!(:camera_id => photo[:camera_id], :date => Date.strptime(photo[:date], '%m-%d-%Y'), :filename => photo[:filename])
 					end
 				end
 			end
