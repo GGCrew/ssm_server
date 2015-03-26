@@ -32,6 +32,9 @@
 							window.URL.revokeObjectURL(SERVER + json.full_path);
 						}
 						egl_load_texture(textureNext, SERVER + json.full_path + '?t=' + json.updated_time);
+
+						//texture_effects[textureNext] = ((textureCurrent + 1) % IMAGE_COUNT) + 1;	// Temp code to alternate between grayscale and sepia
+						texture_effects[textureNext] = Math.floor(Math.random() * 3);	// Temp code to randomly alternate between color, grayscale, and sepia
 						break;
 
 					case 'control':
@@ -227,6 +230,7 @@
 			var _alpha;
 
 			var square_textures = [];
+			var texture_effects = [];
 			var frameCounter;
 			var program_state;
 			var transition_start_time;
@@ -324,16 +328,22 @@ vUV=uv;\n\
 precision mediump float;\n\
 varying vec2 vUV; // Get the pixel coordinates from the vertex shader vUV variable.\n\
 uniform sampler2D sampler; // The texture.\n\
+uniform int effect; // The GLSL effect to apply to the texture (if any).\n\
 uniform float alpha;\n\
 void main(void) {\n\
 vec4 pixel = texture2D(sampler, vUV);\n\
 //gl_FragColor = vec4(pixel.rgb, alpha);\n\
-//float gray = dot(pixel.rgb, vec3(0.299, 0.587, 0.114)); // NTSC conversion weights for Grayscale \n\
+//float gray = dot(pixel.rgb, vec3(0.299, 0.587, 0.114)); // NTSC conversion weights for Grayscale\n\
 //gl_FragColor = vec4(gray, gray, gray, alpha);\n\
-//gl_FragColor = vec4(vec3(gray) * vec3(1.2, 1.0, 0.8), alpha); // Apply brown to our grayscaled pixel \n\
-//gl_FragColor = vec4(pixel.rgb * vec3(0.299, 0.587, 0.114), alpha); // No good - results in a dark green-ish image instead of grayscale \n\
-pixel = vec4(vec3(dot(pixel.rgb, vec3(0.299, 0.587, 0.114))), pixel.a); // Grayscale \n\
-pixel = vec4(pixel.rgb * vec3(1.2, 1.0, 0.8), pixel.a); // Sepia \n\
+//gl_FragColor = vec4(vec3(gray) * vec3(1.2, 1.0, 0.8), alpha); // Apply brown to our grayscaled pixel\n\
+//gl_FragColor = vec4(pixel.rgb * vec3(0.299, 0.587, 0.114), alpha); // No good - results in a dark green-ish image instead of grayscale\n\
+if(effect == 1) { // Grayscale\n\
+pixel = vec4(vec3(dot(pixel.rgb, vec3(0.299, 0.587, 0.114))), pixel.a); // Grayscale\n\
+}\n\
+if(effect == 2) { // Sepia\n\
+pixel = vec4(vec3(dot(pixel.rgb, vec3(0.299, 0.587, 0.114))), pixel.a); // Grayscale\n\
+pixel = vec4(pixel.rgb * vec3(1.2, 1.0, 0.8), pixel.a); // Sepia\n\
+}\n\
 gl_FragColor = vec4(pixel.rgb, alpha);\n\
 }";
 
@@ -362,6 +372,7 @@ gl_FragColor = vec4(pixel.rgb, alpha);\n\
 				_Mmatrix = GL.getUniformLocation(SHADER_PROGRAM, "Mmatrix");
 				_Smatrix = GL.getUniformLocation(SHADER_PROGRAM, "Smatrix");
 				_sampler = GL.getUniformLocation(SHADER_PROGRAM, "sampler");
+				_effect = GL.getUniformLocation(SHADER_PROGRAM, "effect");
 				_alpha = GL.getUniformLocation(SHADER_PROGRAM, "alpha");
 
 				// Linking is over, tell the webgl context to use SHADER_PROGRAM for rendering.
@@ -494,6 +505,11 @@ gl_FragColor = vec4(pixel.rgb, alpha);\n\
 					GL.bindTexture(GL.TEXTURE_2D, square_textures[textureCurrent].webglTexture);
 				}
 
+				// Specify GLSL effect (if any)
+				//console.log("egl_render_current() - effect: " + texture_effects[textureCurrent]);
+				GL.uniform1i(_effect, texture_effects[textureCurrent]);
+
+				// Set blending mode
 				GL.disable(GL.BLEND);
 
 
@@ -529,6 +545,10 @@ gl_FragColor = vec4(pixel.rgb, alpha);\n\
 
 								GL.bindTexture(GL.TEXTURE_2D, square_textures[textureCounter].webglTexture);
 							}
+
+
+							// Specify GLSL effect (if any)
+							GL.uniform1i(_effect, texture_effects[textureCounter]);
 
 
 							// Compute and set the texture's alpha level
@@ -594,6 +614,10 @@ gl_FragColor = vec4(pixel.rgb, alpha);\n\
 
 								GL.bindTexture(GL.TEXTURE_2D, square_textures[textureCounter].webglTexture);
 							}
+
+
+							// Specify GLSL effect (if any)
+							GL.uniform1i(_effect, texture_effects[textureCounter]);
 
 
 							// Compute and set the texture's alpha level
