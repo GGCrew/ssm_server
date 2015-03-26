@@ -16,6 +16,9 @@
 
 		<script type='text/javascript'>
 			var SERVER = "";
+			var EFFECT_NORMAL = 0;
+			var EFFECT_GRAYSCALE = 1;
+			var EFFECT_SEPIA = 2;
 
 			function process_json(json_text)
 			{
@@ -34,7 +37,12 @@
 						egl_load_texture(textureNext, SERVER + json.full_path + '?t=' + json.updated_time);
 
 						//texture_effects[textureNext] = ((textureCurrent + 1) % IMAGE_COUNT) + 1;	// Temp code to alternate between grayscale and sepia
-						texture_effects[textureNext] = Math.floor(Math.random() * 3);	// Temp code to randomly alternate between color, grayscale, and sepia
+						//texture_effects[textureNext] = Math.floor(Math.random() * 3);	// Temp code to randomly alternate between color, grayscale, and sepia
+						texture_effects[textureNext] = json.photo_effect;
+						// Some error handling if the client version is ahead of the server version
+						if(texture_effects[textureNext] === undefined) {
+							texture_effects[textureNext] = EFFECT_NORMAL;	// Default to normal
+						}
 						break;
 
 					case 'control':
@@ -325,6 +333,9 @@ vUV=uv;\n\
 					It returns the RGBA color of the pixel with the pre-build variable gl_FragColor.
 				*/
 				var shader_fragment_source="\n\
+const mediump int EFFECT_NORMAL = 0;\n\
+const mediump int EFFECT_GRAYSCALE = 1;\n\
+const mediump int EFFECT_SEPIA = 2;\n\
 precision mediump float;\n\
 varying vec2 vUV; // Get the pixel coordinates from the vertex shader vUV variable.\n\
 uniform sampler2D sampler; // The texture.\n\
@@ -337,10 +348,10 @@ vec4 pixel = texture2D(sampler, vUV);\n\
 //gl_FragColor = vec4(gray, gray, gray, alpha);\n\
 //gl_FragColor = vec4(vec3(gray) * vec3(1.2, 1.0, 0.8), alpha); // Apply brown to our grayscaled pixel\n\
 //gl_FragColor = vec4(pixel.rgb * vec3(0.299, 0.587, 0.114), alpha); // No good - results in a dark green-ish image instead of grayscale\n\
-if(effect == 1) { // Grayscale\n\
+if(effect == EFFECT_GRAYSCALE) { // Grayscale\n\
 pixel = vec4(vec3(dot(pixel.rgb, vec3(0.299, 0.587, 0.114))), pixel.a); // Grayscale\n\
 }\n\
-if(effect == 2) { // Sepia\n\
+if(effect == EFFECT_SEPIA) { // Sepia\n\
 pixel = vec4(vec3(dot(pixel.rgb, vec3(0.299, 0.587, 0.114))), pixel.a); // Grayscale\n\
 pixel = vec4(pixel.rgb * vec3(1.2, 1.0, 0.8), pixel.a); // Sepia\n\
 }\n\

@@ -29,6 +29,10 @@
 			<td id="transition_duration"><%= @transition_duration -%></td>
 		</tr>
 		<tr>
+			<td>photo_effect</td>
+			<td id="photo_effect"><%= @photo_effect -%></td>
+		</tr>
+		<tr>
 			<td>img</td>
 			<td><img id="photo" src="<%= (Photo::RESIZED_FOLDER + @photo.path) if @photo -%>" height="100" /></td>
 		</tr>

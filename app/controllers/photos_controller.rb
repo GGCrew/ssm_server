@@ -160,6 +160,14 @@ class PhotosController < ApplicationController
 			end
 		end
 
+		# Specify any client-side effects
+		photo_effect_options = []
+		photo_effect_options << Photo::EFFECT_NORMAL		if @control.effect_normal
+		photo_effect_options << Photo::EFFECT_GRAYSCALE	if @control.effect_grayscale
+		photo_effect_options << Photo::EFFECT_SEPIA			if @control.effect_sepia
+		photo_effect_options << Photo::EFFECT_NORMAL		if photo_effect_options.empty?	# Always default to normal if nothing is specified
+		@photo_effect = photo_effect_options[(rand() * photo_effect_options.count).floor]
+
 		# Assume photo has not been updated (if value isn't already set to true)
 		@photo_updated ||= false
 
@@ -169,7 +177,8 @@ class PhotosController < ApplicationController
 				photo_id: @photo.id,
 				hold_duration: @control.hold_duration,
 				transition_type: @control.transition_type,
-				transition_duration: @control.transition_duration
+				transition_duration: @control.transition_duration,
+				effect: @photo_effect
 			}
 		) if @photo
 

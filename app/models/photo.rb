@@ -5,6 +5,10 @@ class Photo < ActiveRecord::Base
 	ROTATED_FOLDER = '/photos/rotated/'
 	RESIZED_FOLDER = '/photos/1920x1080/'
 
+	EFFECT_NORMAL = 0
+	EFFECT_GRAYSCALE = 1
+	EFFECT_SEPIA = 2
+
 
 	#..#
 
