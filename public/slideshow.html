@@ -343,15 +343,10 @@ uniform int effect; // The GLSL effect to apply to the texture (if any).\n\
 uniform float alpha;\n\
 void main(void) {\n\
 vec4 pixel = texture2D(sampler, vUV);\n\
-//gl_FragColor = vec4(pixel.rgb, alpha);\n\
-//float gray = dot(pixel.rgb, vec3(0.299, 0.587, 0.114)); // NTSC conversion weights for Grayscale\n\
-//gl_FragColor = vec4(gray, gray, gray, alpha);\n\
-//gl_FragColor = vec4(vec3(gray) * vec3(1.2, 1.0, 0.8), alpha); // Apply brown to our grayscaled pixel\n\
-//gl_FragColor = vec4(pixel.rgb * vec3(0.299, 0.587, 0.114), alpha); // No good - results in a dark green-ish image instead of grayscale\n\
-if(effect == EFFECT_GRAYSCALE) { // Grayscale\n\
+if(effect == EFFECT_GRAYSCALE) {\n\
 pixel = vec4(vec3(dot(pixel.rgb, vec3(0.299, 0.587, 0.114))), pixel.a); // Grayscale\n\
 }\n\
-if(effect == EFFECT_SEPIA) { // Sepia\n\
+if(effect == EFFECT_SEPIA) {\n\
 pixel = vec4(vec3(dot(pixel.rgb, vec3(0.299, 0.587, 0.114))), pixel.a); // Grayscale\n\
 pixel = vec4(pixel.rgb * vec3(1.2, 1.0, 0.8), pixel.a); // Sepia\n\
 }\n\
