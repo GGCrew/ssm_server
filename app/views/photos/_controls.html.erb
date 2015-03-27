@@ -52,6 +52,14 @@
 			<td><%= @control.transition_type -%></td>
 		</tr>
 		<tr>
+			<th>Photo Effects</th>
+			<td>
+				<%= form_for(@control, remote: true) do |form| -%><%= form.check_box(:effect_normal,		class: '', onclick: '$(this).submit();') -%><%= form.label(:effect_normal,		'Normal') -%><%- end -%>
+				<%= form_for(@control, remote: true) do |form| -%><%= form.check_box(:effect_grayscale,	class: '', onclick: '$(this).submit();') -%><%= form.label(:effect_grayscale,	'B&W'		) -%><%- end -%>
+				<%= form_for(@control, remote: true) do |form| -%><%= form.check_box(:effect_sepia,			class: '', onclick: '$(this).submit();') -%><%= form.label(:effect_sepia,			'Sepia'	) -%><%- end -%>
+			</td>
+		</tr>
+		<tr>
 			<th></th>
 			<td>
 				<%#= link_to('Reset Database and Rescan Photo Folders', reset_and_rescan_photos_path) -%>

@@ -9,7 +9,10 @@ class Control < ActiveRecord::Base
 			transition_duration: 3 * 1000,
 			transition_type: 'dissolve',
 			play_state: 'play',
-			auto_approve: false
+			auto_approve: false,
+			effect_normal: true,
+			effect_grayscale: false,
+			effect_sepia: false
 		) unless control
 
 		attributes = {
@@ -17,7 +20,10 @@ class Control < ActiveRecord::Base
 			transition_duration:	(control.transition_duration	? control.transition_duration	: 3 * 1000),
 			transition_type:			(control.transition_type			? control.transition_type			: 'dissolve'),
 			play_state:						(control.play_state						? control.play_state					: 'play'),
-			auto_approve:					(control.auto_approve					? control.auto_approve				: false)
+			auto_approve:					(control.auto_approve					? control.auto_approve				: false),
+			effect_normal:				(!control.effect_normal.nil?	? control.effect_normal				: true),
+			effect_grayscale:			(control.effect_grayscale			? control.effect_grayscale		: false),
+			effect_sepia:					(control.effect_sepia					? control.effect_sepia				: false)
 		}
 
 		return attributes
