@@ -236,9 +236,11 @@
 			var _uv;
 			var _position;
 			var _alpha;
+			var _resolution;
 
 			var square_textures = [];
 			var texture_effects = [];
+			var texture_vignettes = [];
 			var frameCounter;
 			var program_state;
 			var transition_start_time;
@@ -252,6 +254,7 @@
 
 			// Variables that are localized in main()
 			var textureCurrent;
+			var resolution;
 
 			// Constants
 			var IMAGE_COUNT = 2;
@@ -263,6 +266,8 @@
 				// Resize the Canvas to full browser size
 				CANVAS.width=window.innerWidth;
 				CANVAS.height=window.innerHeight;
+				//resolution = [CANVAS.width, CANVAS.height];
+				texture_vignettes[0] = 1;	// DEBUG CODE
 
 				/*========================= GET WEBGL CONTEXT ========================= */
 				try {
@@ -340,10 +345,16 @@ vUV=uv;\n\
 const mediump int EFFECT_NORMAL = 0;\n\
 const mediump int EFFECT_GRAYSCALE = 1;\n\
 const mediump int EFFECT_SEPIA = 2;\n\
+//const mediump int EFFECT_VIGNETTE = 4;\n\
+const mediump float RADIUS = 0.45;\n\
+const mediump float SOFTNESS = 0.45;\n\
 precision mediump float;\n\
 varying vec2 vUV; // Get the pixel coordinates from the vertex shader vUV variable.\n\
 uniform sampler2D sampler; // The texture.\n\
 uniform int effect; // The GLSL effect to apply to the texture (if any).\n\
+uniform bool vignette;\n\
+uniform vec2 resolution;\n\
+uniform vec2 texture_resolution;\n\
 uniform float alpha;\n\
 void main(void) {\n\
 vec4 pixel = texture2D(sampler, vUV);\n\
@@ -351,8 +362,33 @@ if(effect == EFFECT_GRAYSCALE) {\n\
 pixel = vec4(vec3(dot(pixel.rgb, vec3(0.299, 0.587, 0.114))), pixel.a); // Grayscale\n\
 }\n\
 if(effect == EFFECT_SEPIA) {\n\
-pixel = vec4(vec3(dot(pixel.rgb, vec3(0.299, 0.587, 0.114))), pixel.a); // Grayscale\n\
+pixel = vec4(vec3(dot(pixel.rgb, vec3(0.299, 0.587, 0.114))), pixel.a);	// Grayscale\n\
 pixel = vec4(pixel.rgb * vec3(1.2, 1.0, 0.8), pixel.a); // Sepia\n\
+}\n\
+if(vignette) {\n\
+// I can't get this working correctly.\n\
+// Because the texture is being repositioned on the canvas to keep proper aspect ratio,\n\
+// the \"position\" calculation must determine the texture's center (which doesn't factor in the texture's offset location)\n\
+// and shift the \"position\" result to the canvas's center.\n\
+vec2 position = (gl_FragCoord.xy / texture_resolution.xy) - vec2(0.5);	// Determine center point of canvas\n\
+//position = position + ((gl_FragCoord.xy / texture_resolution.xy) - vec2(0.5));	// Offset from canvas coordinates to texture coordinates\n\
+//position = position - vec2(0.5);\n\
+//position = texture_resolution.xy;	// Offset from canvas coordinates to texture coordinates\n\
+//position = gl_FragCoord.xy / (resolution.xy / texture_resolution.xy);\n\
+//vec2 position2 = (gl_FragCoord.xy / resolution.xy) - vec2(0.5);\n\
+float x = (texture_resolution.x / resolution.x) * 0.6;\n\
+//float y = (resolution.y - texture_resolution.y) / 2.0;\n\
+position.x = position.x - x;\n\
+float len = length(position);\n\
+//float vignette = smoothstep(RADIUS, RADIUS - SOFTNESS, len);\n\
+float vignette = step(RADIUS, len);\n\
+//pixel.rgb = mix(pixel.rgb, pixel.rgb * vignette, 1.0);\n\
+//pixel = vec4(vec3(vignette), 1.0);\n\
+}else{\n\
+vec2 position = (gl_FragCoord.xy / resolution.xy) - vec2(0.5);	// Determine center point of texture\n\
+float len = length(position);\n\
+float vignette = step(RADIUS, len);\n\
+//pixel = vec4(vec3(vignette), 1.0);\n\
 }\n\
 gl_FragColor = vec4(pixel.rgb, alpha);\n\
 }";
@@ -382,6 +418,9 @@ gl_FragColor = vec4(pixel.rgb, alpha);\n\
 				_Mmatrix = GL.getUniformLocation(SHADER_PROGRAM, "Mmatrix");
 				_Smatrix = GL.getUniformLocation(SHADER_PROGRAM, "Smatrix");
 				_sampler = GL.getUniformLocation(SHADER_PROGRAM, "sampler");
+				_texture_resolution = GL.getUniformLocation(SHADER_PROGRAM, "texture_resolution");
+				_resolution = GL.getUniformLocation(SHADER_PROGRAM, "resolution");
+				_vignette = GL.getUniformLocation(SHADER_PROGRAM, "vignette");
 				_effect = GL.getUniformLocation(SHADER_PROGRAM, "effect");
 				_alpha = GL.getUniformLocation(SHADER_PROGRAM, "alpha");
 
@@ -516,8 +555,24 @@ gl_FragColor = vec4(pixel.rgb, alpha);\n\
 				}
 
 				// Specify GLSL effect (if any)
-				//console.log("egl_render_current() - effect: " + texture_effects[textureCurrent]);
 				GL.uniform1i(_effect, texture_effects[textureCurrent]);
+
+				// Specify GLSL vignette (if any)
+				GL.uniform1i(_vignette, texture_vignettes[textureCurrent]);
+
+				// Specify resolutions
+				resolution = [CANVAS.width, CANVAS.height];
+				var ratioW = CANVAS.width / square_textures[textureCurrent].width;
+				var ratioH = CANVAS.height / square_textures[textureCurrent].height;
+				if(ratioW < ratioH) {
+					texture_resolution = [square_textures[textureCurrent].width * ratioW, square_textures[textureCurrent].height * ratioW];
+				} else {
+					texture_resolution = [square_textures[textureCurrent].width * ratioH, square_textures[textureCurrent].height * ratioH];
+				}
+				//resolution = [square_textures[textureCurrent].width, square_textures[textureCurrent].height];
+				console.log(resolution, texture_resolution);
+				GL.uniform2fv(_resolution, resolution);
+				GL.uniform2fv(_texture_resolution, texture_resolution);
 
 				// Set blending mode
 				GL.disable(GL.BLEND);
@@ -559,6 +614,19 @@ gl_FragColor = vec4(pixel.rgb, alpha);\n\
 
 							// Specify GLSL effect (if any)
 							GL.uniform1i(_effect, texture_effects[textureCounter]);
+
+							// Specify GLSL vignette (if any)
+							//GL.uniform1i(_vignette, texture_vignettes[textureCounter]);
+
+							// Specify resolution
+							var ratioW = CANVAS.width / square_textures[textureCurrent].width;
+							var ratioH = CANVAS.height / square_textures[textureCurrent].height;
+							if(ratioW < ratioH) {
+								resolution = [square_textures[textureCurrent].width * ratioW, square_textures[textureCurrent].height * ratioW];
+							} else {
+								resolution = [square_textures[textureCurrent].width * ratioH, square_textures[textureCurrent].height * ratioH];
+							}
+							GL.uniform2fv(_resolution, resolution);
 
 
 							// Compute and set the texture's alpha level
@@ -733,6 +801,7 @@ gl_FragColor = vec4(pixel.rgb, alpha);\n\
 						// Resize the Canvas to full browser size
 						CANVAS.width=window.innerWidth;
 						CANVAS.height=window.innerHeight;
+						resolution = [CANVAS.width, CANVAS.height];
 
 						egl_render();
 
