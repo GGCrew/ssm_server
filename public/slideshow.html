@@ -560,7 +560,7 @@ gl_FragColor = vec4(pixel.rgb, alpha);\n\
 					texture_resolution = [square_textures[textureCurrent].width * ratioH, square_textures[textureCurrent].height * ratioH];
 				}
 				//resolution = [square_textures[textureCurrent].width, square_textures[textureCurrent].height];
-				console.log(resolution, texture_resolution);
+				//console.log(resolution, texture_resolution);
 				GL.uniform2fv(_resolution, resolution);
 				GL.uniform2fv(_texture_resolution, texture_resolution);
 
@@ -606,17 +606,21 @@ gl_FragColor = vec4(pixel.rgb, alpha);\n\
 							GL.uniform1i(_effect, texture_effects[textureCounter]);
 
 							// Specify GLSL vignette (if any)
-							//GL.uniform1i(_vignette, texture_vignettes[textureCounter]);
+							GL.uniform1i(_vignette, texture_vignettes[textureCounter]);
 
-							// Specify resolution
+							// Specify resolutions
+							resolution = [CANVAS.width, CANVAS.height];
 							var ratioW = CANVAS.width / square_textures[textureCurrent].width;
 							var ratioH = CANVAS.height / square_textures[textureCurrent].height;
 							if(ratioW < ratioH) {
-								resolution = [square_textures[textureCurrent].width * ratioW, square_textures[textureCurrent].height * ratioW];
+								texture_resolution = [square_textures[textureCurrent].width * ratioW, square_textures[textureCurrent].height * ratioW];
 							} else {
-								resolution = [square_textures[textureCurrent].width * ratioH, square_textures[textureCurrent].height * ratioH];
+								texture_resolution = [square_textures[textureCurrent].width * ratioH, square_textures[textureCurrent].height * ratioH];
 							}
+							//resolution = [square_textures[textureCurrent].width, square_textures[textureCurrent].height];
+							//console.log(resolution, texture_resolution);
 							GL.uniform2fv(_resolution, resolution);
+							GL.uniform2fv(_texture_resolution, texture_resolution);
 
 
 							// Compute and set the texture's alpha level
