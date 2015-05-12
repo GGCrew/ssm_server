@@ -247,7 +247,7 @@
 			var transition_duration;
 			var transition_complete;
 			var hold_duration;
-			var transition_duration;
+			//var transition_duration;
 			var transition_type;
 			var hold_until_time;
 			var play_state;
@@ -266,8 +266,6 @@
 				// Resize the Canvas to full browser size
 				CANVAS.width=window.innerWidth;
 				CANVAS.height=window.innerHeight;
-				//resolution = [CANVAS.width, CANVAS.height];
-				texture_vignettes[0] = 1;	// DEBUG CODE
 
 				/*========================= GET WEBGL CONTEXT ========================= */
 				try {
@@ -346,7 +344,7 @@ const mediump int EFFECT_NORMAL = 0;\n\
 const mediump int EFFECT_GRAYSCALE = 1;\n\
 const mediump int EFFECT_SEPIA = 2;\n\
 //const mediump int EFFECT_VIGNETTE = 4;\n\
-const mediump float RADIUS = 0.75;\n\
+const mediump float RADIUS = 0.7;\n\
 const mediump float SOFTNESS = 0.45;\n\
 precision mediump float;\n\
 varying vec2 vUV; // Get the pixel coordinates from the vertex shader vUV variable.\n\
