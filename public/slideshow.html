@@ -370,21 +370,24 @@ if(vignette) {\n\
 // Because the texture is being repositioned on the canvas to keep proper aspect ratio,\n\
 // the \"position\" calculation must determine the texture's center (which doesn't factor in the texture's offset location)\n\
 // and shift the \"position\" result to the canvas's center.\n\
-vec2 position = (gl_FragCoord.xy / texture_resolution.xy) - vec2(0.5);	// Determine center point of canvas\n\
+float centerX = 0.5 * (texture_resolution.x / resolution.x);
+float centerY = 0.5 * (texture_resolution.y / resolution.y);
+vec2 position = (gl_FragCoord.xy / texture_resolution.xy) - vec2(centerX, centerY);	// Determine center point of canvas\n\
 //position = position + ((gl_FragCoord.xy / texture_resolution.xy) - vec2(0.5));	// Offset from canvas coordinates to texture coordinates\n\
 //position = position - vec2(0.5);\n\
 //position = texture_resolution.xy;	// Offset from canvas coordinates to texture coordinates\n\
 //position = gl_FragCoord.xy / (resolution.xy / texture_resolution.xy);\n\
 //vec2 position2 = (gl_FragCoord.xy / resolution.xy) - vec2(0.5);\n\
-float x = (texture_resolution.x / resolution.x) * 0.6;\n\
+//float x = (texture_resolution.x / resolution.x) * 0.6;\n\
 //float y = (resolution.y - texture_resolution.y) / 2.0;\n\
-position.x = position.x - x;\n\
+//position.x = position.x - x;\n\
 float len = length(position);\n\
 //float vignette = smoothstep(RADIUS, RADIUS - SOFTNESS, len);\n\
 float vignette = step(RADIUS, len);\n\
 //pixel.rgb = mix(pixel.rgb, pixel.rgb * vignette, 1.0);\n\
 //pixel = vec4(vec3(vignette), 1.0);\n\
 }else{\n\
+//The following code doesn't really belong here - it's being used to compare the above changes to the original code (below).\n\
 vec2 position = (gl_FragCoord.xy / resolution.xy) - vec2(0.5);	// Determine center point of texture\n\
 float len = length(position);\n\
 float vignette = step(RADIUS, len);\n\
