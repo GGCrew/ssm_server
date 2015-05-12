@@ -168,6 +168,9 @@ class PhotosController < ApplicationController
 		photo_effect_options << Photo::EFFECT_NORMAL		if photo_effect_options.empty?	# Always default to normal if nothing is specified
 		@photo_effect = photo_effect_options[(rand() * photo_effect_options.count).floor]
 
+		# Apply client-side vignette effect
+		@apply_vignette = !!@control.apply_vignette
+
 		# Assume photo has not been updated (if value isn't already set to true)
 		@photo_updated ||= false
 
@@ -178,7 +181,8 @@ class PhotosController < ApplicationController
 				hold_duration: @control.hold_duration,
 				transition_type: @control.transition_type,
 				transition_duration: @control.transition_duration,
-				effect: @photo_effect
+				effect: @photo_effect,
+				apply_vignette: @apply_vignette
 			}
 		) if @photo
 

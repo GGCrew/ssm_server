@@ -12,7 +12,8 @@ class Control < ActiveRecord::Base
 			auto_approve: false,
 			effect_normal: true,
 			effect_grayscale: false,
-			effect_sepia: false
+			effect_sepia: false,
+			apply_vignette: false
 		) unless control
 
 		attributes = {
@@ -23,7 +24,8 @@ class Control < ActiveRecord::Base
 			auto_approve:					(control.auto_approve					? control.auto_approve				: false),
 			effect_normal:				(!control.effect_normal.nil?	? control.effect_normal				: true),
 			effect_grayscale:			(control.effect_grayscale			? control.effect_grayscale		: false),
-			effect_sepia:					(control.effect_sepia					? control.effect_sepia				: false)
+			effect_sepia:					(control.effect_sepia					? control.effect_sepia				: false),
+			apply_vignette:				(control.apply_vignette				? control.apply_vignette			: false)
 		}
 
 		return attributes

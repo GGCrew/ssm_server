@@ -29,6 +29,7 @@ ActiveRecord::Schema.define(version: 20150326000002) do
     t.string   "transition_type"
     t.integer  "transition_duration"
     t.integer  "effect"
+    t.boolean  "apply_vignette",      default: false
   end
 
   create_table "clients", force: true do |t|
@@ -48,6 +49,7 @@ ActiveRecord::Schema.define(version: 20150326000002) do
     t.boolean  "effect_normal",       default: true
     t.boolean  "effect_grayscale",    default: false
     t.boolean  "effect_sepia",        default: false
+    t.boolean  "apply_vignette",      default: false
   end
 
   create_table "photos", force: true do |t|

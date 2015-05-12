@@ -3,48 +3,48 @@
 	</thead>
 	<tbody>
 		<tr>
-			<td colspan="2" class="buttons">
+			<td colspan="6" class="buttons">
 				<%= link_to('Play',		controls_path(control: {play_state: 'play'}),		{method: :post,	remote: true, class: "#{selected_if_play_state('play')}"}) -%>
 				<%= link_to('Pause',	controls_path(control: {play_state: 'pause'}),	{method: :post,	remote: true, class: "#{selected_if_play_state('pause')}"}) -%>
 				<%= link_to('Stop',		controls_path(control: {play_state: 'stop'}),		{method: :post,	remote: true, class: "#{selected_if_play_state('stop')}"}) -%>
 			</td>
 		</tr>
 		<tr>
-			<th>Hold Time</th>
-			<td>
-				<%= form_for(@control, remote: true) do |form| -%>
-					<%= form.text_field(:hold_duration, class: 'numbers') -%>
-					milliseconds
-					<%= form.submit('Update', class: 'submit') -%>
-				<%- end -%>
-			</td>
-			<td rowspan="2">
-				<%= form_for(@control, remote: true) do |form| -%>
-					<%= form.hidden_field(:hold_duration,				:value => 10000) -%>
-					<%= form.hidden_field(:transition_duration,	:value => 3000) -%>
-					<%= form.submit('Slow', class: 'submit') -%>
-				<%- end -%>
-				<%= form_for(@control, remote: true) do |form| -%>
-					<%= form.hidden_field(:hold_duration,				:value => 5000) -%>
-					<%= form.hidden_field(:transition_duration,	:value => 2000) -%>
-					<%= form.submit('Medium', class: 'submit') -%>
-				<%- end -%>
-				<%= form_for(@control, remote: true) do |form| -%>
-					<%= form.hidden_field(:hold_duration,				:value => 3000) -%>
-					<%= form.hidden_field(:transition_duration,	:value => 1000) -%>
-					<%= form.submit('Fast', class: 'submit') -%>
-				<%- end -%>
+			<th>
+				Hold Time
 				<br>
-			</td>
-		</tr>
-		<tr>
-			<th>Transition Time</th>
-			<td>
-				<%= form_for(@control, remote: true) do |form| -%>
-					<%= form.text_field(:transition_duration, class: 'numbers') -%>
-					milliseconds
-					<%= form.submit('Update', class: 'submit') -%>
-				<%- end -%>
+				Transition Time
+			</th>
+			<td colspan="5">
+				<div class="timing settings">
+					<%= form_for(@control, remote: true) do |form| -%>
+						<%= form.text_field(:hold_duration, class: 'numbers') -%>
+						milliseconds
+						<%= form.submit('Update', class: 'submit') -%>
+					<%- end -%>
+					<%= form_for(@control, remote: true) do |form| -%>
+						<%= form.text_field(:transition_duration, class: 'numbers') -%>
+						milliseconds
+						<%= form.submit('Update', class: 'submit') -%>
+					<%- end -%>
+				</div>
+				<div class="timing presets">
+					<%= form_for(@control, remote: true) do |form| -%>
+						<%= form.hidden_field(:hold_duration,				:value => 10000) -%>
+						<%= form.hidden_field(:transition_duration,	:value => 3000) -%>
+						<%= form.submit('Slow', class: 'submit') -%>
+					<%- end -%>
+					<%= form_for(@control, remote: true) do |form| -%>
+						<%= form.hidden_field(:hold_duration,				:value => 5000) -%>
+						<%= form.hidden_field(:transition_duration,	:value => 2000) -%>
+						<%= form.submit('Medium', class: 'submit') -%>
+					<%- end -%>
+					<%= form_for(@control, remote: true) do |form| -%>
+						<%= form.hidden_field(:hold_duration,				:value => 3000) -%>
+						<%= form.hidden_field(:transition_duration,	:value => 1000) -%>
+						<%= form.submit('Fast', class: 'submit') -%>
+					<%- end -%>
+				</div>
 			</td>
 		</tr>
 		<tr>
@@ -58,10 +58,18 @@
 				<%= form_for(@control, remote: true) do |form| -%><%= form.check_box(:effect_grayscale,	class: '', onclick: '$(this).submit();') -%><%= form.label(:effect_grayscale,	'B&W'		) -%><%- end -%>
 				<%= form_for(@control, remote: true) do |form| -%><%= form.check_box(:effect_sepia,			class: '', onclick: '$(this).submit();') -%><%= form.label(:effect_sepia,			'Sepia'	) -%><%- end -%>
 			</td>
+			<th>Photo Effects</th>
+			<td>
+				<%= form_for(@control, remote: true) do |form| -%><%= form.check_box(:apply_vignette,		class: '', onclick: '$(this).submit();') -%><%= form.label(:apply_vignette,		'Vignette') -%><%- end -%>
+			</td>
+			<th><!-- placeholder --></th>
+			<td style="width: 40%;">
+				<!-- placeholder -->
+			</td>
 		</tr>
 		<tr>
 			<th></th>
-			<td>
+			<td colspan="5">
 				<%#= link_to('Reset Database and Rescan Photo Folders', reset_and_rescan_photos_path) -%>
 				Reset Database and Rescan Photo Folders:
 				<%= reset_and_rescan_photos_url -%>

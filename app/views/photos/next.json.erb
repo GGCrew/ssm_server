@@ -12,6 +12,7 @@
 		:hold_duration => @control.hold_duration,
 		:transition_type => "#{@control.transition_type}",
 		:transition_duration => @control.transition_duration,
-		:photo_effect => @photo_effect
+		:photo_effect => @photo_effect,
+		:apply_vignette => @apply_vignette
 	}.to_json.html_safe
 -%>

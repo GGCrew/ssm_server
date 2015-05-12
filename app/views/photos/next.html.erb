@@ -33,6 +33,10 @@
 			<td id="photo_effect"><%= @photo_effect -%></td>
 		</tr>
 		<tr>
+			<td>apply_vignette</td>
+			<td id="apply_vignette"><%= @apply_vignette -%></td>
+		</tr>
+		<tr>
 			<td>img</td>
 			<td><img id="photo" src="<%= (Photo::RESIZED_FOLDER + @photo.path) if @photo -%>" height="100" /></td>
 		</tr>

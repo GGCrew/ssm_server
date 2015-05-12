@@ -36,12 +36,16 @@
 						}
 						egl_load_texture(textureNext, SERVER + json.full_path + '?t=' + json.updated_time);
 
-						//texture_effects[textureNext] = ((textureCurrent + 1) % IMAGE_COUNT) + 1;	// Temp code to alternate between grayscale and sepia
-						//texture_effects[textureNext] = Math.floor(Math.random() * 3);	// Temp code to randomly alternate between color, grayscale, and sepia
 						texture_effects[textureNext] = json.photo_effect;
 						// Some error handling if the client version is ahead of the server version
 						if(texture_effects[textureNext] === undefined) {
 							texture_effects[textureNext] = EFFECT_NORMAL;	// Default to normal
+						}
+
+						texture_vignettes[textureNext] = json.apply_vignette;
+						// Some error handling if the client version is ahead of the server version
+						if(texture_vignettes[textureNext] === undefined) {
+							texture_vignettes[textureNext] = false;	// Default to normal
 						}
 						break;
 
@@ -608,14 +612,14 @@ gl_FragColor = vec4(pixel.rgb, alpha);\n\
 
 							// Specify resolutions
 							resolution = [CANVAS.width, CANVAS.height];
-							var ratioW = CANVAS.width / square_textures[textureCurrent].width;
-							var ratioH = CANVAS.height / square_textures[textureCurrent].height;
+							var ratioW = CANVAS.width / square_textures[textureCounter].width;
+							var ratioH = CANVAS.height / square_textures[textureCounter].height;
 							if(ratioW < ratioH) {
-								texture_resolution = [square_textures[textureCurrent].width * ratioW, square_textures[textureCurrent].height * ratioW];
+								texture_resolution = [square_textures[textureCounter].width * ratioW, square_textures[textureCounter].height * ratioW];
 							} else {
-								texture_resolution = [square_textures[textureCurrent].width * ratioH, square_textures[textureCurrent].height * ratioH];
+								texture_resolution = [square_textures[textureCounter].width * ratioH, square_textures[textureCounter].height * ratioH];
 							}
-							//resolution = [square_textures[textureCurrent].width, square_textures[textureCurrent].height];
+							//resolution = [square_textures[textureCounter].width, square_textures[textureCounter].height];
 							//console.log(resolution, texture_resolution);
 							GL.uniform2fv(_resolution, resolution);
 							GL.uniform2fv(_texture_resolution, texture_resolution);

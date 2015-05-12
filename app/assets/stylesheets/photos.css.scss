@@ -27,15 +27,29 @@
 
 		table.controls {
 			margin: 1em;
-			
+
 			tbody {
 				th {
 					text-align: right;
 				}
-				
+
 				td {
 					text-align: left;
 					padding: .5em;
+
+					div {
+						&.settings, &.presets {
+							float: left;
+							display: block;
+							padding-right: 1em;
+						}
+
+						&.timing {
+							&.settings {
+								padding-top: 1em;
+							}
+						}
+					}
 
 					input.numbers {
 						width: 3em;
@@ -66,7 +80,7 @@
 					background-color: green;
 					left: .25em;
 				}
-				
+
 				&.deny {
 					border-color: #FFAAAA;
 					background-color: red;
@@ -80,7 +94,7 @@
 			padding-top: .5em;
 			height: calc(100% - 8.6em);
 			overflow-y: auto;
-			
+
 			a {
 				text-decoration: none;
 				display: inline-block;
@@ -88,7 +102,7 @@
 				margin-bottom: .25em;
 				white-space: nowrap;
 			}
-			
+
 			span {
 				height: 1.25em;
 				display: inline-block;
@@ -102,7 +116,7 @@
 					margin-right: 0;
 				}
 
-				&.camera_id {					
+				&.camera_id {
 					width: 1.5em;
 					text-align: right;
 					margin-right: .5em;
