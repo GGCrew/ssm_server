@@ -52,15 +52,15 @@
 			<td><%= @control.transition_type -%></td>
 		</tr>
 		<tr>
-			<th>Photo Effects</th>
+			<th>Color Modes</th>
 			<td>
-				<%= form_for(@control, remote: true) do |form| -%><%= form.check_box(:effect_normal,		class: '', onclick: '$(this).submit();') -%><%= form.label(:effect_normal,		'Normal') -%><%- end -%>
-				<%= form_for(@control, remote: true) do |form| -%><%= form.check_box(:effect_grayscale,	class: '', onclick: '$(this).submit();') -%><%= form.label(:effect_grayscale,	'B&W'		) -%><%- end -%>
-				<%= form_for(@control, remote: true) do |form| -%><%= form.check_box(:effect_sepia,			class: '', onclick: '$(this).submit();') -%><%= form.label(:effect_sepia,			'Sepia'	) -%><%- end -%>
+				<%= form_for(@control, remote: true) do |form| -%><%= form.check_box(:color_mode_normal,		class: '', onclick: '$(this).submit();') -%><%= form.label(:color_mode_normal,		'Normal') -%><%- end -%>
+				<%= form_for(@control, remote: true) do |form| -%><%= form.check_box(:color_mode_grayscale,	class: '', onclick: '$(this).submit();') -%><%= form.label(:color_mode_grayscale,	'B&W'		) -%><%- end -%>
+				<%= form_for(@control, remote: true) do |form| -%><%= form.check_box(:color_mode_sepia,			class: '', onclick: '$(this).submit();') -%><%= form.label(:color_mode_sepia,			'Sepia'	) -%><%- end -%>
 			</td>
 			<th>Photo Effects</th>
 			<td>
-				<%= form_for(@control, remote: true) do |form| -%><%= form.check_box(:apply_vignette,		class: '', onclick: '$(this).submit();') -%><%= form.label(:apply_vignette,		'Vignette') -%><%- end -%>
+				<%= form_for(@control, remote: true) do |form| -%><%= form.check_box(:effect_vignette,			class: '', onclick: '$(this).submit();') -%><%= form.label(:effect_vignette,			'Vignette') -%><%- end -%>
 			</td>
 			<th><!-- placeholder --></th>
 			<td style="width: 40%;">
@@ -72,7 +72,13 @@
 			<td colspan="5">
 				<%#= link_to('Reset Database and Rescan Photo Folders', reset_and_rescan_photos_path) -%>
 				Reset Database and Rescan Photo Folders:
-				<%= reset_and_rescan_photos_url -%>
+				<%= link_to(
+					reset_and_rescan_photos_url,
+					reset_and_rescan_photos_url,
+					{
+						onclick: "return confirm('Are you sure you want to do this?\\nIT CANNOT BE UNDONE!');"
+					}
+				) -%>
 			</td>
 	</tbody>
 </table>

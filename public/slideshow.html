@@ -16,9 +16,9 @@
 
 		<script type='text/javascript'>
 			var SERVER = "";
-			var EFFECT_NORMAL = 0;
-			var EFFECT_GRAYSCALE = 1;
-			var EFFECT_SEPIA = 2;
+			var COLOR_MODE_NORMAL = 0;
+			var COLOR_MODE_GRAYSCALE = 1;
+			var COLOR_MODE_SEPIA = 2;
 
 			function process_json(json_text)
 			{
@@ -36,13 +36,13 @@
 						}
 						egl_load_texture(textureNext, SERVER + json.full_path + '?t=' + json.updated_time);
 
-						texture_effects[textureNext] = json.photo_effect;
+						texture_color_modes[textureNext] = json.color_mode;
 						// Some error handling if the client version is ahead of the server version
-						if(texture_effects[textureNext] === undefined) {
-							texture_effects[textureNext] = EFFECT_NORMAL;	// Default to normal
+						if(texture_color_modes[textureNext] === undefined) {
+							texture_color_modes[textureNext] = COLOR_MODE_NORMAL;	// Default to normal
 						}
 
-						texture_vignettes[textureNext] = json.apply_vignette;
+						texture_vignettes[textureNext] = json.effect_vignette;
 						// Some error handling if the client version is ahead of the server version
 						if(texture_vignettes[textureNext] === undefined) {
 							texture_vignettes[textureNext] = false;	// Default to normal
@@ -243,7 +243,7 @@
 			var _resolution;
 
 			var square_textures = [];
-			var texture_effects = [];
+			var texture_color_modes = [];
 			var texture_vignettes = [];
 			var frameCounter;
 			var program_state;
@@ -344,26 +344,25 @@ vUV=uv;\n\
 					It returns the RGBA color of the pixel with the pre-build variable gl_FragColor.
 				*/
 				var shader_fragment_source="\n\
-const mediump int EFFECT_NORMAL = 0;\n\
-const mediump int EFFECT_GRAYSCALE = 1;\n\
-const mediump int EFFECT_SEPIA = 2;\n\
-//const mediump int EFFECT_VIGNETTE = 4;\n\
+const mediump int COLOR_MODE_NORMAL = 0;\n\
+const mediump int COLOR_MODE_GRAYSCALE = 1;\n\
+const mediump int COLOR_MODE_SEPIA = 2;\n\
 const mediump float RADIUS = 0.7;\n\
 const mediump float SOFTNESS = 0.45;\n\
 precision mediump float;\n\
 varying vec2 vUV; // Get the pixel coordinates from the vertex shader vUV variable.\n\
 uniform sampler2D sampler; // The texture.\n\
-uniform int effect; // The GLSL effect to apply to the texture (if any).\n\
+uniform int color_mode; // The GLSL color_mode to apply to the texture (if any).\n\
 uniform bool vignette;\n\
 uniform vec2 resolution;\n\
 uniform vec2 texture_resolution;\n\
 uniform float alpha;\n\
 void main(void) {\n\
 vec4 pixel = texture2D(sampler, vUV);\n\
-if(effect == EFFECT_GRAYSCALE) {\n\
+if(color_mode == COLOR_MODE_GRAYSCALE) {\n\
 pixel = vec4(vec3(dot(pixel.rgb, vec3(0.299, 0.587, 0.114))), pixel.a); // Grayscale\n\
 }\n\
-if(effect == EFFECT_SEPIA) {\n\
+if(color_mode == COLOR_MODE_SEPIA) {\n\
 pixel = vec4(vec3(dot(pixel.rgb, vec3(0.299, 0.587, 0.114))), pixel.a);	// Grayscale\n\
 pixel = vec4(pixel.rgb * vec3(1.2, 1.0, 0.8), pixel.a); // Sepia\n\
 }\n\
@@ -372,8 +371,10 @@ vec2 position = (gl_FragCoord.xy / texture_resolution.xy) - vec2(0.5, 0.5);	// D
 // Reposition the center point based on difference between texture and screen resolutions\n\
 position.x = position.x - ( ( (resolution.x - texture_resolution.x) / texture_resolution.x) / 2.0);\n\
 position.y = position.y - ( ( (resolution.y - texture_resolution.y) / texture_resolution.y) / 2.0);\n\
+// Calculate vignette\n\
 float len = length(position);\n\
 float vignette = smoothstep(RADIUS, RADIUS - SOFTNESS, len);\n\
+// Apply vignette\n\
 pixel.rgb = mix(pixel.rgb, pixel.rgb * vignette, 1.0);\n\
 }else{\n\
 //The following code doesn't really belong here - it's being used to compare the above changes to the original code (below).\n\
@@ -413,7 +414,7 @@ gl_FragColor = vec4(pixel.rgb, alpha);\n\
 				_texture_resolution = GL.getUniformLocation(SHADER_PROGRAM, "texture_resolution");
 				_resolution = GL.getUniformLocation(SHADER_PROGRAM, "resolution");
 				_vignette = GL.getUniformLocation(SHADER_PROGRAM, "vignette");
-				_effect = GL.getUniformLocation(SHADER_PROGRAM, "effect");
+				_color_mode = GL.getUniformLocation(SHADER_PROGRAM, "color_mode");
 				_alpha = GL.getUniformLocation(SHADER_PROGRAM, "alpha");
 
 				// Linking is over, tell the webgl context to use SHADER_PROGRAM for rendering.
@@ -546,8 +547,8 @@ gl_FragColor = vec4(pixel.rgb, alpha);\n\
 					GL.bindTexture(GL.TEXTURE_2D, square_textures[textureCurrent].webglTexture);
 				}
 
-				// Specify GLSL effect (if any)
-				GL.uniform1i(_effect, texture_effects[textureCurrent]);
+				// Specify GLSL color_mode (if any)
+				GL.uniform1i(_color_mode, texture_color_modes[textureCurrent]);
 
 				// Specify GLSL vignette (if any)
 				GL.uniform1i(_vignette, texture_vignettes[textureCurrent]);
@@ -604,8 +605,8 @@ gl_FragColor = vec4(pixel.rgb, alpha);\n\
 							}
 
 
-							// Specify GLSL effect (if any)
-							GL.uniform1i(_effect, texture_effects[textureCounter]);
+							// Specify GLSL color_mode (if any)
+							GL.uniform1i(_color_mode, texture_color_modes[textureCounter]);
 
 							// Specify GLSL vignette (if any)
 							GL.uniform1i(_vignette, texture_vignettes[textureCounter]);
@@ -690,8 +691,8 @@ gl_FragColor = vec4(pixel.rgb, alpha);\n\
 							}
 
 
-							// Specify GLSL effect (if any)
-							GL.uniform1i(_effect, texture_effects[textureCounter]);
+							// Specify GLSL color_mode (if any)
+							GL.uniform1i(_color_mode, texture_color_modes[textureCounter]);
 
 
 							// Compute and set the texture's alpha level

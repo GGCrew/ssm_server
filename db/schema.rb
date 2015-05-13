@@ -28,8 +28,8 @@ ActiveRecord::Schema.define(version: 20150326000002) do
     t.integer  "hold_duration"
     t.string   "transition_type"
     t.integer  "transition_duration"
-    t.integer  "effect"
-    t.boolean  "apply_vignette",      default: false
+    t.integer  "color_mode"
+    t.boolean  "effect_vignette",     default: false
   end
 
   create_table "clients", force: true do |t|
@@ -45,11 +45,11 @@ ActiveRecord::Schema.define(version: 20150326000002) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.string   "play_state"
-    t.boolean  "auto_approve",        default: false
-    t.boolean  "effect_normal",       default: true
-    t.boolean  "effect_grayscale",    default: false
-    t.boolean  "effect_sepia",        default: false
-    t.boolean  "apply_vignette",      default: false
+    t.boolean  "auto_approve",         default: false
+    t.boolean  "color_mode_normal",    default: true
+    t.boolean  "color_mode_grayscale", default: false
+    t.boolean  "color_mode_sepia",     default: false
+    t.boolean  "effect_vignette",      default: false
   end
 
   create_table "photos", force: true do |t|
