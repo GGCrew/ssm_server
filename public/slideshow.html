@@ -554,17 +554,17 @@ gl_FragColor = vec4(pixel.rgb, alpha);\n\
 				GL.uniform1i(_vignette, texture_vignettes[textureCurrent]);
 
 				// Specify resolutions
-				resolution = [CANVAS.width, CANVAS.height];
+				var canvas_resolution = [CANVAS.width, CANVAS.height];
 				var ratioW = CANVAS.width / square_textures[textureCurrent].width;
 				var ratioH = CANVAS.height / square_textures[textureCurrent].height;
 				if(ratioW < ratioH) {
-					texture_resolution = [square_textures[textureCurrent].width * ratioW, square_textures[textureCurrent].height * ratioW];
+					var texture_resolution = [square_textures[textureCurrent].width * ratioW, square_textures[textureCurrent].height * ratioW];
 				} else {
-					texture_resolution = [square_textures[textureCurrent].width * ratioH, square_textures[textureCurrent].height * ratioH];
+					var texture_resolution = [square_textures[textureCurrent].width * ratioH, square_textures[textureCurrent].height * ratioH];
 				}
 				//resolution = [square_textures[textureCurrent].width, square_textures[textureCurrent].height];
 				//console.log(resolution, texture_resolution);
-				GL.uniform2fv(_resolution, resolution);
+				GL.uniform2fv(_resolution, canvas_resolution);
 				GL.uniform2fv(_texture_resolution, texture_resolution);
 
 				// Set blending mode
@@ -612,17 +612,17 @@ gl_FragColor = vec4(pixel.rgb, alpha);\n\
 							GL.uniform1i(_vignette, texture_vignettes[textureCounter]);
 
 							// Specify resolutions
-							resolution = [CANVAS.width, CANVAS.height];
+							var canvas_resolution = [CANVAS.width, CANVAS.height];
 							var ratioW = CANVAS.width / square_textures[textureCounter].width;
 							var ratioH = CANVAS.height / square_textures[textureCounter].height;
 							if(ratioW < ratioH) {
-								texture_resolution = [square_textures[textureCounter].width * ratioW, square_textures[textureCounter].height * ratioW];
+								var texture_resolution = [square_textures[textureCounter].width * ratioW, square_textures[textureCounter].height * ratioW];
 							} else {
-								texture_resolution = [square_textures[textureCounter].width * ratioH, square_textures[textureCounter].height * ratioH];
+								var texture_resolution = [square_textures[textureCounter].width * ratioH, square_textures[textureCounter].height * ratioH];
 							}
 							//resolution = [square_textures[textureCounter].width, square_textures[textureCounter].height];
 							//console.log(resolution, texture_resolution);
-							GL.uniform2fv(_resolution, resolution);
+							GL.uniform2fv(_resolution, canvas_resolution);
 							GL.uniform2fv(_texture_resolution, texture_resolution);
 
 
