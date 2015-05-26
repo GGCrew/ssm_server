@@ -38,7 +38,7 @@ class Photo < ActiveRecord::Base
 		files = Dir.glob(path + '**/*.{JPG,PNG}', File::FNM_CASEFOLD)
 		files.each_with_index do |file, index|
 			photo_hash = path_to_hash(file[path.size..-1])
-			logger.info("#{index}/#{files.count} - #{photo_hash.to_s}")
+			logger.info("#{index + 1}/#{files.count} - #{photo_hash.to_s}")
 			if Photo.where(photo_hash).blank?
 				photo_hash.merge!(approval_state: 'approved') if auto_approve
 				Photo.create!(photo_hash)
