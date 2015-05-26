@@ -16,6 +16,9 @@
 
 		<script type='text/javascript'>
 			var SERVER = "";
+			var COLOR_MODE_NORMAL = 0;
+			var COLOR_MODE_GRAYSCALE = 1;
+			var COLOR_MODE_SEPIA = 2;
 
 			function process_json(json_text)
 			{
@@ -32,6 +35,18 @@
 							window.URL.revokeObjectURL(SERVER + json.full_path);
 						}
 						egl_load_texture(textureNext, SERVER + json.full_path + '?t=' + json.updated_time);
+
+						texture_color_modes[textureNext] = json.color_mode;
+						// Some error handling if the client version is ahead of the server version
+						if(texture_color_modes[textureNext] === undefined) {
+							texture_color_modes[textureNext] = COLOR_MODE_NORMAL;	// Default to normal
+						}
+
+						texture_vignettes[textureNext] = json.effect_vignette;
+						// Some error handling if the client version is ahead of the server version
+						if(texture_vignettes[textureNext] === undefined) {
+							texture_vignettes[textureNext] = false;	// Default to normal
+						}
 						break;
 
 					case 'control':
@@ -225,21 +240,25 @@
 			var _uv;
 			var _position;
 			var _alpha;
+			var _resolution;
 
 			var square_textures = [];
+			var texture_color_modes = [];
+			var texture_vignettes = [];
 			var frameCounter;
 			var program_state;
 			var transition_start_time;
 			var transition_duration;
 			var transition_complete;
 			var hold_duration;
-			var transition_duration;
+			//var transition_duration;
 			var transition_type;
 			var hold_until_time;
 			var play_state;
 
 			// Variables that are localized in main()
 			var textureCurrent;
+			var resolution;
 
 			// Constants
 			var IMAGE_COUNT = 2;
@@ -315,18 +334,55 @@ gl_Position = Pmatrix * Vmatrix * Mmatrix * Smatrix * vec4(position, 1.); //0. i
 vUV=uv;\n\
 }";
 
+				/*
+					Vignette example:
+					https://github.com/mattdesl/lwjgl-basics/wiki/ShaderLesson3
+				*/
 
 				/*
 					The fragment(or pixel) shader is executed for each pixel of the render of the triangle. 
 					It returns the RGBA color of the pixel with the pre-build variable gl_FragColor.
 				*/
 				var shader_fragment_source="\n\
+const mediump int COLOR_MODE_NORMAL = 0;\n\
+const mediump int COLOR_MODE_GRAYSCALE = 1;\n\
+const mediump int COLOR_MODE_SEPIA = 2;\n\
+const mediump float RADIUS = 0.7;\n\
+const mediump float SOFTNESS = 0.45;\n\
 precision mediump float;\n\
 varying vec2 vUV; // Get the pixel coordinates from the vertex shader vUV variable.\n\
 uniform sampler2D sampler; // The texture.\n\
+uniform int color_mode; // The GLSL color_mode to apply to the texture (if any).\n\
+uniform bool vignette;\n\
+uniform vec2 resolution;\n\
+uniform vec2 texture_resolution;\n\
 uniform float alpha;\n\
 void main(void) {\n\
 vec4 pixel = texture2D(sampler, vUV);\n\
+if(color_mode == COLOR_MODE_GRAYSCALE) {\n\
+pixel = vec4(vec3(dot(pixel.rgb, vec3(0.299, 0.587, 0.114))), pixel.a); // Grayscale\n\
+}\n\
+if(color_mode == COLOR_MODE_SEPIA) {\n\
+pixel = vec4(vec3(dot(pixel.rgb, vec3(0.299, 0.587, 0.114))), pixel.a);	// Grayscale\n\
+pixel = vec4(pixel.rgb * vec3(1.2, 1.0, 0.8), pixel.a); // Sepia\n\
+}\n\
+if(vignette) {\n\
+vec2 position = (gl_FragCoord.xy / texture_resolution.xy) - vec2(0.5, 0.5);	// Determine center point of texture\n\
+// Reposition the center point based on difference between texture and screen resolutions\n\
+position.x = position.x - ( ( (resolution.x - texture_resolution.x) / texture_resolution.x) / 2.0);\n\
+position.y = position.y - ( ( (resolution.y - texture_resolution.y) / texture_resolution.y) / 2.0);\n\
+// Calculate vignette\n\
+float len = length(position);\n\
+float vignetting = smoothstep(RADIUS, RADIUS - SOFTNESS, len);\n\
+// Apply vignette\n\
+pixel.rgb = mix(pixel.rgb, pixel.rgb * vignetting, 1.0);\n\
+}else{\n\
+//The following code doesn't really belong here - it's being used to compare the above changes to the original code (below).\n\
+//vec2 position = (gl_FragCoord.xy / resolution.xy) - vec2(0.5);	// Determine center point of texture\n\
+//float len = length(position);\n\
+//float vignetting = step(RADIUS, len);\n\
+//pixel = vec4(vec3(vignetting), 1.0);\n\
+}\n\
 gl_FragColor = vec4(pixel.rgb, alpha);\n\
 }";
 
@@ -355,6 +411,10 @@ gl_FragColor = vec4(pixel.rgb, alpha);\n\
 				_Mmatrix = GL.getUniformLocation(SHADER_PROGRAM, "Mmatrix");
 				_Smatrix = GL.getUniformLocation(SHADER_PROGRAM, "Smatrix");
 				_sampler = GL.getUniformLocation(SHADER_PROGRAM, "sampler");
+				_texture_resolution = GL.getUniformLocation(SHADER_PROGRAM, "texture_resolution");
+				_resolution = GL.getUniformLocation(SHADER_PROGRAM, "resolution");
+				_vignette = GL.getUniformLocation(SHADER_PROGRAM, "vignette");
+				_color_mode = GL.getUniformLocation(SHADER_PROGRAM, "color_mode");
 				_alpha = GL.getUniformLocation(SHADER_PROGRAM, "alpha");
 
 				// Linking is over, tell the webgl context to use SHADER_PROGRAM for rendering.
@@ -487,6 +547,27 @@ gl_FragColor = vec4(pixel.rgb, alpha);\n\
 					GL.bindTexture(GL.TEXTURE_2D, square_textures[textureCurrent].webglTexture);
 				}
 
+				// Specify GLSL color_mode (if any)
+				GL.uniform1i(_color_mode, texture_color_modes[textureCurrent]);
+
+				// Specify GLSL vignette (if any)
+				GL.uniform1i(_vignette, texture_vignettes[textureCurrent]);
+
+				// Specify resolutions
+				var canvas_resolution = [CANVAS.width, CANVAS.height];
+				var ratioW = CANVAS.width / square_textures[textureCurrent].width;
+				var ratioH = CANVAS.height / square_textures[textureCurrent].height;
+				if(ratioW < ratioH) {
+					var texture_resolution = [square_textures[textureCurrent].width * ratioW, square_textures[textureCurrent].height * ratioW];
+				} else {
+					var texture_resolution = [square_textures[textureCurrent].width * ratioH, square_textures[textureCurrent].height * ratioH];
+				}
+				//resolution = [square_textures[textureCurrent].width, square_textures[textureCurrent].height];
+				//console.log(resolution, texture_resolution);
+				GL.uniform2fv(_resolution, canvas_resolution);
+				GL.uniform2fv(_texture_resolution, texture_resolution);
+
+				// Set blending mode
 				GL.disable(GL.BLEND);
 
 
@@ -522,6 +603,27 @@ gl_FragColor = vec4(pixel.rgb, alpha);\n\
 
 								GL.bindTexture(GL.TEXTURE_2D, square_textures[textureCounter].webglTexture);
 							}
+
+
+							// Specify GLSL color_mode (if any)
+							GL.uniform1i(_color_mode, texture_color_modes[textureCounter]);
+
+							// Specify GLSL vignette (if any)
+							GL.uniform1i(_vignette, texture_vignettes[textureCounter]);
+
+							// Specify resolutions
+							var canvas_resolution = [CANVAS.width, CANVAS.height];
+							var ratioW = CANVAS.width / square_textures[textureCounter].width;
+							var ratioH = CANVAS.height / square_textures[textureCounter].height;
+							if(ratioW < ratioH) {
+								var texture_resolution = [square_textures[textureCounter].width * ratioW, square_textures[textureCounter].height * ratioW];
+							} else {
+								var texture_resolution = [square_textures[textureCounter].width * ratioH, square_textures[textureCounter].height * ratioH];
+							}
+							//resolution = [square_textures[textureCounter].width, square_textures[textureCounter].height];
+							//console.log(resolution, texture_resolution);
+							GL.uniform2fv(_resolution, canvas_resolution);
+							GL.uniform2fv(_texture_resolution, texture_resolution);
 
 
 							// Compute and set the texture's alpha level
@@ -587,6 +689,10 @@ gl_FragColor = vec4(pixel.rgb, alpha);\n\
 
 								GL.bindTexture(GL.TEXTURE_2D, square_textures[textureCounter].webglTexture);
 							}
+
+
+							// Specify GLSL color_mode (if any)
+							GL.uniform1i(_color_mode, texture_color_modes[textureCounter]);
 
 
 							// Compute and set the texture's alpha level
@@ -692,6 +798,7 @@ gl_FragColor = vec4(pixel.rgb, alpha);\n\
 						// Resize the Canvas to full browser size
 						CANVAS.width=window.innerWidth;
 						CANVAS.height=window.innerHeight;
+						resolution = [CANVAS.width, CANVAS.height];
 
 						egl_render();
 

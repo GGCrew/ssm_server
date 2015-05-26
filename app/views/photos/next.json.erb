@@ -11,6 +11,8 @@
 		:updated_time => (@photo.updated_at.tv_sec if @photo),
 		:hold_duration => @control.hold_duration,
 		:transition_type => "#{@control.transition_type}",
-		:transition_duration => @control.transition_duration
+		:transition_duration => @control.transition_duration,
+		:color_mode => @color_mode,
+		:effect_vignette => @effect_vignette
 	}.to_json.html_safe
 -%>

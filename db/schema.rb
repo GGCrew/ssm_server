@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150116000001) do
+ActiveRecord::Schema.define(version: 20150326000002) do
 
   create_table "client_photo_queues", force: true do |t|
     t.integer  "client_id"
@@ -28,6 +28,8 @@ ActiveRecord::Schema.define(version: 20150116000001) do
     t.integer  "hold_duration"
     t.string   "transition_type"
     t.integer  "transition_duration"
+    t.integer  "color_mode"
+    t.boolean  "effect_vignette",     default: false
   end
 
   create_table "clients", force: true do |t|
@@ -43,7 +45,11 @@ ActiveRecord::Schema.define(version: 20150116000001) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.string   "play_state"
-    t.boolean  "auto_approve",        default: false
+    t.boolean  "auto_approve",         default: false
+    t.boolean  "color_mode_normal",    default: true
+    t.boolean  "color_mode_grayscale", default: false
+    t.boolean  "color_mode_sepia",     default: false
+    t.boolean  "effect_vignette",      default: false
   end
 
   create_table "photos", force: true do |t|

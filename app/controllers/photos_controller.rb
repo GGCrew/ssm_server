@@ -160,6 +160,17 @@ class PhotosController < ApplicationController
 			end
 		end
 
+		# Specify client-side color mode
+		color_modes = []
+		color_modes << Photo::COLOR_MODE_NORMAL			if @control.color_mode_normal
+		color_modes << Photo::COLOR_MODE_GRAYSCALE	if @control.color_mode_grayscale
+		color_modes << Photo::COLOR_MODE_SEPIA			if @control.color_mode_sepia
+		color_modes << Photo::COLOR_MODE_NORMAL			if color_modes.empty?	# Always default to normal if nothing is specified
+		@color_mode = color_modes[(rand() * color_modes.count).floor]
+
+		# Apply client-side vignette effect
+		@effect_vignette = !!@control.effect_vignette
+
 		# Assume photo has not been updated (if value isn't already set to true)
 		@photo_updated ||= false
 
@@ -169,7 +180,9 @@ class PhotosController < ApplicationController
 				photo_id: @photo.id,
 				hold_duration: @control.hold_duration,
 				transition_type: @control.transition_type,
-				transition_duration: @control.transition_duration
+				transition_duration: @control.transition_duration,
+				color_mode: @color_mode,
+				effect_vignette: @effect_vignette
 			}
 		) if @photo
 
