@@ -373,15 +373,15 @@ position.x = position.x - ( ( (resolution.x - texture_resolution.x) / texture_re
 position.y = position.y - ( ( (resolution.y - texture_resolution.y) / texture_resolution.y) / 2.0);\n\
 // Calculate vignette\n\
 float len = length(position);\n\
-float vignette = smoothstep(RADIUS, RADIUS - SOFTNESS, len);\n\
+float vignetting = smoothstep(RADIUS, RADIUS - SOFTNESS, len);\n\
 // Apply vignette\n\
-pixel.rgb = mix(pixel.rgb, pixel.rgb * vignette, 1.0);\n\
+pixel.rgb = mix(pixel.rgb, pixel.rgb * vignetting, 1.0);\n\
 }else{\n\
 //The following code doesn't really belong here - it's being used to compare the above changes to the original code (below).\n\
 //vec2 position = (gl_FragCoord.xy / resolution.xy) - vec2(0.5);	// Determine center point of texture\n\
 //float len = length(position);\n\
-//float vignette = step(RADIUS, len);\n\
-//pixel = vec4(vec3(vignette), 1.0);\n\
+//float vignetting = step(RADIUS, len);\n\
+//pixel = vec4(vec3(vignetting), 1.0);\n\
 }\n\
 gl_FragColor = vec4(pixel.rgb, alpha);\n\
 }";
