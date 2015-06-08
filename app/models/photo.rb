@@ -219,6 +219,11 @@ class Photo < ActiveRecord::Base
 			)
 		) do |rotated_image|
 
+			begin
+				# Check if there were any errors when loading the image.  Most commonly triggered by invalid/incomplete image files.
+				# If this fails, Ruby throws an error and we skip to the "rescue" block
+				FreeImage.check_last_error
+
 			# Scale
 			logger.debug("\tScaling")
 			width_scale = rotated_image.width / 1920.0
@@ -241,6 +246,13 @@ class Photo < ActiveRecord::Base
 				Dir.mkdir(resized_folder + camera_folder) unless Dir.exists?(resized_folder + camera_folder)
 				Dir.mkdir(resized_folder + camera_folder + '/' + date_folder) unless Dir.exists?(resized_folder + camera_folder + '/' + date_folder)
 				scaled_image.save(resized_folder + path, :jpeg, save_flags)
+			end
+
+			rescue
+				# Need to destroy the current record
+				logger.debug("\tFreeImage error!")
+				logger.debug("\tDestroying newly-created record: #{self.id}")
+				self.destroy!
 			end
 		end
 		logger.info("\tDone")
