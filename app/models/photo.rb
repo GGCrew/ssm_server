@@ -224,29 +224,29 @@ class Photo < ActiveRecord::Base
 				# If this fails, Ruby throws an error and we skip to the "rescue" block
 				FreeImage.check_last_error
 
-			# Scale
-			logger.debug("\tScaling")
-			width_scale = rotated_image.width / 1920.0
-			height_scale = rotated_image.height / 1080.0
-			if(width_scale > height_scale)
-				new_width = (rotated_image.width / width_scale).to_i
-				new_height = (rotated_image.height / width_scale).to_i
-			else
-				new_width = (rotated_image.width / height_scale).to_i
-				new_height = (rotated_image.height / height_scale).to_i
-			end
-			scaled_image = rotated_image.rescale(new_width, new_height, :bilinear)
+				# Scale
+				logger.debug("\tScaling")
+				width_scale = rotated_image.width / 1920.0
+				height_scale = rotated_image.height / 1080.0
+				if(width_scale > height_scale)
+					new_width = (rotated_image.width / width_scale).to_i
+					new_height = (rotated_image.height / width_scale).to_i
+				else
+					new_width = (rotated_image.width / height_scale).to_i
+					new_height = (rotated_image.height / height_scale).to_i
+				end
+				scaled_image = rotated_image.rescale(new_width, new_height, :bilinear)
 
-			# Save rotated & scaled copy
-			logger.debug("\tSaving #{resized_folder + path}")
-			begin
-				scaled_image.save(resized_folder + path, :jpeg, save_flags)
-			rescue
-				Dir.mkdir(resized_folder) unless Dir.exists?(resized_folder)
-				Dir.mkdir(resized_folder + camera_folder) unless Dir.exists?(resized_folder + camera_folder)
-				Dir.mkdir(resized_folder + camera_folder + '/' + date_folder) unless Dir.exists?(resized_folder + camera_folder + '/' + date_folder)
-				scaled_image.save(resized_folder + path, :jpeg, save_flags)
-			end
+				# Save rotated & scaled copy
+				logger.debug("\tSaving #{resized_folder + path}")
+				begin
+					scaled_image.save(resized_folder + path, :jpeg, save_flags)
+				rescue
+					Dir.mkdir(resized_folder) unless Dir.exists?(resized_folder)
+					Dir.mkdir(resized_folder + camera_folder) unless Dir.exists?(resized_folder + camera_folder)
+					Dir.mkdir(resized_folder + camera_folder + '/' + date_folder) unless Dir.exists?(resized_folder + camera_folder + '/' + date_folder)
+					scaled_image.save(resized_folder + path, :jpeg, save_flags)
+				end
 
 			rescue
 				# Need to destroy the current record
