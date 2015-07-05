@@ -267,8 +267,11 @@ class PhotosController < ApplicationController
 		Client.destroy_all
 
 		# Delete processed photo files
-		resized_folder = 'public' + Photo::RESIZED_FOLDER
-		## TODO: recursive folder scan and file delete
+		logger.debug("\tDeleting processed photo files...")
+		`rm -Rf #{'public' + Photo::DISPLAY_FOLDER}`
+		`rm -Rf #{'public' + Photo::THUMBNAIL_FOLDER}`
+		`rm -Rf #{'public' + Photo::PRINT_FOLDER}`
+		logger.debug("\t\tDone!")
 		
 		Photo.scan_for_new_photos
 		
