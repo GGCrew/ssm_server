@@ -1,18 +1,3 @@
 <%=
-	{
-		:message_type => 'photo',
-		:id => (@photo.id if @photo),
-		:server_path => Photo::RESIZED_FOLDER,
-		:camera_folder => "#{@photo.camera_folder if @photo}",
-		:date_folder => "#{@photo.date_folder if @photo}",
-		:filename => "#{@photo.filename if @photo}",
-		:full_path => "#{(Photo::RESIZED_FOLDER + @photo.path) if @photo}",
-		:updated => @photo_updated,
-		:updated_time => (@photo.updated_at.tv_sec if @photo),
-		:hold_duration => @control.hold_duration,
-		:transition_type => "#{@control.transition_type}",
-		:transition_duration => @control.transition_duration,
-		:color_mode => @color_mode,
-		:effect_vignette => @effect_vignette
-	}.to_json.html_safe
+	@photo_hash.to_json.html_safe
 -%>

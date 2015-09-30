@@ -44,10 +44,12 @@ class Photo < ActiveRecord::Base
 		files = all_files - processed_files
 		files.sort!
 		files.each_with_index do |file, index|
+			logger.debug("#{index + 1}/#{files.count} - #{file}")
 			photo_hash = path_to_hash(file[path.size..-1])
 			logger.info("#{index + 1}/#{files.count} - #{photo_hash.to_s}")
 			if Photo.where(photo_hash).blank?
 				photo_hash.merge!(approval_state: 'approved') if auto_approve
+				#md5 = Digest::MD5.file('path_to_file').hexdigest
 				Photo.create!(photo_hash)
 			end
 		end
@@ -55,18 +57,39 @@ class Photo < ActiveRecord::Base
 
 
 	def self.path_to_hash(path)
-		hash = {}
+		hash = {
+			special: false
+		}
+
 		path_components = path.split('/')
 
-		if path_components.count == 3
-			camera_id = path_components[0][-2..-1].to_i
-			date = Date.strptime(path_components[1], '%m-%d-%Y')
-			filename = path_components[2]
+		case path_components.count
+			when 3
+				filename = path_components[2]
+				hash.merge!(filename: filename)
+				case path_components[0]
+					when 'special'
+						logger.debug "\t\tSPECIAL"
+						special_folder = path_components[1]
+						
+						hash.merge!(special: true)
+						hash.merge!(special_folder: special_folder)
 
-			hash.merge!(camera_id: camera_id)
-			hash.merge!(date: date)
-			hash.merge!(filename: filename)
+					when /SSM-\d\d/
+						logger.debug "\t\tSSM-\\d\\d"
+						camera_id = path_components[0][-2..-1].to_i
+						date = Date.strptime(path_components[1], '%m-%d-%Y')
+
+						hash.merge!(camera_id: camera_id)
+						hash.merge!(date: date)
+				end
+
+			else
+				# Yikes!  Unexpected number of path components!
+				logger.info "!!!!! Photo.path_to_hash -- Unexpected number of path components: #{path_components.count} (#{path})"
 		end
+
+		hash.merge!(md5: Digest::MD5.file('public' + Photo::SOURCE_FOLDER + '/' + path).hexdigest)
 
 		return hash
 	end
@@ -128,8 +151,14 @@ class Photo < ActiveRecord::Base
 				scaled_image.save(resized_folder + path, :jpeg, save_flags)
 			rescue
 				Dir.mkdir(resized_folder) unless Dir.exists?(resized_folder)
-				Dir.mkdir(resized_folder + camera_folder) unless Dir.exists?(resized_folder + camera_folder)
-				Dir.mkdir(resized_folder + camera_folder + '/' + date_folder) unless Dir.exists?(resized_folder + camera_folder + '/' + date_folder)
+				#Dir.mkdir(resized_folder + camera_folder) unless Dir.exists?(resized_folder + camera_folder)
+				#Dir.mkdir(resized_folder + camera_folder + '/' + date_folder) unless Dir.exists?(resized_folder + camera_folder + '/' + date_folder)
+				save_folder = resized_folder[0..-2]
+				path_components = path.split('/')[0..-2]
+				path_components.each_with_index do |path_component, index|
+					save_folder << "/#{path_component}"
+					Dir.mkdir(save_folder) unless Dir.exists?(save_folder)
+				end
 				scaled_image.save(resized_folder + path, :jpeg, save_flags)
 			end
 		end
@@ -139,17 +168,29 @@ class Photo < ActiveRecord::Base
 
 
 	def path
-		return "#{camera_folder}/#{date_folder}/#{self.filename}"
+		if self.special
+			return "special/#{self.special_folder}/#{self.filename}"
+		else
+			return "#{camera_folder}/#{date_folder}/#{self.filename}"
+		end
 	end
 
 
 	def camera_folder
-		return "SSM-#{self.camera_id.to_s.rjust(2, '0')}"
+		#if self.special
+		#	return 'special'
+		#else
+			return "SSM-#{self.camera_id.to_s.rjust(2, '0')}"
+		#end
 	end
 
 
 	def date_folder
-		return self.date.strftime("%-m-%-d-%Y")
+		#if self.special
+		#	return special_folder
+		#else
+			return self.date.strftime("%-m-%-d-%Y")
+		#end
 	end
 
 
@@ -246,8 +287,14 @@ class Photo < ActiveRecord::Base
 					scaled_image.save(resized_folder + path, :jpeg, save_flags)
 				rescue
 					Dir.mkdir(resized_folder) unless Dir.exists?(resized_folder)
-					Dir.mkdir(resized_folder + camera_folder) unless Dir.exists?(resized_folder + camera_folder)
-					Dir.mkdir(resized_folder + camera_folder + '/' + date_folder) unless Dir.exists?(resized_folder + camera_folder + '/' + date_folder)
+					#Dir.mkdir(resized_folder + camera_folder) unless Dir.exists?(resized_folder + camera_folder)
+					#Dir.mkdir(resized_folder + camera_folder + '/' + date_folder) unless Dir.exists?(resized_folder + camera_folder + '/' + date_folder)
+					save_folder = resized_folder[0..-2]
+					path_components = path.split('/')[0..-2]
+					path_components.each_with_index do |path_component, index|
+						save_folder << "/#{path_component}"
+						Dir.mkdir(save_folder) unless Dir.exists?(save_folder)
+					end
 					scaled_image.save(resized_folder + path, :jpeg, save_flags)
 				end
 

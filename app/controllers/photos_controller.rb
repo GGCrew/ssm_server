@@ -188,7 +188,52 @@ class PhotosController < ApplicationController
 
 		respond_to do |format|
 			format.html {}
-			format.json {}
+			format.json {
+				if @photo
+					if @photo.special
+						@photo_hash = {
+							message_type: 'sequence',
+							data: [
+								{
+									full_path: "#{Photo::RESIZED_FOLDER + @photo.path}",
+									updated: @photo_updated,
+									updated_time: @photo.updated_at.tv_sec,
+									hold_duration: @control.hold_duration,
+									transition_type: "#{@control.transition_type}",
+									transition_duration: @control.transition_duration
+								}
+							]
+						}
+					else
+						@photo_hash = {
+							message_type: 'photo',
+							id: (@photo.id),
+							server_path: Photo::RESIZED_FOLDER,
+							camera_folder: "#{@photo.camera_folder}",
+							date_folder: "#{@photo.date_folder}",
+							filename: "#{@photo.filename}",
+							full_path: "#{Photo::RESIZED_FOLDER + @photo.path}",
+							updated: @photo_updated,
+							updated_time: (@photo.updated_at.tv_sec),
+							hold_duration: @control.hold_duration,
+							transition_type: "#{@control.transition_type}",
+							transition_duration: @control.transition_duration,
+							color_mode: @color_mode,
+							effect_vignette: @effect_vignette
+						}
+					end
+				else
+					@photo_hash = {
+						message_type: 'photo',
+						server_path: Photo::RESIZED_FOLDER,
+						hold_duration: @control.hold_duration,
+						transition_type: "#{@control.transition_type}",
+						transition_duration: @control.transition_duration,
+						color_mode: @color_mode,
+						effect_vignette: @effect_vignette
+					}
+				end
+			}
 		end
 	end
 
