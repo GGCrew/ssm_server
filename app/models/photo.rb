@@ -44,7 +44,7 @@ class Photo < ActiveRecord::Base
 		files = all_files - processed_files
 		files.sort!
 		files.each_with_index do |file, index|
-			logger.debug("#{index + 1}/#{files.count} - #{file}")
+			#logger.debug("#{index + 1}/#{files.count} - #{file}")
 			photo_hash = path_to_hash(file[path.size..-1])
 			logger.info("#{index + 1}/#{files.count} - #{photo_hash.to_s}")
 			if Photo.where(photo_hash).blank?
@@ -69,14 +69,14 @@ class Photo < ActiveRecord::Base
 				hash.merge!(filename: filename)
 				case path_components[0]
 					when 'special'
-						logger.debug "\t\tSPECIAL"
+						#logger.debug "\t\tSPECIAL"
 						special_folder = path_components[1]
 						
 						hash.merge!(special: true)
 						hash.merge!(special_folder: special_folder)
 
 					when /SSM-\d\d/
-						logger.debug "\t\tSSM-\\d\\d"
+						#logger.debug "\t\tSSM-\\d\\d"
 						camera_id = path_components[0][-2..-1].to_i
 						date = Date.strptime(path_components[1], '%m-%d-%Y')
 
@@ -92,6 +92,40 @@ class Photo < ActiveRecord::Base
 		hash.merge!(md5: Digest::MD5.file('public' + Photo::SOURCE_FOLDER + '/' + path).hexdigest)
 
 		return hash
+	end
+
+
+	def self.remove_duplicates
+		sql = '
+			SELECT photos.id, photos_1.id AS duplicate_id
+			FROM photos
+			INNER JOIN photos AS photos_1
+			ON photos.md5 = photos_1.md5
+			WHERE photos.id != photos_1.id
+			 AND photos.id < photos_1.id
+			 AND ((photos.camera_id = photos_1.camera_id) OR (ISNULL(photos.camera_id) AND ISNULL(photos_1.camera_id)))
+			 AND ((photos.date = photos_1.date) OR (ISNULL(photos.date) AND ISNULL(photos_1.date)))
+			 AND photos.filename = photos_1.filename
+			ORDER BY photos.id, photos_1.id
+			;
+		'
+
+		duplicates = ActiveRecord::Base.connection.execute(sql)
+		for duplicate in duplicates
+			if self.exists?(duplicate[0])
+				keeper = self.find(duplicate[0])
+				if self.exists?(duplicate[1])
+					extra = self.find(duplicate[1])
+					if extra.approval_state == 'approved' && keeper.approval_state != 'approved'
+						keeper.approve!
+					end
+					extra.destroy
+				end
+			end
+		end
+
+		ids = duplicates.map{|i| [i[0], i[1]]}.flatten.uniq.sort
+		self.where(['id IN (:ids)', {ids: ids}]).order(:id)
 	end
 
 

@@ -295,6 +295,7 @@ class PhotosController < ApplicationController
 
 	def scan
 		Photo.scan_for_new_photos(Control.last.auto_approve)
+		Photo.remove_duplicates
 
 		@photos = Photo.pending
 		respond_to do |format|
@@ -317,9 +318,9 @@ class PhotosController < ApplicationController
 		`rm -Rf #{'public' + Photo::THUMBNAIL_FOLDER}`
 		`rm -Rf #{'public' + Photo::PRINT_FOLDER}`
 		logger.debug("\t\tDone!")
-		
+
 		Photo.scan_for_new_photos
-		
+
 		@photos = Photo.pending
 		respond_to do |format|
 			format.js { render('reload_list') }
