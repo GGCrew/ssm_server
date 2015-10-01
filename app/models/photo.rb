@@ -45,7 +45,8 @@ class Photo < ActiveRecord::Base
 		files.sort!
 		files.each_with_index do |file, index|
 			#logger.debug("#{index + 1}/#{files.count} - #{file}")
-			photo_hash = path_to_hash(file[path.size..-1])
+			#photo_hash = path_to_hash(file[path.size..-1])
+			photo_hash = path_to_hash(file)
 			logger.info("#{index + 1}/#{files.count} - #{photo_hash.to_s}")
 			if Photo.where(photo_hash).blank?
 				photo_hash.merge!(approval_state: 'approved') if auto_approve
@@ -56,10 +57,13 @@ class Photo < ActiveRecord::Base
 	end
 
 
-	def self.path_to_hash(path)
+	def self.path_to_hash(path, generate_md5 = true)
 		hash = {
 			special: false
 		}
+
+		# Strip superfluous folders from path
+		path.gsub!('public' + SOURCE_FOLDER, '')
 
 		path_components = path.split('/')
 
@@ -89,7 +93,7 @@ class Photo < ActiveRecord::Base
 				logger.info "!!!!! Photo.path_to_hash -- Unexpected number of path components: #{path_components.count} (#{path})"
 		end
 
-		hash.merge!(md5: Digest::MD5.file('public' + Photo::SOURCE_FOLDER + '/' + path).hexdigest)
+		hash.merge!(md5: Digest::MD5.file('public' + Photo::SOURCE_FOLDER + '/' + path).hexdigest) if generate_md5
 
 		return hash
 	end
@@ -126,6 +130,20 @@ class Photo < ActiveRecord::Base
 
 		ids = duplicates.map{|i| [i[0], i[1]]}.flatten.uniq.sort
 		self.where(['id IN (:ids)', {ids: ids}]).order(:id)
+	end
+
+
+	def self.card_counts
+		database_counts = self.group(:camera_id).count.sort_by{|i| i[0].nil? ? -1 : i[0]}
+
+		path = 'public' + SOURCE_FOLDER
+		all_files = Dir.glob(path + '**/*.{JPG,PNG}', File::FNM_CASEFOLD)
+		#all_files.each{|i| i.sub!(path, '')}
+		hashed_files = all_files.map{|i| Photo.path_to_hash(i, false)}
+		camera_ids = hashed_files.map{|i| i[:camera_id].nil? ? nil : i[:camera_id]}
+		source_counts = camera_ids.uniq.map{|i| [i, camera_ids.count(i)]}.sort_by{|i| i[0].nil? ? -1 : i[0]}
+
+		return {database_counts: database_counts, source_counts: source_counts}
 	end
 
 
