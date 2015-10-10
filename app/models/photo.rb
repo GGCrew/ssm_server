@@ -360,4 +360,58 @@ class Photo < ActiveRecord::Base
 		logger.info("\tDone")
 	end
 
+
+	# This block requires FreeImage
+	def exif_date
+		logger.info("exif_date")
+
+		source_folder = 'public' + SOURCE_FOLDER
+
+		# Load source
+		#FreeImage::Bitmap.open(source_folder + path, FreeImage::AbstractSource::Decoder::JPEG_EXIFROTATE) do |image|
+		logger.debug("\tLoading #{source_folder + path}")
+		FreeImage::Bitmap.new(
+			FreeImage.FreeImage_Load(
+				FreeImage::FreeImage_GetFIFFromFilename(source_folder + path),
+				source_folder + path,
+				FreeImage::AbstractSource::Decoder::FIF_LOADNOPIXELS
+			)
+		) do |image_header|
+
+			begin
+				# Check if there were any errors when loading the image.  Most commonly triggered by invalid/incomplete image files.
+				# If this fails, Ruby throws an error and we skip to the "rescue" block
+				FreeImage.check_last_error
+
+=begin
+	From: http://sourceforge.net/p/freeimage/discussion/36109/thread/b1464b0d/
+
+	Private Sub CreateDate(myJPG as string)
+		Dim keySearch As String
+		Dim dib As Long
+		Dim bDone As Boolean
+		Dim tstTag As FREE_IMAGE_TAG
+
+		dib = FreeImage_Load(FIF_JPEG, myJPG, 0) 'in our source dir for testing
+
+		keySearch = "DateTimeOriginal"
+
+		bDone = FreeImage_GetMetadataEx(FIMD_EXIF_EXIF, dib, keySearch, tstTag)
+		If bDone Then
+					MsgBox tstTag.Key & " = " & tstTag.StringValue
+		Else
+			MsgBox "Not found"
+		End If
+
+		' Unload the dib
+		FreeImage_Unload (dib)
+	End Sub
+=end
+
+			rescue
+
+			end
+		
+		end
+		logger.info("\tDone")
 end
