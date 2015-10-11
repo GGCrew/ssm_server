@@ -408,10 +408,33 @@ class Photo < ActiveRecord::Base
 	End Sub
 =end
 
+				fitag = FreeImage::FITAG.new
+				p "fitag[:key]: #{fitag[:key]}"
+				p "fitag[:description]: #{fitag[:description]}"
+				p "fitag[:id]: #{fitag[:id]}"
+				p "fitag[:type]: #{fitag[:type]}"
+				p "fitag[:count]: #{fitag[:count]}"
+				p "fitag[:length]: #{fitag[:length]}"
+				p "fitag[:value]: #{fitag[:value]}"
+
+				FreeImage.FreeImage_GetMetadata(:fimd_exif_exif, image_header, 'DateTimeOriginal', fitag)
+				p "fitag[:key]: #{fitag[:key]}"
+				p "fitag[:description]: #{fitag[:description]}"
+
+				FreeImage.FreeImage_GetMetadata(:fimd_exif_main, image_header, 'DateTime', fitag)
+				p "fitag[:key]: #{fitag[:key]}"
+				p "fitag[:description]: #{fitag[:description]}"
+
+				FreeImage.FreeImage_GetMetadata(:fimd_exif_main, image_header, 'Make', fitag)
+				p "fitag[:key]: #{fitag[:key]}"
+				p "fitag[:description]: #{fitag[:description]}"
+
 			rescue
+				logger.debug "INSERT COMMENT HERE"
 
 			end
 		
 		end
 		logger.info("\tDone")
+	end
 end
