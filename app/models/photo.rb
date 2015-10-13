@@ -361,12 +361,17 @@ class Photo < ActiveRecord::Base
 	end
 
 
-	# This block requires FreeImage
 	def exif_date
-		get_exif_data :fimd_exif_exif, 'DateTimeOriginal'
+		exif_date_text = get_exif_data :fimd_exif_exif, 'DateTimeOriginal'
+		if exif_date_text
+			return DateTime.strptime(exif_date_text, '%Y:%m:%d %H:%M:%S')
+		else
+			return nil
+		end
 	end
 
 
+	# This block requires FreeImage
 	def get_exif_data(metadata_model, key_name)
 		source_folder = 'public' + SOURCE_FOLDER
 
@@ -389,9 +394,10 @@ class Photo < ActiveRecord::Base
 
 				fitag_pointer = FFI::MemoryPointer.new :pointer
 
-				FreeImage.FreeImage_GetMetadata(metadata_model, image_header, key_name, fitag_pointer)
-				fitag = FreeImage::FITAG.new(fitag_pointer.read_pointer())
-				return_value = FreeImage.get_fitag_value(fitag)
+				if FreeImage.FreeImage_GetMetadata(metadata_model, image_header, key_name, fitag_pointer)
+					fitag = FreeImage::FITAG.new(fitag_pointer.read_pointer())
+					return_value = FreeImage.get_fitag_value(fitag)
+				end
 
 			rescue
 				logger.debug "INSERT COMMENT HERE"
@@ -399,7 +405,6 @@ class Photo < ActiveRecord::Base
 			end
 		
 		end
-		logger.info("\tDone")
 		return return_value
 	end
 end
