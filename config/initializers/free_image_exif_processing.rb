@@ -49,13 +49,43 @@ module FreeImage
   # DLL_API BOOL DLL_CALLCONV FreeImage_GetMetadata(FREE_IMAGE_MDMODEL model, FIBITMAP *dib, const char *key, FITAG **tag);
   attach_function('FreeImage_GetMetadata', [:metadata_model, :pointer, :string, :pointer], FreeImage::Boolean)
 
+	# DLL_API const char *DLL_CALLCONV FreeImage_GetTagKey(FITAG *tag);
+	attach_function('FreeImage_GetTagKey', [:pointer], :string)
+
 	# DLL_API const char *DLL_CALLCONV FreeImage_GetTagDescription(FITAG *tag);
 	attach_function('FreeImage_GetTagDescription', [:pointer], :string)
 
+	# DLL_API WORD DLL_CALLCONV FreeImage_GetTagID(FITAG *tag);
+	attach_function('FreeImage_GetTagID', [:pointer], :word)
+
+	# DLL_API FREE_IMAGE_MDTYPE DLL_CALLCONV FreeImage_GetTagType(FITAG *tag);
+	attach_function('FreeImage_GetTagType', [:pointer], :tag_data_type)
+
+	# DLL_API DWORD DLL_CALLCONV FreeImage_GetTagCount(FITAG *tag);
+	attach_function('FreeImage_GetTagCount', [:pointer], :dword)
+
+	# DLL_API DWORD DLL_CALLCONV FreeImage_GetTagLength(FITAG *tag);
+	attach_function('FreeImage_GetTagLength', [:pointer], :dword)
+
+	# DLL_API const void *DLL_CALLCONV FreeImage_GetTagValue(FITAG *tag);
+	attach_function('FreeImage_GetTagValue', [:pointer], :pointer)
 
 	#..#
 
 
-	# FreeImage_GetMetadata(FIMD_EXIF_MAIN, dib, "Make", &tagMake);
+	def self.get_fitag_value(fitag)
+		return_value = case FreeImage_GetTagType(fitag)
+			when :fidt_ascii
+				FreeImage_GetTagValue(fitag).read_string
+
+			else
+				logger.debug('UNEXPECTED FITAG Tag Type!')
+				nil
+
+		end
+
+		return return_value
+	end
+
 
 end

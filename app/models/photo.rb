@@ -367,6 +367,8 @@ class Photo < ActiveRecord::Base
 
 		source_folder = 'public' + SOURCE_FOLDER
 
+		return_value = nil # Assume failure
+
 		# Load source
 		#FreeImage::Bitmap.open(source_folder + path, FreeImage::AbstractSource::Decoder::JPEG_EXIFROTATE) do |image|
 		logger.debug("\tLoading #{source_folder + path}")
@@ -408,26 +410,32 @@ class Photo < ActiveRecord::Base
 	End Sub
 =end
 
-				fitag = FreeImage::FITAG.new
-				p "fitag[:key]: #{fitag[:key]}"
-				p "fitag[:description]: #{fitag[:description]}"
-				p "fitag[:id]: #{fitag[:id]}"
-				p "fitag[:type]: #{fitag[:type]}"
-				p "fitag[:count]: #{fitag[:count]}"
-				p "fitag[:length]: #{fitag[:length]}"
-				p "fitag[:value]: #{fitag[:value]}"
+				#fitag = FreeImage::FITAG.new
+				#p "fitag[:key]: #{fitag[:key]}"
+				#p "fitag[:description]: #{fitag[:description]}"
+				#p "fitag[:id]: #{fitag[:id]}"
+				#p "fitag[:type]: #{fitag[:type]}"
+				#p "fitag[:count]: #{fitag[:count]}"
+				#p "fitag[:length]: #{fitag[:length]}"
+				#p "fitag[:value]: #{fitag[:value]}"
 
-				FreeImage.FreeImage_GetMetadata(:fimd_exif_exif, image_header, 'DateTimeOriginal', fitag)
-				p "fitag[:key]: #{fitag[:key]}"
-				p "fitag[:description]: #{fitag[:description]}"
+				fitag_pointer = FFI::MemoryPointer.new :pointer
 
-				FreeImage.FreeImage_GetMetadata(:fimd_exif_main, image_header, 'DateTime', fitag)
-				p "fitag[:key]: #{fitag[:key]}"
-				p "fitag[:description]: #{fitag[:description]}"
+				FreeImage.FreeImage_GetMetadata(:fimd_exif_exif, image_header, 'DateTimeOriginal', fitag_pointer)
+				fitag = FreeImage::FITAG.new(fitag_pointer.read_pointer())
+				return_value = FreeImage.get_fitag_value(fitag)
+				#p "key: #{FreeImage.FreeImage_GetTagKey(fitag)}"
+				#p "description: #{FreeImage.FreeImage_GetTagDescription(fitag)}"
 
-				FreeImage.FreeImage_GetMetadata(:fimd_exif_main, image_header, 'Make', fitag)
-				p "fitag[:key]: #{fitag[:key]}"
-				p "fitag[:description]: #{fitag[:description]}"
+				#FreeImage.FreeImage_GetMetadata(:fimd_exif_main, image_header, 'DateTime', fitag_pointer)
+				#fitag = FreeImage::FITAG.new(fitag_pointer.read_pointer())
+				#p "key: #{FreeImage.FreeImage_GetTagKey(fitag)}"
+				#p "description: #{FreeImage.FreeImage_GetTagDescription(fitag)}"
+
+				#FreeImage.FreeImage_GetMetadata(:fimd_exif_main, image_header, 'Make', fitag_pointer)
+				#fitag = FreeImage::FITAG.new(fitag_pointer.read_pointer())
+				#p "key: #{FreeImage.FreeImage_GetTagKey(fitag)}"
+				#p "description: #{FreeImage.FreeImage_GetTagDescription(fitag)}"
 
 			rescue
 				logger.debug "INSERT COMMENT HERE"
@@ -436,5 +444,6 @@ class Photo < ActiveRecord::Base
 		
 		end
 		logger.info("\tDone")
+		return return_value
 	end
 end
