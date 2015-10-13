@@ -363,15 +363,17 @@ class Photo < ActiveRecord::Base
 
 	# This block requires FreeImage
 	def exif_date
-		logger.info("exif_date")
+		get_exif_data :fimd_exif_exif, 'DateTimeOriginal'
+	end
 
+
+	def get_exif_data(metadata_model, key_name)
 		source_folder = 'public' + SOURCE_FOLDER
 
 		return_value = nil # Assume failure
 
 		# Load source
 		#FreeImage::Bitmap.open(source_folder + path, FreeImage::AbstractSource::Decoder::JPEG_EXIFROTATE) do |image|
-		logger.debug("\tLoading #{source_folder + path}")
 		FreeImage::Bitmap.new(
 			FreeImage.FreeImage_Load(
 				FreeImage::FreeImage_GetFIFFromFilename(source_folder + path),
@@ -385,57 +387,11 @@ class Photo < ActiveRecord::Base
 				# If this fails, Ruby throws an error and we skip to the "rescue" block
 				FreeImage.check_last_error
 
-=begin
-	From: http://sourceforge.net/p/freeimage/discussion/36109/thread/b1464b0d/
-
-	Private Sub CreateDate(myJPG as string)
-		Dim keySearch As String
-		Dim dib As Long
-		Dim bDone As Boolean
-		Dim tstTag As FREE_IMAGE_TAG
-
-		dib = FreeImage_Load(FIF_JPEG, myJPG, 0) 'in our source dir for testing
-
-		keySearch = "DateTimeOriginal"
-
-		bDone = FreeImage_GetMetadataEx(FIMD_EXIF_EXIF, dib, keySearch, tstTag)
-		If bDone Then
-					MsgBox tstTag.Key & " = " & tstTag.StringValue
-		Else
-			MsgBox "Not found"
-		End If
-
-		' Unload the dib
-		FreeImage_Unload (dib)
-	End Sub
-=end
-
-				#fitag = FreeImage::FITAG.new
-				#p "fitag[:key]: #{fitag[:key]}"
-				#p "fitag[:description]: #{fitag[:description]}"
-				#p "fitag[:id]: #{fitag[:id]}"
-				#p "fitag[:type]: #{fitag[:type]}"
-				#p "fitag[:count]: #{fitag[:count]}"
-				#p "fitag[:length]: #{fitag[:length]}"
-				#p "fitag[:value]: #{fitag[:value]}"
-
 				fitag_pointer = FFI::MemoryPointer.new :pointer
 
-				FreeImage.FreeImage_GetMetadata(:fimd_exif_exif, image_header, 'DateTimeOriginal', fitag_pointer)
+				FreeImage.FreeImage_GetMetadata(metadata_model, image_header, key_name, fitag_pointer)
 				fitag = FreeImage::FITAG.new(fitag_pointer.read_pointer())
 				return_value = FreeImage.get_fitag_value(fitag)
-				#p "key: #{FreeImage.FreeImage_GetTagKey(fitag)}"
-				#p "description: #{FreeImage.FreeImage_GetTagDescription(fitag)}"
-
-				#FreeImage.FreeImage_GetMetadata(:fimd_exif_main, image_header, 'DateTime', fitag_pointer)
-				#fitag = FreeImage::FITAG.new(fitag_pointer.read_pointer())
-				#p "key: #{FreeImage.FreeImage_GetTagKey(fitag)}"
-				#p "description: #{FreeImage.FreeImage_GetTagDescription(fitag)}"
-
-				#FreeImage.FreeImage_GetMetadata(:fimd_exif_main, image_header, 'Make', fitag_pointer)
-				#fitag = FreeImage::FITAG.new(fitag_pointer.read_pointer())
-				#p "key: #{FreeImage.FreeImage_GetTagKey(fitag)}"
-				#p "description: #{FreeImage.FreeImage_GetTagDescription(fitag)}"
 
 			rescue
 				logger.debug "INSERT COMMENT HERE"
