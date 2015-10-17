@@ -48,6 +48,15 @@ module FreeImage
 	end
 
 
+	# DLL_API FIMETADATA *DLL_CALLCONV FreeImage_FindFirstMetadata(FREE_IMAGE_MDMODEL model, FIBITMAP *dib, FITAG **tag);
+	attach_function('FreeImage_FindFirstMetadata', [:metadata_model, :pointer, :pointer], :pointer)
+
+	# DLL_API BOOL DLL_CALLCONV FreeImage_FindNextMetadata(FIMETADATA *mdhandle, FITAG **tag);
+	attach_function('FreeImage_FindNextMetadata', [:pointer, :pointer], FreeImage::Boolean)
+
+	# DLL_API void DLL_CALLCONV FreeImage_FindCloseMetadata(FIMETADATA *mdhandle);
+	attach_function('FreeImage_FindCloseMetadata', [:pointer], :void)
+
   # DLL_API BOOL DLL_CALLCONV FreeImage_GetMetadata(FREE_IMAGE_MDMODEL model, FIBITMAP *dib, const char *key, FITAG **tag);
   attach_function('FreeImage_GetMetadata', [:metadata_model, :pointer, :string, :pointer], FreeImage::Boolean)
 
