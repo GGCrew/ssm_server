@@ -164,12 +164,7 @@ class Photo < ActiveRecord::Base
 
 
 	def self.get_exif_date(filename)
-		exif_date_text = Photo.get_exif_data(filename, :fimd_exif_exif, 'DateTimeOriginal')
-		if exif_date_text
-			return DateTime.strptime(exif_date_text, '%Y:%m:%d %H:%M:%S')
-		else
-			return DEFAULT_DATE
-		end
+		Photo.exif_data_hash(filename)[:exif_date]
 	end
 
 
@@ -187,7 +182,7 @@ class Photo < ActiveRecord::Base
 			)
 		) do |image_header|
 
-#			begin
+			begin
 				# Check if there were any errors when loading the image.  Most commonly triggered by invalid/incomplete image files.
 				# If this fails, Ruby throws an error and we skip to the "rescue" block
 				FreeImage.check_last_error
@@ -199,10 +194,10 @@ class Photo < ActiveRecord::Base
 					return_value = FreeImage.get_fitag_value(fitag)
 				end
 
-#			rescue
-#				logger.debug "INSERT COMMENT HERE"
-#
-#			end
+			rescue
+				logger.debug "INSERT COMMENT HERE"
+
+			end
 		
 		end
 		return return_value
@@ -251,7 +246,7 @@ class Photo < ActiveRecord::Base
 		
 		end
 
-		(attribute_hash[:exif_date] = DateTime.strptime(attribute_hash[:exif_date], '%Y:%m:%d %H:%M:%S')) if attribute_hash[:exif_date]
+		attribute_hash[:exif_date] = (attribute_hash[:exif_date] ? DateTime.strptime(attribute_hash[:exif_date], '%Y:%m:%d %H:%M:%S') : DEFAULT_DATE)
 
 		return attribute_hash
 	end
@@ -482,15 +477,6 @@ class Photo < ActiveRecord::Base
 		source_folder = 'public' + SOURCE_FOLDER
 
 		Photo.get_exif_date(source_folder + path)
-
-=begin
-		exif_date_text = get_exif_data :fimd_exif_exif, 'DateTimeOriginal'
-		if exif_date_text
-			return DateTime.strptime(exif_date_text, '%Y:%m:%d %H:%M:%S')
-		else
-			return DEFAULT_DATE
-		end
-=end
 	end
 
 
@@ -499,39 +485,5 @@ class Photo < ActiveRecord::Base
 		source_folder = 'public' + SOURCE_FOLDER
 
 		Photo.get_exif_data(source_folder + path, metadata_model, key_name)
-
-=begin
-		return_value = nil # Assume failure
-
-		# Load source
-		#FreeImage::Bitmap.open(source_folder + path, FreeImage::AbstractSource::Decoder::JPEG_EXIFROTATE) do |image|
-		FreeImage::Bitmap.new(
-			FreeImage.FreeImage_Load(
-				FreeImage::FreeImage_GetFIFFromFilename(source_folder + path),
-				source_folder + path,
-				FreeImage::AbstractSource::Decoder::FIF_LOADNOPIXELS
-			)
-		) do |image_header|
-
-			begin
-				# Check if there were any errors when loading the image.  Most commonly triggered by invalid/incomplete image files.
-				# If this fails, Ruby throws an error and we skip to the "rescue" block
-				FreeImage.check_last_error
-
-				fitag_pointer = FFI::MemoryPointer.new :pointer
-
-				if FreeImage.FreeImage_GetMetadata(metadata_model, image_header, key_name, fitag_pointer)
-					fitag = FreeImage::FITAG.new(fitag_pointer.read_pointer())
-					return_value = FreeImage.get_fitag_value(fitag)
-				end
-
-			rescue
-				logger.debug "INSERT COMMENT HERE"
-
-			end
-		
-		end
-		return return_value
-=end
 	end
 end
