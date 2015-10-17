@@ -25,6 +25,9 @@ FreeImage.FreeImage_GetTagValue(fitag)
 
 
 
+FreeImage.FreeImage_GetMetadata(:fimd_exif_exif, image_header, 'PixelYDimension', fitag_pointer)
+fitag = FreeImage::FITAG.new(fitag_pointer.read_pointer())
+FreeImage.get_fitag_value(fitag)
 
 ####################
 

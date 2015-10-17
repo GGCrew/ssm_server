@@ -36,6 +36,7 @@ module FreeImage
 		:fidt_ifd8, 18 # FIDT_IFD8 data type is identical to LONG8, but is only used to store offsets
 	]
 
+
   class FITAG < FFI::Struct
 		layout :key,					:string,
 					 :description,	:string,
@@ -45,6 +46,7 @@ module FreeImage
 					 :length,				:dword,
 					 :value,				:dword
 	end
+
 
   # DLL_API BOOL DLL_CALLCONV FreeImage_GetMetadata(FREE_IMAGE_MDMODEL model, FIBITMAP *dib, const char *key, FITAG **tag);
   attach_function('FreeImage_GetMetadata', [:metadata_model, :pointer, :string, :pointer], FreeImage::Boolean)
@@ -70,6 +72,7 @@ module FreeImage
 	# DLL_API const void *DLL_CALLCONV FreeImage_GetTagValue(FITAG *tag);
 	attach_function('FreeImage_GetTagValue', [:pointer], :pointer)
 
+
 	#..#
 
 
@@ -78,8 +81,14 @@ module FreeImage
 			when :fidt_ascii
 				FreeImage_GetTagValue(fitag).read_string
 
+			when :fidt_short
+				FreeImage_GetTagValue(fitag).read_short
+
+			when :fidt_long
+				FreeImage_GetTagValue(fitag).read_long
+
 			else
-				logger.debug('UNEXPECTED FITAG Tag Type!')
+				p "FreeImage_GetTagType(fitag): #{FreeImage_GetTagType(fitag)}"
 				nil
 
 		end
