@@ -25,9 +25,9 @@ class Photo < ActiveRecord::Base
 	#..#
 
 
-	scope	:pending,		-> { where(approval_state: 'pending').order(updated_at: :asc) }
-	scope :approved,	-> { where(approval_state: 'approved').order(updated_at: :asc) }
-	scope :denied,		-> { where(approval_state: 'denied').order(updated_at: :asc) }
+	scope	:pending,		-> { where(approval_state: 'pending').order(exif_date: :asc).order(updated_at: :asc) }
+	scope :approved,	-> { where(approval_state: 'approved').order(exif_date: :asc).order(updated_at: :asc) }
+	scope :denied,		-> { where(approval_state: 'denied').order(exif_date: :asc).order(updated_at: :asc) }
 
 
 	#..#
