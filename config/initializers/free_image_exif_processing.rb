@@ -94,10 +94,18 @@ module FreeImage
 				FreeImage_GetTagValue(fitag).read_short
 
 			when :fidt_long
-				FreeImage_GetTagValue(fitag).read_long
+				FreeImage_GetTagValue(fitag).read_short
+				#FreeImage_GetTagValue(fitag).read_long
+				# The sample photos from a Sony NEX-5N claim that the PixelX/YDimension EXIF fields are "long",
+				# but using read_long returns PixelDimensions of 140097538233136x140097538231488.
+				# Reading the same data as read_short returns 4912x3264 (the actual image dimensions).
+				# Haven't easily determined whether the issue is with Sony, FreeImage, FFI, or Ruby.
+				# Because I'm only hitting the "fidt_long" condition when reading the PixelDimensions from the Sony NEX-5N photos
+				# (and because I have full control over which cameras are taking the photos),
+				# I'm overriding the expected functionality so the function returns the expected PixelDimensions.
 
 			else
-				p "FreeImage_GetTagType(fitag): #{FreeImage_GetTagType(fitag)}"
+				#p "FreeImage_GetTagType(fitag): #{FreeImage_GetTagType(fitag)}"
 				nil
 
 		end
