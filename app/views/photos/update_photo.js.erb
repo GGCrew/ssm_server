@@ -2,6 +2,9 @@ var list_item_element = $('#<%= @photo.id -%>');
 var photo_section = $(list_item_element).parents('.photo_section');
 var image = $(photo_section).find('.preview img');
 var caption = $(photo_section).find('.preview .caption');
+var caption_filename = $(caption).find('.caption_filename');
+var caption_exif = $(caption).find('.caption_exif');
 
 $(image).attr('src', '<%= Photo::RESIZED_FOLDER + @photo.path + '?time=' + Time.now.tv_sec.to_s -%>');
-$(caption).text('<%= @photo.path -%>');
+$(caption_filename).text('<%= @photo.path -%>');
+$(caption_exif).text('<%= @photo.exif_caption -%>');

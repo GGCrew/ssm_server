@@ -26,7 +26,11 @@
 	
 	<div class="preview">
 		<img style="display: <%= @preview_img_css -%>;" src="/photos/black.png">
-		<p class="caption" style="display: <%= @preview_caption_css -%>;">&nbsp;</p>
+		<p class="caption" style="display: <%= @preview_caption_css -%>;">
+			<span class="caption_filename">&nbsp;</span>
+			<br>
+			<span class="caption_exif">&nbsp;</span>
+		</p>
 		<div class="buttons" style="position: absolute; bottom: .5em; right: .5em;">
 			<%= link_to('Queue', queue_photo_path(-1), {remote: true, class: 'manage'}) -%>
 			<br />

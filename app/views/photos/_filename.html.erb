@@ -3,7 +3,13 @@
 	"#",
 	{
 		id: filename.id,
-		onclick: "show_photo(this, #{filename.id}, '#{filename.path}', '#{Photo::RESIZED_FOLDER + filename.path}'); return false;"
+		onclick: "show_photo(
+			this,
+			#{filename.id},
+			'#{filename.path}',
+			'#{Photo::RESIZED_FOLDER + filename.path}',
+			'#{filename.exif_caption}'
+		); return false;"
 	}
 ) -%>
 <br>

@@ -486,4 +486,21 @@ class Photo < ActiveRecord::Base
 
 		Photo.get_exif_data(source_folder + path, metadata_model, key_name)
 	end
+
+
+	def exif_caption
+		#[exif_make, exif_model, exif_date, "#{exif_width}x#{exif_height}"].join(' ')
+		captions = []
+		if exif_make
+			if exif_model
+				captions << exif_make unless exif_model.match(exif_make)
+			else
+				captions << exif_make
+			end
+		end
+		captions << exif_model
+		captions << exif_date.strftime('%Y-%m-%d %H:%M:%S')
+		captions << "#{exif_width}x#{exif_height}" if (exif_width and exif_height)
+		captions.compact.join(' ')
+	end
 end
