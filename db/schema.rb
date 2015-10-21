@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150928000002) do
+ActiveRecord::Schema.define(version: 20151014000001) do
 
   create_table "client_photo_queues", force: true do |t|
     t.integer  "client_id"
@@ -56,6 +56,11 @@ ActiveRecord::Schema.define(version: 20150928000002) do
     t.integer  "camera_id"
     t.date     "date"
     t.string   "filename"
+    t.datetime "exif_date"
+    t.string   "exif_make"
+    t.string   "exif_model"
+    t.integer  "exif_width"
+    t.integer  "exif_height"
     t.integer  "rotation",       default: 0
     t.datetime "created_at"
     t.datetime "updated_at"

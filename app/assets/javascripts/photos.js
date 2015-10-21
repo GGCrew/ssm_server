@@ -1,4 +1,4 @@
-function show_photo(list_item_element, id, short_path, full_path) {
+function show_photo(list_item_element, id, short_path, full_path, exif_caption) {
 	var photo_section = $(list_item_element).parents('.photo_section');
 
 	var button_approve = $(photo_section).find('.sidebar .approve');
@@ -6,6 +6,8 @@ function show_photo(list_item_element, id, short_path, full_path) {
 
 	var image = $(photo_section).find('.preview img');
 	var caption = $(photo_section).find('.preview .caption');
+	var caption_filename = $(caption).find('.caption_filename');
+	var caption_exif = $(caption).find('.caption_exif');
 	var rotation_buttons = $(photo_section).find('.preview .buttons a.rotate').parent();
 
 	// highlight selected item
@@ -14,7 +16,8 @@ function show_photo(list_item_element, id, short_path, full_path) {
 
 	// keep related items in sync
 	$(image).attr('src', full_path);
-	$(caption).text(short_path);
+	$(caption_filename).text(short_path);
+	$(caption_exif).text(exif_caption);
 	$(rotation_buttons).css('display', 'block');
 
 	update_buttons(photo_section, id);
@@ -27,7 +30,7 @@ function clear_photo(photo_section) {
 	var rotation_buttons = $(photo_section).find('.preview .buttons a.rotate').parent();
 
 	$(image).attr('src', '/photos/black.png');
-	$(caption).text('');
+	$(caption).children().text('');
 	$(rotation_buttons).css('display', 'none');
 }
 
@@ -112,7 +115,7 @@ $(document).ready(function() {
 	$('.rotate')
 		.on('ajax:beforeSend', function(evt, xhr, settings) {
 			$(this).parents('.preview').children('img').attr('src', '/photos/black.png');
-			$(this).parents('.preview').children('.caption').text('');
+			$(this).parents('.preview').children('.caption').children().text('');
 		});
 
 	$('ul.menu_bar li a')

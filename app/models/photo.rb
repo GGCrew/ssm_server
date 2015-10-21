@@ -9,6 +9,8 @@ class Photo < ActiveRecord::Base
 	COLOR_MODE_GRAYSCALE = 1
 	COLOR_MODE_SEPIA = 2
 
+	DEFAULT_DATE = DateTime.parse('1970-01-01 00:00:00')
+
 
 	#..#
 
@@ -23,9 +25,9 @@ class Photo < ActiveRecord::Base
 	#..#
 
 
-	scope	:pending,		-> { where(approval_state: 'pending').order(updated_at: :asc) }
-	scope :approved,	-> { where(approval_state: 'approved').order(updated_at: :asc) }
-	scope :denied,		-> { where(approval_state: 'denied').order(updated_at: :asc) }
+	scope	:pending,		-> { where(approval_state: 'pending').order(exif_date: :asc).order(updated_at: :asc) }
+	scope :approved,	-> { where(approval_state: 'approved').order(exif_date: :asc).order(updated_at: :asc) }
+	scope :denied,		-> { where(approval_state: 'denied').order(exif_date: :asc).order(updated_at: :asc) }
 
 
 	#..#
@@ -50,17 +52,19 @@ class Photo < ActiveRecord::Base
 			logger.info("#{index + 1}/#{files.count} - #{photo_hash.to_s}")
 			if Photo.where(photo_hash).blank?
 				photo_hash.merge!(approval_state: 'approved') if auto_approve
-				#md5 = Digest::MD5.file('path_to_file').hexdigest
+				photo_hash.merge!(Photo.exif_data_hash(file))
 				Photo.create!(photo_hash)
 			end
 		end
 	end
 
 
-	def self.path_to_hash(path, generate_md5 = true)
+	def self.path_to_hash(source_path, generate_md5 = true)
 		hash = {
 			special: false
 		}
+
+		path = source_path.dup
 
 		# Strip superfluous folders from path
 		path.gsub!('public' + SOURCE_FOLDER, '')
@@ -75,7 +79,7 @@ class Photo < ActiveRecord::Base
 					when 'special'
 						#logger.debug "\t\tSPECIAL"
 						special_folder = path_components[1]
-						
+
 						hash.merge!(special: true)
 						hash.merge!(special_folder: special_folder)
 
@@ -144,6 +148,107 @@ class Photo < ActiveRecord::Base
 		source_counts = camera_ids.uniq.map{|i| [i, camera_ids.count(i)]}.sort_by{|i| i[0].nil? ? -1 : i[0]}
 
 		return {database_counts: database_counts, source_counts: source_counts}
+	end
+
+
+	def self.import_exif_dates
+		path = 'public' + SOURCE_FOLDER
+		photos = Photo.where(exif_date: nil)
+		photo_count = photos.count
+		photos.each_with_index do |photo, index|
+			logger.info "#{index + 1}/#{photo_count}"
+			photo.exif_date = photo.get_exif_date
+			photo.save
+		end
+	end
+
+
+	def self.get_exif_date(filename)
+		Photo.exif_data_hash(filename)[:exif_date]
+	end
+
+
+	# This block requires FreeImage
+	def self.get_exif_data(filename, metadata_model, key_name)
+		return_value = nil # Assume failure
+
+		# Load source
+		#FreeImage::Bitmap.open(source_folder + path, FreeImage::AbstractSource::Decoder::JPEG_EXIFROTATE) do |image|
+		FreeImage::Bitmap.new(
+			FreeImage.FreeImage_Load(
+				FreeImage::FreeImage_GetFIFFromFilename(filename),
+				filename,
+				FreeImage::AbstractSource::Decoder::FIF_LOADNOPIXELS
+			)
+		) do |image_header|
+
+			begin
+				# Check if there were any errors when loading the image.  Most commonly triggered by invalid/incomplete image files.
+				# If this fails, Ruby throws an error and we skip to the "rescue" block
+				FreeImage.check_last_error
+
+				fitag_pointer = FFI::MemoryPointer.new :pointer
+
+				if FreeImage.FreeImage_GetMetadata(metadata_model, image_header, key_name, fitag_pointer)
+					fitag = FreeImage::FITAG.new(fitag_pointer.read_pointer())
+					return_value = FreeImage.get_fitag_value(fitag)
+				end
+
+			rescue
+				logger.debug "INSERT COMMENT HERE"
+
+			end
+		
+		end
+		return return_value
+	end
+
+
+	def self.exif_data_hash(filename)
+		metadata = [
+			{metadata_model: :fimd_exif_exif, key_name: 'DateTimeOriginal',	value: nil, model_attribute: 'exif_date'},
+			{metadata_model: :fimd_exif_exif, key_name: 'PixelXDimension',	value: nil, model_attribute: 'exif_width'},
+			{metadata_model: :fimd_exif_exif, key_name: 'PixelYDimension',	value: nil, model_attribute: 'exif_height'},
+			{metadata_model: :fimd_exif_main, key_name: 'Make',							value: nil, model_attribute: 'exif_make'},
+			{metadata_model: :fimd_exif_main, key_name: 'Model',						value: nil, model_attribute: 'exif_model'}
+		]
+
+		attribute_hash = {}
+
+		# Load source
+		FreeImage::Bitmap.new(
+			FreeImage.FreeImage_Load(
+				FreeImage::FreeImage_GetFIFFromFilename(filename),
+				filename,
+				FreeImage::AbstractSource::Decoder::FIF_LOADNOPIXELS
+			)
+		) do |image_header|
+
+			begin
+				# Check if there were any errors when loading the image.  Most commonly triggered by invalid/incomplete image files.
+				# If this fails, Ruby throws an error and we skip to the "rescue" block
+				FreeImage.check_last_error
+
+				fitag_pointer = FFI::MemoryPointer.new :pointer
+
+				for metadatum in metadata
+					if FreeImage.FreeImage_GetMetadata(metadatum[:metadata_model], image_header, metadatum[:key_name], fitag_pointer)
+						fitag = FreeImage::FITAG.new(fitag_pointer.read_pointer())
+						metadatum[:value] = FreeImage.get_fitag_value(fitag)
+						attribute_hash.merge!(metadatum[:model_attribute].to_sym => metadatum[:value])
+					end
+				end
+
+			rescue
+				logger.debug "INSERT ERROR CODE HERE"
+
+			end
+		
+		end
+
+		attribute_hash[:exif_date] = (attribute_hash[:exif_date] ? DateTime.strptime(attribute_hash[:exif_date], '%Y:%m:%d %H:%M:%S') : DEFAULT_DATE)
+
+		return attribute_hash
 	end
 
 
@@ -360,4 +465,42 @@ class Photo < ActiveRecord::Base
 		logger.info("\tDone")
 	end
 
+
+	def exif_data_hash
+		source_folder = 'public' + SOURCE_FOLDER
+
+		Photo.exif_data_hash(source_folder + path)
+	end
+
+
+	def get_exif_date
+		source_folder = 'public' + SOURCE_FOLDER
+
+		Photo.get_exif_date(source_folder + path)
+	end
+
+
+	# This block requires FreeImage
+	def get_exif_data(metadata_model, key_name)
+		source_folder = 'public' + SOURCE_FOLDER
+
+		Photo.get_exif_data(source_folder + path, metadata_model, key_name)
+	end
+
+
+	def exif_caption
+		#[exif_make, exif_model, exif_date, "#{exif_width}x#{exif_height}"].join(' ')
+		captions = []
+		if exif_make
+			if exif_model
+				captions << exif_make unless exif_model.match(exif_make)
+			else
+				captions << exif_make
+			end
+		end
+		captions << exif_model
+		captions << exif_date.strftime('%Y-%m-%d %H:%M:%S')
+		captions << "#{exif_width}x#{exif_height}" if (exif_width and exif_height)
+		captions.compact.join(' ')
+	end
 end
