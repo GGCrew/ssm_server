@@ -320,71 +320,13 @@
 					It computes the position of the point on the viewport (displayed on the canvas), gl_Position. 
 					gl_Position is given in clipping coordinates
 				*/
-				var shader_vertex_source="\n\
-attribute vec3 position; //the 3D position of the point\n\
-attribute vec2 uv; // The x,y coordinates of the texture\n\
-varying vec2 vUV; // Used to give the pixel data to the fragment shader.  This value will change during render\n\
-uniform mat4 Pmatrix; // Creating a projection matrix, which represents the viewable area.  This value will remain constant during render.\n\
-uniform mat4 Vmatrix; // Movement matrix for the view (camera)\n\
-uniform mat4 Mmatrix; // Movement matrix for the object\n\
-uniform mat4 Smatrix; // Scaling matrix for the object\n\
-void main(void) { //pre-built function\n\
-// Order of P,V,M is important!!!\n\
-gl_Position = Pmatrix * Vmatrix * Mmatrix * Smatrix * vec4(position, 1.); //0. is the z, and 1 is w\n\
-vUV=uv;\n\
-}";
-
-				/*
-					Vignette example:
-					https://github.com/mattdesl/lwjgl-basics/wiki/ShaderLesson3
-				*/
+				var shader_vertex_source=document.getElementById('vertex-shader').text;
 
 				/*
 					The fragment(or pixel) shader is executed for each pixel of the render of the triangle. 
 					It returns the RGBA color of the pixel with the pre-build variable gl_FragColor.
 				*/
-				var shader_fragment_source="\n\
-const mediump int COLOR_MODE_NORMAL = 0;\n\
-const mediump int COLOR_MODE_GRAYSCALE = 1;\n\
-const mediump int COLOR_MODE_SEPIA = 2;\n\
-const mediump float RADIUS = 0.7;\n\
-const mediump float SOFTNESS = 0.45;\n\
-precision mediump float;\n\
-varying vec2 vUV; // Get the pixel coordinates from the vertex shader vUV variable.\n\
-uniform sampler2D sampler; // The texture.\n\
-uniform int color_mode; // The GLSL color_mode to apply to the texture (if any).\n\
-uniform bool vignette;\n\
-uniform vec2 resolution;\n\
-uniform vec2 texture_resolution;\n\
-uniform float alpha;\n\
-void main(void) {\n\
-vec4 pixel = texture2D(sampler, vUV);\n\
-if(color_mode == COLOR_MODE_GRAYSCALE) {\n\
-pixel = vec4(vec3(dot(pixel.rgb, vec3(0.299, 0.587, 0.114))), pixel.a); // Grayscale\n\
-}\n\
-if(color_mode == COLOR_MODE_SEPIA) {\n\
-pixel = vec4(vec3(dot(pixel.rgb, vec3(0.299, 0.587, 0.114))), pixel.a);	// Grayscale\n\
-pixel = vec4(pixel.rgb * vec3(1.2, 1.0, 0.8), pixel.a); // Sepia\n\
-}\n\
-if(vignette) {\n\
-vec2 position = (gl_FragCoord.xy / texture_resolution.xy) - vec2(0.5, 0.5);	// Determine center point of texture\n\
-// Reposition the center point based on difference between texture and screen resolutions\n\
-position.x = position.x - ( ( (resolution.x - texture_resolution.x) / texture_resolution.x) / 2.0);\n\
-position.y = position.y - ( ( (resolution.y - texture_resolution.y) / texture_resolution.y) / 2.0);\n\
-// Calculate vignette\n\
-float len = length(position);\n\
-float vignetting = smoothstep(RADIUS, RADIUS - SOFTNESS, len);\n\
-// Apply vignette\n\
-pixel.rgb = mix(pixel.rgb, pixel.rgb * vignetting, 1.0);\n\
-}else{\n\
-//The following code doesn't really belong here - it's being used to compare the above changes to the original code (below).\n\
-//vec2 position = (gl_FragCoord.xy / resolution.xy) - vec2(0.5);	// Determine center point of texture\n\
-//float len = length(position);\n\
-//float vignetting = step(RADIUS, len);\n\
-//pixel = vec4(vec3(vignetting), 1.0);\n\
-}\n\
-gl_FragColor = vec4(pixel.rgb, alpha);\n\
-}";
+				var shader_fragment_source=document.getElementById('fragment-shader').text;
 
 				// Compile the shaders
 				var shader_vertex=egl_compile_shader(shader_vertex_source, GL.VERTEX_SHADER);
@@ -874,6 +816,71 @@ gl_FragColor = vec4(pixel.rgb, alpha);\n\
 				
 				// Go!
 				animate();  // This represents the primary loop in main()
+			}
+		</script>
+
+		<script type='x-shader/x-vertex' id='vertex-shader'>
+			attribute vec3 position; //the 3D position of the point
+			attribute vec2 uv; // The x,y coordinates of the texture
+			varying vec2 vUV; // Used to give the pixel data to the fragment shader.  This value will change during render
+			uniform mat4 Pmatrix; // Creating a projection matrix, which represents the viewable area.  This value will remain constant during render.
+			uniform mat4 Vmatrix; // Movement matrix for the view (camera)
+			uniform mat4 Mmatrix; // Movement matrix for the object
+			uniform mat4 Smatrix; // Scaling matrix for the object
+
+			void main(void) { //pre-built function
+				// Order of P,V,M is important!!!
+				gl_Position = Pmatrix * Vmatrix * Mmatrix * Smatrix * vec4(position, 1.); //0. is the z, and 1 is w
+				vUV=uv;
+			}
+		</script>
+
+		<script type='x-shader/x-fragment' id='fragment-shader'>
+			const mediump int COLOR_MODE_NORMAL = 0;
+			const mediump int COLOR_MODE_GRAYSCALE = 1;
+			const mediump int COLOR_MODE_SEPIA = 2;
+			const mediump float RADIUS = 0.7;
+			const mediump float SOFTNESS = 0.45;
+			precision mediump float;
+			varying vec2 vUV; // Get the pixel coordinates from the vertex shader vUV variable.
+			uniform sampler2D sampler; // The texture.
+			uniform int color_mode; // The GLSL color_mode to apply to the texture (if any).
+			uniform bool vignette;
+			uniform vec2 resolution;
+			uniform vec2 texture_resolution;
+			uniform float alpha;
+
+			void main(void) {
+				vec4 pixel = texture2D(sampler, vUV);
+					if(color_mode == COLOR_MODE_GRAYSCALE) {
+					pixel = vec4(vec3(dot(pixel.rgb, vec3(0.299, 0.587, 0.114))), pixel.a); // Grayscale
+				}
+				if(color_mode == COLOR_MODE_SEPIA) {
+					pixel = vec4(vec3(dot(pixel.rgb, vec3(0.299, 0.587, 0.114))), pixel.a);	// Grayscale
+					pixel = vec4(pixel.rgb * vec3(1.2, 1.0, 0.8), pixel.a); // Sepia
+				}
+				if(vignette) {
+					/*
+						Vignette example:
+						https://github.com/mattdesl/lwjgl-basics/wiki/ShaderLesson3
+					*/
+					vec2 position = (gl_FragCoord.xy / texture_resolution.xy) - vec2(0.5, 0.5);	// Determine center point of texture
+					// Reposition the center point based on difference between texture and screen resolutions
+					position.x = position.x - ( ( (resolution.x - texture_resolution.x) / texture_resolution.x) / 2.0);
+					position.y = position.y - ( ( (resolution.y - texture_resolution.y) / texture_resolution.y) / 2.0);
+					// Calculate vignette
+					float len = length(position);
+					float vignetting = smoothstep(RADIUS, RADIUS - SOFTNESS, len);
+					// Apply vignette
+					pixel.rgb = mix(pixel.rgb, pixel.rgb * vignetting, 1.0);
+				}else{
+					//The following code doesn't really belong here - it's being used to compare the above changes to the original code (below).
+					//vec2 position = (gl_FragCoord.xy / resolution.xy) - vec2(0.5);	// Determine center point of texture
+					//float len = length(position);
+					//float vignetting = step(RADIUS, len);
+					//pixel = vec4(vec3(vignetting), 1.0);
+				}
+				gl_FragColor = vec4(pixel.rgb, alpha);
 			}
 		</script>
 	</head>
