@@ -4,6 +4,8 @@
 <div class="photo_section">
 	<div class="sidebar">
 		<div class="buttons">
+			<%= link_to('Favorite', favorite_photo_path(-1), {remote: true, class: 'favorite', style: "display: #{@favorite_button_css};"}) -%>
+			<%= link_to('Reject', reject_photo_path(-1), {remote: true, class: 'reject', style: "display: #{@reject_button_css};"}) -%>
 			<%= link_to('Approve', approve_photo_path(-1), {remote: true, class: 'approve', style: "display: #{@approve_button_css};"}) -%>
 			<%= link_to('Deny', deny_photo_path(-1), {remote: true, class: 'deny', style: "display: #{@deny_button_css};"}) -%>
 		</div>

@@ -69,22 +69,31 @@
 		.buttons {
 			display: inline-block;
 			width: 100%;
-			height: 4em;
+			height: 5.5em;
 
 			a {
 				position: absolute;
-				top: .25em;
-				
-				&.approve {
+
+				&.approve, &.favorite {
 					border-color: #00FF00;
 					background-color: green;
 					left: .25em;
 				}
 
-				&.deny {
+				&.deny, &.reject {
 					border-color: #FFAAAA;
 					background-color: red;
 					left: 7.75em;
+				}
+
+				&.favorite, &.reject {
+					top: .25em;
+					padding-top: 0;
+					padding-bottom: 0;
+				}
+
+				&.approve, &.deny {
+					top: 2em;
 				}
 			}
 		}
@@ -92,7 +101,7 @@
 		.filenames {
 			border: 1px solid orange;
 			padding-top: .5em;
-			height: calc(100% - 8.6em);
+			height: calc(100% - 10em);
 			overflow-y: auto;
 
 			a {
