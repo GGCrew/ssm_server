@@ -1,7 +1,27 @@
 class PhotosController < ApplicationController
 
-  before_action :set_photo, only: [:show, :edit, :update, :destroy, :approve, :deny, :rotate, :queue]
-	before_action :set_control,	only: [:next, :index, :controls, :pending, :approved, :denied, :recent]
+  before_action :set_photo, only: [
+		:show,
+		:edit,
+		:update,
+		:destroy,
+		:approve,
+		:deny,
+		:favorite,
+		:reject,
+		:rotate,
+		:queue
+	]
+
+	before_action :set_control,	only: [
+		:next,
+		:index,
+		:controls,
+		:pending,
+		:approved,
+		:denied,
+		:recent
+	]
 
 
 	#..#
@@ -77,7 +97,6 @@ class PhotosController < ApplicationController
 
 
 	def approve
-		logger.debug('PhotosController.approve')
 		@photo.approve!
     respond_to do |format|
 			format.js { render('update_list') }
@@ -93,6 +112,26 @@ class PhotosController < ApplicationController
 			format.js { render('update_list') }
       format.html { redirect_to(photos_path, notice: 'Photo was successfully denied.') }
       format.json { head :no_content }
+		end
+	end
+
+
+	def favorite
+		@photo.favorite!
+		respond_to do |format|
+			format.js { render('update_list') }
+			format.html { redirect_to(photos_path, notice: 'Photo was successfully favorited') }
+			format.json { head :no_content }
+		end
+	end
+
+
+	def reject
+		@photo.reject!
+		respond_to do |format|
+			format.js { render('update_list') }
+			format.html { redirect_to(photos_path, notice: 'Photo was successfully rejected') }
+			format.json { head :no_content }
 		end
 	end
 
@@ -314,9 +353,8 @@ class PhotosController < ApplicationController
 
 		# Delete processed photo files
 		logger.debug("\tDeleting processed photo files...")
-		`rm -Rf #{'public' + Photo::DISPLAY_FOLDER}`
-		`rm -Rf #{'public' + Photo::THUMBNAIL_FOLDER}`
-		`rm -Rf #{'public' + Photo::PRINT_FOLDER}`
+		`rm -Rf #{'public' + Photo::RESIZED_FOLDER}`
+		`rm -Rf #{'public' + Photo::ROTATED_FOLDER}`
 		logger.debug("\t\tDone!")
 
 		Photo.scan_for_new_photos

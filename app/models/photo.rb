@@ -25,9 +25,12 @@ class Photo < ActiveRecord::Base
 	#..#
 
 
-	scope	:pending,		-> { where(approval_state: 'pending').order(exif_date: :asc).order(updated_at: :asc) }
-	scope :approved,	-> { where(approval_state: 'approved').order(exif_date: :asc).order(updated_at: :asc) }
-	scope :denied,		-> { where(approval_state: 'denied').order(exif_date: :asc).order(updated_at: :asc) }
+	scope	:pending,				-> { where(approval_state: 'pending').order(exif_date: :asc).order(updated_at: :asc) }
+	scope :approved,			-> { where(approval_state: 'approved').order(exif_date: :asc).order(updated_at: :asc) }
+	scope :denied,				-> { where(approval_state: 'denied').order(exif_date: :asc).order(updated_at: :asc) }
+	scope :favorited,			-> { where(favorite: true).order(exif_date: :asc).order(updated_at: :asc) }
+	scope :rejected,			-> { where(reject: true).order(exif_date: :asc).order(updated_at: :asc) }
+	scope :not_rejected,	-> { where(reject: false).order(exif_date: :asc).order(updated_at: :asc) }
 
 
 	#..#
@@ -256,14 +259,34 @@ class Photo < ActiveRecord::Base
 
 
 	def approve!
-		self.approval_state = 'approved'
-		self.save!
+		self.update!(approval_state: 'approved')
 	end
 
 
 	def deny!
-		self.approval_state = 'denied'
-		self.save!
+		self.update!(approval_state: 'denied')
+	end
+
+
+	def favorite!
+		self.update!(
+			favorite: true,
+			reject: false
+		)
+		self.approve!
+
+		# TODO: Copy to Favorite folder
+	end
+
+
+	def reject!
+		self.update!(
+			favorite: true,
+			reject: false
+		)
+		self.deny!
+
+		# TODO: Move to Reject folder
 	end
 
 

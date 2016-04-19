@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151014000001) do
+ActiveRecord::Schema.define(version: 20160418000002) do
 
   create_table "client_photo_queues", force: true do |t|
     t.integer  "client_id"
@@ -65,6 +65,8 @@ ActiveRecord::Schema.define(version: 20151014000001) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.string   "approval_state", default: "pending"
+    t.boolean  "favorite",       default: false
+    t.boolean  "reject",         default: false
     t.string   "md5"
     t.boolean  "special",        default: false
     t.string   "special_folder"
