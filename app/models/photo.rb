@@ -2,6 +2,8 @@ class Photo < ActiveRecord::Base
 
 
 	SOURCE_FOLDER = '/photos/eye-fi/'
+	REJECT_FOLDER = SOURCE_FOLDER + 'rejects/'
+	FAVORITE_FOLDER = SOURCE_FOLDER + 'favorites/'
 	ROTATED_FOLDER = '/photos/rotated/'
 	RESIZED_FOLDER = '/photos/1920x1080/'
 
@@ -45,8 +47,10 @@ class Photo < ActiveRecord::Base
 	def self.scan_for_new_photos(auto_approve = false)
 		path = 'public' + SOURCE_FOLDER
 		processed_files = self.all.map{|photo| path + photo.path}
+		rejected_files = Dir.glob('public' + REJECT_FOLDER + '**/*.{JPG,PNG}', File::FNM_CASEFOLD)
+		favorited_files = Dir.glob('public' + FAVORITE_FOLDER + '**/*.{JPG,PNG}', File::FNM_CASEFOLD)
 		all_files = Dir.glob(path + '**/*.{JPG,PNG}', File::FNM_CASEFOLD)
-		files = all_files - processed_files
+		files = all_files - processed_files - rejected_files - favorited_files
 		files.sort!
 		files.each_with_index do |file, index|
 			#logger.debug("#{index + 1}/#{files.count} - #{file}")
