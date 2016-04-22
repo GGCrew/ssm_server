@@ -279,18 +279,44 @@ class Photo < ActiveRecord::Base
 		)
 		self.approve!
 
-		# TODO: Copy to Favorite folder
+		# Copy to Favorite folder
+		favorite_folder = "public#{Photo::FAVORITE_FOLDER}"
+		source = "public#{Photo::SOURCE_FOLDER}#{path}"
+		destination = "#{favorite_folder}#{favorite_path}"
+
+		Dir.mkdir(favorite_folder) unless Dir.exists?(favorite_folder)
+		save_folder = favorite_folder[0..-2]
+		path_components = favorite_path.split('/')[0..-2]
+		path_components.each_with_index do |path_component, index|
+			save_folder << "/#{path_component}"
+			Dir.mkdir(save_folder) unless Dir.exists?(save_folder)
+		end
+		
+		`cp #{source} #{destination}`
 	end
 
 
 	def reject!
 		self.update!(
-			favorite: true,
-			reject: false
+			favorite: false,
+			reject: true
 		)
 		self.deny!
 
-		# TODO: Move to Reject folder
+		# Move to Reject folder
+		reject_folder = "public#{Photo::REJECT_FOLDER}"
+		source = "public#{Photo::SOURCE_FOLDER}#{path}"
+		destination = "#{reject_folder}#{reject_path}"
+
+		Dir.mkdir(reject_folder) unless Dir.exists?(reject_folder)
+		save_folder = reject_folder[0..-2]
+		path_components = reject_path.split('/')[0..-2]
+		path_components.each_with_index do |path_component, index|
+			save_folder << "/#{path_component}"
+			Dir.mkdir(save_folder) unless Dir.exists?(save_folder)
+		end
+		
+		`mv #{source} #{destination}`
 	end
 
 
@@ -357,6 +383,18 @@ class Photo < ActiveRecord::Base
 		else
 			return "#{camera_folder}/#{date_folder}/#{self.filename}"
 		end
+	end
+
+
+	def reject_path
+		#return "#{REJECT_FOLDER}#{date_folder}/#{camera_folder}/#{self.filename}"
+		return "#{date_folder}/#{camera_folder}/#{self.filename}"
+	end
+
+
+	def favorite_path
+		#return "#{FAVORITE_FOLDER}#{date_folder}/#{camera_folder}/#{self.filename}"
+		return "#{date_folder}/#{camera_folder}/#{self.filename}"
 	end
 
 
