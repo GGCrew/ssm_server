@@ -2,6 +2,8 @@ class Photo < ActiveRecord::Base
 
 
 	SOURCE_FOLDER = '/photos/eye-fi/'
+	REJECT_FOLDER = SOURCE_FOLDER + 'rejects/'
+	FAVORITE_FOLDER = SOURCE_FOLDER + 'favorites/'
 	ROTATED_FOLDER = '/photos/rotated/'
 	RESIZED_FOLDER = '/photos/1920x1080/'
 
@@ -25,9 +27,12 @@ class Photo < ActiveRecord::Base
 	#..#
 
 
-	scope	:pending,		-> { where(approval_state: 'pending').order(exif_date: :asc).order(updated_at: :asc) }
-	scope :approved,	-> { where(approval_state: 'approved').order(exif_date: :asc).order(updated_at: :asc) }
-	scope :denied,		-> { where(approval_state: 'denied').order(exif_date: :asc).order(updated_at: :asc) }
+	scope	:pending,				-> { where(approval_state: 'pending').order(exif_date: :asc).order(updated_at: :asc) }
+	scope :approved,			-> { where(approval_state: 'approved').order(exif_date: :asc).order(updated_at: :asc) }
+	scope :denied,				-> { where(approval_state: 'denied').order(exif_date: :asc).order(updated_at: :asc) }
+	scope :favorited,			-> { where(favorite: true).order(exif_date: :asc).order(updated_at: :asc) }
+	scope :rejected,			-> { where(reject: true).order(exif_date: :asc).order(updated_at: :asc) }
+	scope :not_rejected,	-> { where(reject: false).order(exif_date: :asc).order(updated_at: :asc) }
 
 
 	#..#
@@ -42,8 +47,10 @@ class Photo < ActiveRecord::Base
 	def self.scan_for_new_photos(auto_approve = false)
 		path = 'public' + SOURCE_FOLDER
 		processed_files = self.all.map{|photo| path + photo.path}
+		rejected_files = Dir.glob('public' + REJECT_FOLDER + '**/*.{JPG,PNG}', File::FNM_CASEFOLD)
+		favorited_files = Dir.glob('public' + FAVORITE_FOLDER + '**/*.{JPG,PNG}', File::FNM_CASEFOLD)
 		all_files = Dir.glob(path + '**/*.{JPG,PNG}', File::FNM_CASEFOLD)
-		files = all_files - processed_files
+		files = all_files - processed_files - rejected_files - favorited_files
 		files.sort!
 		files.each_with_index do |file, index|
 			#logger.debug("#{index + 1}/#{files.count} - #{file}")
@@ -256,14 +263,60 @@ class Photo < ActiveRecord::Base
 
 
 	def approve!
-		self.approval_state = 'approved'
-		self.save!
+		self.update!(approval_state: 'approved')
 	end
 
 
 	def deny!
-		self.approval_state = 'denied'
-		self.save!
+		self.update!(approval_state: 'denied')
+	end
+
+
+	def favorite!
+		self.update!(
+			favorite: true,
+			reject: false
+		)
+		self.approve!
+
+		# Copy to Favorite folder
+		favorite_folder = "public#{Photo::FAVORITE_FOLDER}"
+		source = "public#{Photo::SOURCE_FOLDER}#{path}"
+		destination = "#{favorite_folder}#{favorite_path}"
+
+		Dir.mkdir(favorite_folder) unless Dir.exists?(favorite_folder)
+		save_folder = favorite_folder[0..-2]
+		path_components = favorite_path.split('/')[0..-2]
+		path_components.each_with_index do |path_component, index|
+			save_folder << "/#{path_component}"
+			Dir.mkdir(save_folder) unless Dir.exists?(save_folder)
+		end
+		
+		`cp #{source} #{destination}`
+	end
+
+
+	def reject!
+		self.update!(
+			favorite: false,
+			reject: true
+		)
+		self.deny!
+
+		# Move to Reject folder
+		reject_folder = "public#{Photo::REJECT_FOLDER}"
+		source = "public#{Photo::SOURCE_FOLDER}#{path}"
+		destination = "#{reject_folder}#{reject_path}"
+
+		Dir.mkdir(reject_folder) unless Dir.exists?(reject_folder)
+		save_folder = reject_folder[0..-2]
+		path_components = reject_path.split('/')[0..-2]
+		path_components.each_with_index do |path_component, index|
+			save_folder << "/#{path_component}"
+			Dir.mkdir(save_folder) unless Dir.exists?(save_folder)
+		end
+		
+		`mv #{source} #{destination}`
 	end
 
 
@@ -330,6 +383,18 @@ class Photo < ActiveRecord::Base
 		else
 			return "#{camera_folder}/#{date_folder}/#{self.filename}"
 		end
+	end
+
+
+	def reject_path
+		#return "#{REJECT_FOLDER}#{date_folder}/#{camera_folder}/#{self.filename}"
+		return "#{date_folder}/#{camera_folder}/#{self.filename}"
+	end
+
+
+	def favorite_path
+		#return "#{FAVORITE_FOLDER}#{date_folder}/#{camera_folder}/#{self.filename}"
+		return "#{date_folder}/#{camera_folder}/#{self.filename}"
 	end
 
 

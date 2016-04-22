@@ -13,7 +13,9 @@ module PhotosHelper
 	def set_per_action_css
 		# set defaults
 		@approve_button_css = ''
+		@favorite_button_css = ''
 		@deny_button_css = ''
+		@reject_button_css = ''
 		@scan_button_css = 'none'
 		@preview_img_css = ''
 		@preview_caption_css = ''
@@ -31,7 +33,9 @@ module PhotosHelper
 
 			when 'controls', 'index'
 				@approve_button_css = 'none'
+				@favorite_button_css = 'none'
 				@deny_button_css = 'none'
+				@reject_button_css = 'none'
 				@preview_img_css = 'none'
 				@preview_caption_css = 'none'
 				@preview_controls_css = ''

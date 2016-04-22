@@ -1,6 +1,8 @@
                  Prefix Verb   URI Pattern                        Controller#Action
           approve_photo GET    /photos/:id/approve(.:format)      photos#approve
              deny_photo GET    /photos/:id/deny(.:format)         photos#deny
+         favorite_photo GET    /photos/:id/favorite(.:format)     photos#favorite
+           reject_photo GET    /photos/:id/reject(.:format)       photos#reject
            rotate_photo GET    /photos/:id/rotate(.:format)       photos#rotate
             queue_photo GET    /photos/:id/queue(.:format)        photos#queue
             next_photos GET    /photos/next(.:format)             photos#next

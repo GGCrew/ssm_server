@@ -1,8 +1,8 @@
 function show_photo(list_item_element, id, short_path, full_path, exif_caption) {
 	var photo_section = $(list_item_element).parents('.photo_section');
 
-	var button_approve = $(photo_section).find('.sidebar .approve');
-	var button_deny = $(photo_section).find('.sidebar .deny');
+	//var button_approve = $(photo_section).find('.sidebar .approve');
+	//var button_deny = $(photo_section).find('.sidebar .deny');
 
 	var image = $(photo_section).find('.preview img');
 	var caption = $(photo_section).find('.preview .caption');
@@ -41,6 +41,7 @@ function update_buttons(photo_section, id) {
 	buttons = $(photo_section).find('.sidebar .buttons').children('a');
 	buttons.each( function() {
 		var url_components = $(this).attr('href').match(/(.*\/photos\/).*(\/.*)/);
+		console.log(url_components);
 		if(url_components !== null) {
 			$(this).attr('href', url_components[1] + id + url_components[2]);
 		}
@@ -72,35 +73,40 @@ function update_photo_counts(pending_count, approved_count, denied_count, recent
 }
 
 
+function highlight_related_filenames(related_object, color) {
+	var filenames = $(related_object).parent().siblings('.filenames');
+	$(filenames).children('a').each( function() {
+		//console.log('background-color: ' + $(this).css('background-color'));
+		if(
+			$(this).css('background-color') != 'transparent' // Firefox
+			&&
+			$(this).css('background-color') != 'rgba(0, 0, 0, 0)' // Chrome
+		) {
+			$(this).css('background-color', color);
+		}
+	})
+}
+
+
 $(document).ready(function() {
 	$('.approve')
 		.on('ajax:beforeSend', function(evt, xhr, settings) {
-			var filenames = $(this).parent().siblings('.filenames');
-			$(filenames).children('a').each( function() {
-				//console.log('background-color: ' + $(this).css('background-color'));
-				if(
-					$(this).css('background-color') != 'transparent' // Firefox
-					&&
-					$(this).css('background-color') != 'rgba(0, 0, 0, 0)' // Chrome
-				) {
-					$(this).css('background-color', 'darkgreen');
-				}
-			})
+			highlight_related_filenames(this, 'darkgreen');
+		});
+
+	$('.favorite')
+		.on('ajax:beforeSend', function(evt, xhr, settings) {
+			highlight_related_filenames(this, 'darkgreen');
 		});
 
 	$('.deny')
 		.on('ajax:beforeSend', function(evt, xhr, settings) {
-			var filenames = $(this).parent().siblings('.filenames');
-			$(filenames).children('a').each( function() { 
-				//console.log('background-color: ' + $(this).css('background-color'));
-				if(
-					$(this).css('background-color') != 'transparent' // Firefox
-					&&
-					$(this).css('background-color') != 'rgba(0, 0, 0, 0)' // Chrome
-				) {
-					$(this).css('background-color', 'darkred');
-				}
-			})
+			highlight_related_filenames(this, 'darkred');
+		});
+
+	$('.reject')
+		.on('ajax:beforeSend', function(evt, xhr, settings) {
+			highlight_related_filenames(this, 'darkred');
 		});
 
 	$('.scan')

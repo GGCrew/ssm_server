@@ -3,6 +3,8 @@ Rails.application.routes.draw do
 		member do
 			get 'approve'
 			get 'deny'
+			get 'favorite'
+			get 'reject'
 			get 'rotate'
 			get 'queue'
 		end
