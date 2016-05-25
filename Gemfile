@@ -42,4 +42,4 @@ gem 'spring',        group: :development
 #gem 'rmagick'
 
 # Use FreeImage
-gem 'free-image'
+gem 'free-image', '~> 0.7.1'
