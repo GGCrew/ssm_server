@@ -20,8 +20,8 @@ Photo.scan_for_new_photos
 
 
 # Check for (and create) benchmark image folder
-save_folder = "public#{Photo::SOURCE_FOLDER}"
-path_components = benchmark_image_folder.split('/')
+save_folder = "public"
+path_components = "#{Photo::SOURCE_FOLDER}#{benchmark_image_folder}".split('/')
 path_components.each_with_index do |path_component, index|
 	save_folder << "/#{path_component}"
 	Dir.mkdir(save_folder) unless Dir.exists?(save_folder)
