@@ -4,6 +4,7 @@ class Photo < ActiveRecord::Base
 	SOURCE_FOLDER = '/photos/eye-fi/'
 	REJECT_FOLDER = SOURCE_FOLDER + 'rejects/'
 	FAVORITE_FOLDER = SOURCE_FOLDER + 'favorites/'
+	COLLECTION_FOLDER = SOURCE_FOLDER + 'collection/'
 	ROTATED_FOLDER = '/photos/rotated/'
 	RESIZED_FOLDER = '/photos/1920x1080/'
 
@@ -39,6 +40,7 @@ class Photo < ActiveRecord::Base
 
 
 	after_create	:create_rotated_and_scaled_copy
+	after_create	:collect_for_copying
 
 
 	#..#
@@ -49,8 +51,9 @@ class Photo < ActiveRecord::Base
 		processed_files = self.all.map{|photo| path + photo.path}
 		rejected_files = Dir.glob('public' + REJECT_FOLDER + '**/*.{JPG,PNG}', File::FNM_CASEFOLD)
 		favorited_files = Dir.glob('public' + FAVORITE_FOLDER + '**/*.{JPG,PNG}', File::FNM_CASEFOLD)
+		collected_files = Dir.glob('public' + COLLECTION_FOLDER + '**/*.{JPG,PNG}', File::FNM_CASEFOLD)
 		all_files = Dir.glob(path + '**/*.{JPG,PNG}', File::FNM_CASEFOLD)
-		files = all_files - processed_files - rejected_files - favorited_files
+		files = all_files - processed_files - rejected_files - favorited_files - collected_files
 		files.sort!
 		files.each_with_index do |file, index|
 			#logger.debug("#{index + 1}/#{files.count} - #{file}")
@@ -74,7 +77,7 @@ class Photo < ActiveRecord::Base
 		path = source_path.dup
 
 		# Strip superfluous folders from path
-		path.gsub!('public' + SOURCE_FOLDER, '')
+		path.gsub!(/public#{SOURCE_FOLDER}/i, '')
 
 		path_components = path.split('/')
 
@@ -398,6 +401,21 @@ class Photo < ActiveRecord::Base
 	end
 
 
+	def collection_path
+		return "#{self.exif_date.to_formatted_s(:number)}_#{self.camera_id.to_s.rjust(2, '0')}_#{self.basename}_#{self.md5}#{self.extension}"
+	end
+
+
+	def basename
+		return self.filename.chomp("#{self.extension}")
+	end
+
+
+	def extension
+		return File.extname(self.filename)
+	end
+
+
 	def camera_folder
 		#if self.special
 		#	return 'special'
@@ -528,6 +546,16 @@ class Photo < ActiveRecord::Base
 			end
 		end
 		logger.info("\tDone")
+	end
+
+
+	def collect_for_copying
+		source_folder = 'public' + SOURCE_FOLDER
+		collection_folder = 'public' + COLLECTION_FOLDER
+		source = source_folder + self.path
+		destination = collection_folder + self.collection_path
+
+		`cp #{source} #{destination}`
 	end
 
 
