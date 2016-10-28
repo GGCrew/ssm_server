@@ -355,6 +355,9 @@ class PhotosController < ApplicationController
 		logger.debug("\tDeleting processed photo files...")
 		`rm -Rf #{'public' + Photo::RESIZED_FOLDER}`
 		`rm -Rf #{'public' + Photo::ROTATED_FOLDER}`
+		#`rm -Rf #{'public' + Photo::REJECT_FOLDER}`
+		#`rm -Rf #{'public' + Photo::FAVOTITE_FOLDER}`
+		#`rm -Rf #{'public' + Photo::COLLECTION_FOLDER}`
 		logger.debug("\t\tDone!")
 
 		Photo.scan_for_new_photos

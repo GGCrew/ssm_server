@@ -42,6 +42,8 @@ class Photo < ActiveRecord::Base
 	after_create	:create_rotated_and_scaled_copy
 	after_create	:collect_for_copying
 
+	before_destroy	:delete_copies
+
 
 	#..#
 
@@ -555,7 +557,16 @@ class Photo < ActiveRecord::Base
 		source = source_folder + self.path
 		destination = collection_folder + self.collection_path
 
+		Dir.mkdir(collection_folder) unless Dir.exists?(collection_folder)
 		`cp #{source} #{destination}`
+	end
+
+
+	def delete_copies
+		collection_folder = 'public' + COLLECTION_FOLDER
+		collection_copy = collection_folder + self.collection_path
+		
+		`rm #{collection_copy}` if File.exists?(collection_copy)
 	end
 
 
