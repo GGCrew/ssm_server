@@ -565,8 +565,9 @@ class Photo < ActiveRecord::Base
 	def delete_copies
 		collection_folder = 'public' + COLLECTION_FOLDER
 		collection_copy = collection_folder + self.collection_path
-		
 		`rm #{collection_copy}` if File.exists?(collection_copy)
+
+		# TODO: Delete favorite copy
 	end
 
 
