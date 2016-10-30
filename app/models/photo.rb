@@ -264,6 +264,19 @@ class Photo < ActiveRecord::Base
 	end
 
 
+	def self.collect_for_copying
+		photos = Photo.not_rejected
+		photos_count = photos.count
+
+		photos.each_with_index do |photo, index|
+			logger.info "Collecting #{index + 1} / #{photos_count}"
+			photo.collect_for_copying
+		end
+
+		return photos_count
+	end
+
+
 	#..#
 
 
@@ -558,7 +571,7 @@ class Photo < ActiveRecord::Base
 		destination = collection_folder + self.collection_path
 
 		Dir.mkdir(collection_folder) unless Dir.exists?(collection_folder)
-		`cp #{source} #{destination}`
+		`cp --update #{source} #{destination}`
 	end
 
 
