@@ -417,7 +417,7 @@ class Photo < ActiveRecord::Base
 
 
 	def collection_path
-		return "#{self.exif_date.to_formatted_s(:number)}_#{self.camera_id.to_s.rjust(2, '0')}_#{self.basename}_#{self.md5}#{self.extension}"
+		return "#{self.exif_date.to_formatted_s(:number)}_#{self.camera_id.to_s.rjust(2, '0')}_#{self.basename}_#{self.md5}#{self.extension}".gsub(/[^a-zA-Z0-9_\.\-]/, '_')
 	end
 
 
@@ -571,7 +571,7 @@ class Photo < ActiveRecord::Base
 		destination = collection_folder + self.collection_path
 
 		Dir.mkdir(collection_folder) unless Dir.exists?(collection_folder)
-		`cp --update #{source} #{destination}`
+		`cp --update "#{source}" "#{destination}"`
 	end
 
 
