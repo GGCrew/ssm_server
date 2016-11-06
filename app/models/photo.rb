@@ -14,6 +14,8 @@ class Photo < ActiveRecord::Base
 
 	DEFAULT_DATE = DateTime.parse('1970-01-01 00:00:00')
 
+	CAMERA_ID_RANGE = 1..98
+
 
 	#..#
 
@@ -34,13 +36,16 @@ class Photo < ActiveRecord::Base
 	scope :favorited,			-> { where(favorite: true).order(exif_date: :asc).order(updated_at: :asc) }
 	scope :rejected,			-> { where(reject: true).order(exif_date: :asc).order(updated_at: :asc) }
 	scope :not_rejected,	-> { where(reject: false).order(exif_date: :asc).order(updated_at: :asc) }
+	scope	:from_cameras,	-> { where.not(camera_id: [0, 99]).order(exif_date: :asc).order(updated_at: :asc) }
+	scope	:from_stock,		-> { where(camera_id: 0).order(exif_date: :asc).order(updated_at: :asc) }
+	scope	:from_custom,		-> { where(camera_id: 99).order(exif_date: :asc).order(updated_at: :asc) }
 
 
 	#..#
 
 
 	after_create	:create_rotated_and_scaled_copy
-	after_create	:collect_for_copying
+	#after_create	:collect_for_copying
 
 	before_destroy	:delete_copies
 
@@ -264,6 +269,7 @@ class Photo < ActiveRecord::Base
 	end
 
 
+=begin
 	def self.collect_for_copying
 		photos = Photo.not_rejected
 		photos_count = photos.count
@@ -275,6 +281,7 @@ class Photo < ActiveRecord::Base
 
 		return photos_count
 	end
+=end
 
 
 	#..#
@@ -446,6 +453,11 @@ class Photo < ActiveRecord::Base
 		#else
 			return self.date.strftime("%-m-%-d-%Y")
 		#end
+	end
+
+
+	def from_camera?
+		return self.camera_id.in?(CAMERA_ID_RANGE)
 	end
 
 

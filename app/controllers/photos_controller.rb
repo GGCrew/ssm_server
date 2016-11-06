@@ -24,6 +24,13 @@ class PhotosController < ApplicationController
 	]
 
 
+	after_action :collect_for_copying, only: [
+		:approve,
+		:deny,
+		:favorite
+	], if: -> { Control.last.collect_for_copying && @photo.from_camera?}
+
+
 	#..#
 
 
@@ -422,5 +429,9 @@ class PhotosController < ApplicationController
       params[:photo]
     end
 
+
+		def collect_for_copying
+			@photo.collect_for_copying
+		end
 
 end
