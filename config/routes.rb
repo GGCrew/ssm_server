@@ -19,6 +19,8 @@ Rails.application.routes.draw do
 			get 'scan'
 			get 'reset_and_rescan'
 			get 'auto_approve'
+			get 'copy_collected'
+			post 'copy_collected'
 		end
 	end
 

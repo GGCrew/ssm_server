@@ -68,6 +68,21 @@
 			</td>
 		</tr>
 		<tr>
+			<th>
+				Copy Options
+			</th>
+			<td>
+				<%= form_for(@control, remote: true) do |form| -%><%= form.check_box(:collect_for_copying, class: '', onclick: '$(this).submit();') -%><%= form.label(:collect_for_copying, 'Prep for copy'	) -%><%- end -%>
+			</td>
+			<td>
+				<%= link_to(
+					'Copy to USB',
+					copy_collected_photos_path,
+					{method: :post,	remote: true, class: ''}
+				) -%>
+			</td>
+		</tr>
+		<tr>
 			<th></th>
 			<td colspan="5">
 				<%#= link_to('Reset Database and Rescan Photo Folders', reset_and_rescan_photos_path) -%>

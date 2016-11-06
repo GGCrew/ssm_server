@@ -14,6 +14,8 @@
             scan_photos GET    /photos/scan(.:format)             photos#scan
 reset_and_rescan_photos GET    /photos/reset_and_rescan(.:format) photos#reset_and_rescan
     auto_approve_photos GET    /photos/auto_approve(.:format)     photos#auto_approve
+  copy_collected_photos GET    /photos/copy_collected(.:format)   photos#copy_collected
+                        POST   /photos/copy_collected(.:format)   photos#copy_collected
                  photos GET    /photos(.:format)                  photos#index
                         POST   /photos(.:format)                  photos#create
               new_photo GET    /photos/new(.:format)              photos#new

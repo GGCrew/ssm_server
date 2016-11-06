@@ -378,6 +378,32 @@ class PhotosController < ApplicationController
 	end
 
 
+	def copy_collected
+		camera_photos = Photo.from_cameras.not_rejected
+		camera_photos_count = camera_photos.count
+		camera_photos.each_with_index do |photo, index|
+			logger.info("Photos#copy_collected - collect_for_copying #{index+1}/#{camera_photos_count}")
+			photo.collect_for_copying
+		end
+
+		# TODO: Scan for drives (preferably USB) with name "SnapShow"
+
+		collected_photos = Dir.glob('public' + Photo::COLLECTION_FOLDER + '**/*.{JPG,PNG}', File::FNM_CASEFOLD)
+		collected_photos.sort!
+		prefix = 'test'
+		collected_photos.each_with_index do |photo, index|
+			filename = "#{prefix} #{index.to_s.rjust(4, '0')}#{File.extname(photo)}".gsub(/[^a-zA-Z0-9_\.\-]/, '_')
+			logger.info("Photos#copy_collected - copying #{filename} #{index+1}/#{camera_photos_count}")
+		end
+
+		respond_to do |format|
+			format.js { render( true ) }
+			format.html {redirect_to(controls_photos_path)}
+			format.json {}
+		end
+	end
+
+
 	def queue
 		# Assuming queue for all clients because related client-specific stuffs not implemented yet
 		for client_id in Client.select(:id).map(&:id)
