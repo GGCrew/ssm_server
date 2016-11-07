@@ -379,6 +379,8 @@ class PhotosController < ApplicationController
 
 
 	def copy_collected
+		os = get_os
+
 		camera_photos = Photo.from_cameras.not_rejected
 		camera_photos_count = camera_photos.count
 		camera_photos.each_with_index do |photo, index|
@@ -387,13 +389,38 @@ class PhotosController < ApplicationController
 		end
 
 		# TODO: Scan for drives (preferably USB) with name "SnapShow"
+		ssm_volumes = []
+		case os
+			when 'Linux'
+				# Linux
+				logger.info("Photo#copy_collected - Linux OS detected.")
+				volumes = `df -h`
+				volumes = volumes.split("\n")
+				volumes.each do |volume|
+					regex_volume = volume.match(/\s(\S*\/SnapShow\d*)$/i)
+					ssm_volumes << regex_volume[1] if regex_volume
+				end
 
-		collected_photos = Dir.glob('public' + Photo::COLLECTION_FOLDER + '**/*.{JPG,PNG}', File::FNM_CASEFOLD)
-		collected_photos.sort!
-		prefix = 'test'
-		collected_photos.each_with_index do |photo, index|
-			filename = "#{prefix} #{index.to_s.rjust(4, '0')}#{File.extname(photo)}".gsub(/[^a-zA-Z0-9_\.\-]/, '_')
-			logger.info("Photos#copy_collected - copying #{filename} #{index+1}/#{camera_photos_count}")
+			# TODO: when 'Windows'
+
+			else
+				logger.info("Photo#copy_collected - UNKNOWN OS!!!")
+		end
+
+		unless ssm_volumes.empty?
+			collected_photos = Dir.glob('public' + Photo::COLLECTION_FOLDER + '**/*.{JPG,PNG}', File::FNM_CASEFOLD)
+			collected_photos.sort!
+			#prefix = 'test'
+			collected_photos.each_with_index do |collected_photo, index|
+				ssm_volumes.each do |ssm_volume|
+					#filename = "#{prefix} #{index.to_s.rjust(4, '0')}#{File.extname(photo)}".gsub(/[^a-zA-Z0-9_\.\-]/, '_')
+					destination = "#{ssm_volume}/#{photo.collection_path}"
+					logger.info("Photos#copy_collected - copying #{filename} #{index+1}/#{camera_photos_count}")
+
+					FileUtils.cp collected_photo, filename, verbose: true
+					# TODO: replace FileUtils.cp with OS-specific calls for increased control over the copy processed
+				end
+			end
 		end
 
 		respond_to do |format|

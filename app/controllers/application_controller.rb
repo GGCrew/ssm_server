@@ -9,4 +9,15 @@ class ApplicationController < ActionController::Base
 		@control = Control.last
 	end
 
+
+	def get_os
+		os = nil
+
+		case RUBY_PLATFORM
+			when /linux$/i
+				os = 'Linux'
+		end
+
+		return os
+	end
 end
