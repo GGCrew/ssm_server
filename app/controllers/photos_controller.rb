@@ -379,8 +379,6 @@ class PhotosController < ApplicationController
 
 
 	def copy_collected
-		os = get_os
-
 		camera_photos = Photo.from_cameras.not_rejected
 		camera_photos_count = camera_photos.count
 		camera_photos.each_with_index do |photo, index|
@@ -388,43 +386,49 @@ class PhotosController < ApplicationController
 			photo.collect_for_copying
 		end
 
-		# TODO: Scan for drives (preferably USB) with name "SnapShow"
-		ssm_volumes = []
-		case os
-			when 'Linux'
-				# Linux
-				logger.info("Photo#copy_collected - Linux OS detected.")
-				volumes = `df -h`
-				volumes = volumes.split("\n")
-				volumes.each do |volume|
-					regex_volume = volume.match(/\s(\S*\/SnapShow\d*)$/i)
-					ssm_volumes << regex_volume[1] if regex_volume
-				end
+		ssm_volumes = get_ssm_volumes
 
-			# TODO: when 'Windows'
+		collected_photos = Dir.glob('public' + Photo::COLLECTION_FOLDER + '**/*.{JPG,PNG}', File::FNM_CASEFOLD)
+		collected_photos.sort!
+		collected_photos.each_with_index do |collected_photo, index|
+			ssm_volumes.each do |ssm_volume|
+				destination = "#{ssm_volume}/#{File.basename(collected_photo)}"
+				logger.info("Photos#copy_collected - copying #{index+1}/#{camera_photos_count} - #{destination} ")
 
-			else
-				logger.info("Photo#copy_collected - UNKNOWN OS!!!")
-		end
-
-		unless ssm_volumes.empty?
-			collected_photos = Dir.glob('public' + Photo::COLLECTION_FOLDER + '**/*.{JPG,PNG}', File::FNM_CASEFOLD)
-			collected_photos.sort!
-			#prefix = 'test'
-			collected_photos.each_with_index do |collected_photo, index|
-				ssm_volumes.each do |ssm_volume|
-					#filename = "#{prefix} #{index.to_s.rjust(4, '0')}#{File.extname(photo)}".gsub(/[^a-zA-Z0-9_\.\-]/, '_')
-					destination = "#{ssm_volume}/#{photo.collection_path}"
-					logger.info("Photos#copy_collected - copying #{filename} #{index+1}/#{camera_photos_count}")
-
-					FileUtils.cp collected_photo, filename, verbose: true
-					# TODO: replace FileUtils.cp with OS-specific calls for increased control over the copy processed
-				end
+				FileUtils.cp collected_photo, destination, verbose: false
+				# TODO: replace FileUtils.cp with OS-specific calls for increased control over the copy processed
 			end
 		end
 
 		respond_to do |format|
-			format.js { render( true ) }
+			format.js { render( json: nil, status: :ok ) }
+			format.html {redirect_to(controls_photos_path)}
+			format.json {}
+		end
+	end
+
+
+	def rename_usb
+		prefix = 'test'
+		ssm_volumes = get_ssm_volumes
+		ssm_volumes_count = ssm_volumes.count
+		ssm_volumes.each_with_index do |ssm_volume, ssm_volume_index|
+			filenames = Dir.glob(ssm_volume + '/*.{JPG,PNG}', File::FNM_CASEFOLD)
+			filenames_count = filenames.count
+			filenames.sort!
+			logger.debug(filenames)
+			filenames.each_with_index do |filename, filename_index|
+				new_filename = "#{prefix} #{(filename_index + 1).to_s.rjust(4, '0')}#{File.extname(filename)}".gsub(/[^a-zA-Z0-9_\.\-]/, '_')
+				new_filename = "#{ssm_volume}/#{new_filename}"
+
+				logger.info("Photos#rename_usb - renaming #{filename_index+1}/#{filenames_count}")
+				logger.debug("#{filename} --> #{new_filename}")
+				FileUtils.mv(filename, new_filename, verbose: true) unless ((filename == new_filename) || (filenames.include?(new_filename)))
+			end
+		end
+
+		respond_to do |format|
+			format.js { render( json: nil, status: :ok ) }
 			format.html {redirect_to(controls_photos_path)}
 			format.json {}
 		end

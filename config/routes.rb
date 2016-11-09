@@ -21,6 +21,8 @@ Rails.application.routes.draw do
 			get 'auto_approve'
 			get 'copy_collected'
 			post 'copy_collected'
+			get 'rename_usb'
+			post 'rename_usb'
 		end
 	end
 
