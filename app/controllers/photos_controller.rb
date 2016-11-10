@@ -389,12 +389,12 @@ class PhotosController < ApplicationController
 	end
 
 
-	def copy_collected
+	def copy_collected_to_usb
 		camera_photos = Photo.from_cameras.not_rejected
 		camera_photos_count = camera_photos.count
 		pids = []
 		camera_photos.each_with_index do |photo, index|
-			logger.info("Photos#copy_collected - collect_for_copying #{index+1}/#{camera_photos_count}")
+			logger.info("Photos#copy_collected_to_usb - collect_for_copying #{index+1}/#{camera_photos_count}")
 			pids << photo.collect_for_copying(false)
 			
 			# Avoid running out of handles.  Hit limit of 256 on Win10 during testing.
@@ -419,18 +419,37 @@ class PhotosController < ApplicationController
 		end
 
 		ssm_volumes = get_ssm_volumes
+		ssm_volume_count = ssm_volumes.count
 
-		collected_photos = Dir.glob('public' + Photo::COLLECTION_FOLDER + '**/*.{JPG,PNG}', File::FNM_CASEFOLD)
-		collected_photos.sort!
-		collected_photos.each_with_index do |collected_photo, index|
-			ssm_volumes.each do |ssm_volume|
-				#destination = "#{ssm_volume}/#{File.basename(collected_photo)}"
-				destination = "#{ssm_volume}/"
-				logger.info("Photos#copy_collected - copying #{index+1}/#{camera_photos_count} - #{destination} ")
+		case get_os
+			when 'Linux'
+				collected_photos = Dir.glob('public' + Photo::COLLECTION_FOLDER + '**/*.{JPG,PNG}', File::FNM_CASEFOLD)
+				collected_photos.sort!
+				collected_photos.each_with_index do |collected_photo, index|
+					ssm_volumes.each do |ssm_volume|
+						#destination = "#{ssm_volume}/#{File.basename(collected_photo)}"
+						destination = "#{ssm_volume}/"
+						logger.info("Photos#copy_collected_to_usb - copying #{index+1}/#{camera_photos_count} - #{destination} ")
 
-				FileUtils.cp collected_photo, destination, verbose: false
-				# TODO: replace FileUtils.cp with OS-specific calls for increased control over the copy processed
-			end
+						FileUtils.cp collected_photo, destination, verbose: false
+						# TODO: replace FileUtils.cp with OS-specific calls for increased control over the copy process
+					end
+				end
+
+			when 'Windows'
+				source = Rails.root.join('public' + Photo::COLLECTION_FOLDER).to_path
+				ssm_volumes.each_with_index do |ssm_volume, ssm_volume_index|
+					logger.info("#{ssm_volume_index + 1}/#{ssm_volume_count} - Copying from #{source} to #{ssm_volume}")
+					#`robocopy "#{source}" "#{ssm_volume}" /R:5 /W:15 /MT:8 /XA:SH /Z`
+					command = "robocopy \"#{source}\" \"#{ssm_volume}\" /R:5 /W:15 /MT:8 /XA:SH /Z"
+					#`#{command}`
+					pid = Process.spawn(command)
+					Process.detach(pid)
+				end
+
+			else
+				logger.info("Photos#copy_collected_to_usb - Unexpected OS!")
+				
 		end
 
 		respond_to do |format|
