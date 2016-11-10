@@ -135,6 +135,10 @@ class Photo < ActiveRecord::Base
 			;
 		'
 
+		# ISNULL() is a MySQL function and does not exist in SQLite -- use IFNULL(<<field>>, NULL) instead
+		# Good examples here: http://www.techonthenet.com/sqlite/functions/ifnull.php
+		sql.gsub!(/ISNULL\((\w*\.\w*)\)/, 'IFNULL(\1, NULL)') if ActiveRecord::Base.configurations[Rails.env]['adapter'] == 'sqlite3'
+
 		duplicates = ActiveRecord::Base.connection.execute(sql)
 		for duplicate in duplicates
 			if self.exists?(duplicate[0])
@@ -309,6 +313,7 @@ class Photo < ActiveRecord::Base
 		source = "public#{Photo::SOURCE_FOLDER}#{path}"
 		destination = "#{favorite_folder}#{favorite_path}"
 
+		#TODO: Make a chkdir/mkdir method
 		Dir.mkdir(favorite_folder) unless Dir.exists?(favorite_folder)
 		save_folder = favorite_folder[0..-2]
 		path_components = favorite_path.split('/')[0..-2]
@@ -316,8 +321,8 @@ class Photo < ActiveRecord::Base
 			save_folder << "/#{path_component}"
 			Dir.mkdir(save_folder) unless Dir.exists?(save_folder)
 		end
-		
-		`cp #{source} #{destination}`
+
+		FileUtils.cp source, destination
 	end
 
 
@@ -333,6 +338,7 @@ class Photo < ActiveRecord::Base
 		source = "public#{Photo::SOURCE_FOLDER}#{path}"
 		destination = "#{reject_folder}#{reject_path}"
 
+		#TODO: Make a chkdir/mkdir method
 		Dir.mkdir(reject_folder) unless Dir.exists?(reject_folder)
 		save_folder = reject_folder[0..-2]
 		path_components = reject_path.split('/')[0..-2]
@@ -340,8 +346,8 @@ class Photo < ActiveRecord::Base
 			save_folder << "/#{path_component}"
 			Dir.mkdir(save_folder) unless Dir.exists?(save_folder)
 		end
-		
-		`mv #{source} #{destination}`
+
+		FileUtils.mv source, destination
 	end
 
 
@@ -412,12 +418,14 @@ class Photo < ActiveRecord::Base
 
 
 	def reject_path
+		#TODO: Why is this commented out?
 		#return "#{REJECT_FOLDER}#{date_folder}/#{camera_folder}/#{self.filename}"
 		return "#{date_folder}/#{camera_folder}/#{self.filename}"
 	end
 
 
 	def favorite_path
+		#TODO: Why is this commented out?
 		#return "#{FAVORITE_FOLDER}#{date_folder}/#{camera_folder}/#{self.filename}"
 		return "#{date_folder}/#{camera_folder}/#{self.filename}"
 	end
@@ -580,17 +588,40 @@ class Photo < ActiveRecord::Base
 		source_folder = 'public' + SOURCE_FOLDER
 		collection_folder = 'public' + COLLECTION_FOLDER
 		source = source_folder + self.path
-		destination = collection_folder + self.collection_path
+		destination = collection_folder #+ self.collection_path
 
 		Dir.mkdir(collection_folder) unless Dir.exists?(collection_folder)
-		`cp --update "#{source}" "#{destination}"`
+
+		#logger.info("\"#{ENV['ProgramW6432']}\\TeraCopy\\TeraCopy.exe\" \"#{source}\" \"#{destination}\" /OverwriteOlder")
+
+		# TODO: Make get_os a global method
+		# possible solution: http://stackoverflow.com/questions/15289065/rails-universal-global-function
+		case 'Windows' #get_os
+			when 'Linux'
+				`cp --update "#{source}" "#{destination}"`
+
+			when 'Windows'
+				# Specify full paths
+				source = Rails.root.join(source).to_s
+				destination = Rails.root.join(destination).to_s
+
+				# Use correct slashes
+				source.gsub!('/', '\\')
+				destination.gsub!('/', '\\')
+
+				command = "\"#{ENV['ProgramW6432']}\\TeraCopy\\TeraCopy.exe\" Copy \"#{source}\" \"#{destination}\" /OverwriteOlder"
+				#logger.info(command)
+				#`#{command}`
+				# Using "spawn" to continue execution instead of waiting for copy process to complete
+				spawn command
+		end
 	end
 
 
 	def delete_copies
 		collection_folder = 'public' + COLLECTION_FOLDER
 		collection_copy = collection_folder + self.collection_path
-		`rm #{collection_copy}` if File.exists?(collection_copy)
+		FileUtils.rm collection_copy if File.exists?(collection_copy)
 
 		# TODO: Delete favorite copy
 	end

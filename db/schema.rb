@@ -46,31 +46,31 @@ ActiveRecord::Schema.define(version: 20161105235101) do
     t.datetime "updated_at"
     t.string   "play_state"
     t.boolean  "auto_approve",         default: false
-    t.boolean  "collect_for_copying",  default: false
     t.boolean  "color_mode_normal",    default: true
     t.boolean  "color_mode_grayscale", default: false
     t.boolean  "color_mode_sepia",     default: false
     t.boolean  "effect_vignette",      default: false
+    t.boolean  "collect_for_copying",  default: false
   end
 
   create_table "photos", force: true do |t|
     t.integer  "camera_id"
     t.date     "date"
     t.string   "filename"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.string   "approval_state", default: "pending"
+    t.integer  "rotation",       default: 0
+    t.string   "md5"
+    t.boolean  "special",        default: false
+    t.string   "special_folder"
     t.datetime "exif_date"
     t.string   "exif_make"
     t.string   "exif_model"
     t.integer  "exif_width"
     t.integer  "exif_height"
-    t.integer  "rotation",       default: 0
-    t.datetime "created_at"
-    t.datetime "updated_at"
-    t.string   "approval_state", default: "pending"
     t.boolean  "favorite",       default: false
     t.boolean  "reject",         default: false
-    t.string   "md5"
-    t.boolean  "special",        default: false
-    t.string   "special_folder"
   end
 
 end

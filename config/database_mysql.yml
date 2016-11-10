@@ -1,26 +1,32 @@
-# SQLite version 3.x
+# MySQL.  Versions 5.0+ are recommended.
 #
-# Install the SQLite driver
-#   gem install sqlite3
+# Install the MYSQL driver
+#   gem install mysql2
 #
-# Ensure the SQLite gem is defined in your Gemfile
-#   gem 'sqlite3'
+# Ensure the MySQL gem is defined in your Gemfile
+#   gem 'mysql2'
+#
+# And be sure to use new-style password hashing:
+#   http://dev.mysql.com/doc/refman/5.0/en/old-client.html
 #
 default: &default
-  adapter: sqlite3
+  adapter: mysql2
+  encoding: utf8
   pool: 5
-  timeout: 5000
+  username: root
+  password:
+  socket: /var/run/mysqld/mysqld.sock
 
 development:
   <<: *default
-  database: db/ssm_development.sqlite3
+  database: ssm_development
 
 # Warning: The database defined as "test" will be erased and
 # re-generated from your development database when you run "rake".
 # Do not set this db to the same as development or production.
 test:
   <<: *default
-  database: db/ssm_test.sqlite3
+  database: ssm_test
 
 # As with config/secrets.yml, you never want to store sensitive information,
 # like your database password, in your source code. If your source code is
@@ -43,4 +49,6 @@ test:
 #
 production:
   <<: *default
-  database: db/ssm_production.sqlite3
+  database: ssm_production
+  username: ssm
+  password: <%= ENV['SSM_DATABASE_PASSWORD'] %>

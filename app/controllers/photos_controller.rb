@@ -353,21 +353,32 @@ class PhotosController < ApplicationController
 
 
 	def reset_and_rescan
-		# Delete database records
-		ClientPhoto.destroy_all	# Killing these first to prevent associations from triggering (causing massive slowdown)
-		Photo.destroy_all
-		Client.destroy_all
+		# Note: The "Rails Way" is to use Model.destroy_all,
+		# but all the before_destroy and after_destroy callbacks were killing performance.
+		# Especially when there are over 500 photos.
+		# Using Model.delete_all is immeasurably faster.
 
+		# Delete database records
+		logger.info("\tDeleting ClientPhoto records (#{ClientPhoto.all.count})...")
+		ClientPhoto.delete_all	# Killing these first to prevent associations from triggering (causing massive slowdown)
+		logger.info("\tDeleting Photo records (#{Photo.all.count})...")
+		Photo.delete_all
+		logger.info("\tDeleting Client records (#{Client.all.count})...")
+		Client.delete_all
+
+		# TODO: Use Ruby methods or detect OS & make OS-appropriate system calls
 		# Delete processed photo files
-		logger.debug("\tDeleting processed photo files...")
+		logger.info("\tDeleting processed photo files...")
 		`rm -Rf #{'public' + Photo::RESIZED_FOLDER}`
 		`rm -Rf #{'public' + Photo::ROTATED_FOLDER}`
 		#`rm -Rf #{'public' + Photo::REJECT_FOLDER}`
 		#`rm -Rf #{'public' + Photo::FAVOTITE_FOLDER}`
 		#`rm -Rf #{'public' + Photo::COLLECTION_FOLDER}`
-		logger.debug("\t\tDone!")
+		logger.info("\t\tDone!")
 
+		logger.info("\tScanning for new photos...")
 		Photo.scan_for_new_photos
+		logger.info("\t\tDone!")
 
 		@photos = Photo.pending
 		respond_to do |format|
