@@ -269,6 +269,12 @@ class Photo < ActiveRecord::Base
 
 		attribute_hash[:exif_date] = (attribute_hash[:exif_date] ? DateTime.strptime(attribute_hash[:exif_date], '%Y:%m:%d %H:%M:%S') : DEFAULT_DATE)
 
+		# Fix for "Binary data inserted for `string` type on column `exif_make/exif_model`" error messages with SQLite
+		if ActiveRecord::Base.configurations[Rails.env]['adapter'] == 'sqlite3'
+			(attribute_hash[:exif_make] = attribute_hash[:exif_make].encode) if attribute_hash[:exif_make]
+			(attribute_hash[:exif_model] = attribute_hash[:exif_model].encode) if attribute_hash[:exif_model]
+		end
+
 		return attribute_hash
 	end
 
@@ -584,11 +590,11 @@ class Photo < ActiveRecord::Base
 	end
 
 
-	def collect_for_copying
+	def collect_for_copying(detach_process = true)
 		source_folder = 'public' + SOURCE_FOLDER
 		collection_folder = 'public' + COLLECTION_FOLDER
 		source = source_folder + self.path
-		destination = collection_folder #+ self.collection_path
+		destination = collection_folder + self.collection_path
 
 		Dir.mkdir(collection_folder) unless Dir.exists?(collection_folder)
 
@@ -596,9 +602,10 @@ class Photo < ActiveRecord::Base
 
 		# TODO: Make get_os a global method
 		# possible solution: http://stackoverflow.com/questions/15289065/rails-universal-global-function
-		case 'Windows' #get_os
+		case get_os
 			when 'Linux'
 				`cp --update "#{source}" "#{destination}"`
+				pid = nil
 
 			when 'Windows'
 				# Specify full paths
@@ -609,12 +616,31 @@ class Photo < ActiveRecord::Base
 				source.gsub!('/', '\\')
 				destination.gsub!('/', '\\')
 
-				command = "\"#{ENV['ProgramW6432']}\\TeraCopy\\TeraCopy.exe\" Copy \"#{source}\" \"#{destination}\" /OverwriteOlder"
-				#logger.info(command)
-				#`#{command}`
-				# Using "spawn" to continue execution instead of waiting for copy process to complete
-				spawn command
+				unless File.exists(destination)
+					#command = "\"#{ENV['ProgramW6432']}\\TeraCopy\\TeraCopy.exe\" Copy \"#{source}\" \"#{destination}\" /OverwriteOlder"
+					#command = "echo f | xcopy \"#{source}\" \"#{destination}\" /Y"
+					command = "copy /y /z \"#{source}\" \"#{destination}\""
+					#logger.info(command)
+					#`#{command}`
+
+					# Using "spawn" to continue execution instead of waiting for copy process to complete
+					pid = spawn(command)
+				else
+					pid = nil
+				end
+			
+			else
+				# Unknown OS
+				pid = nil
 		end
+
+		if pid && detach_process
+			logger.info("Detaching process #{pid}")
+			Process.detach(pid)
+			pid = nil
+		end
+
+		return pid
 	end
 
 

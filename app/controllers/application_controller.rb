@@ -10,6 +10,7 @@ class ApplicationController < ActionController::Base
 	end
 
 
+=begin
 	def get_os
 		os = nil
 
@@ -28,6 +29,7 @@ class ApplicationController < ActionController::Base
 
 		return os
 	end
+=end
 
 
 	def get_ssm_volumes

@@ -392,9 +392,30 @@ class PhotosController < ApplicationController
 	def copy_collected
 		camera_photos = Photo.from_cameras.not_rejected
 		camera_photos_count = camera_photos.count
+		pids = []
 		camera_photos.each_with_index do |photo, index|
 			logger.info("Photos#copy_collected - collect_for_copying #{index+1}/#{camera_photos_count}")
-			photo.collect_for_copying
+			pids << photo.collect_for_copying(false)
+			
+			# Avoid running out of handles.  Hit limit of 256 on Win10 during testing.
+			if pids.count > 200
+				pids.compact!
+				pids.uniq!
+				# Clear out some of the pids.  No need to wait for them all to finish.
+				while pids.count > 100
+					# Work from front of array; these first processes have probably finished by now.
+					pid = pids.slice(0)
+					logger.info(pid)
+					Process.wait(pid)
+				end
+			end
+		end
+		pids.compact!
+		pids.uniq!
+		pids_count = pids.count
+		pids.each_with_index do |pid, index|
+			logger.info("Waiting for copy processes to complete - #{index + 1}/#{pids_count}")
+			Process.wait(pid)
 		end
 
 		ssm_volumes = get_ssm_volumes
@@ -403,7 +424,8 @@ class PhotosController < ApplicationController
 		collected_photos.sort!
 		collected_photos.each_with_index do |collected_photo, index|
 			ssm_volumes.each do |ssm_volume|
-				destination = "#{ssm_volume}/#{File.basename(collected_photo)}"
+				#destination = "#{ssm_volume}/#{File.basename(collected_photo)}"
+				destination = "#{ssm_volume}/"
 				logger.info("Photos#copy_collected - copying #{index+1}/#{camera_photos_count} - #{destination} ")
 
 				FileUtils.cp collected_photo, destination, verbose: false
