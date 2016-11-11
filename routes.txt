@@ -1,36 +1,38 @@
-                 Prefix Verb   URI Pattern                        Controller#Action
-          approve_photo GET    /photos/:id/approve(.:format)      photos#approve
-             deny_photo GET    /photos/:id/deny(.:format)         photos#deny
-         favorite_photo GET    /photos/:id/favorite(.:format)     photos#favorite
-           reject_photo GET    /photos/:id/reject(.:format)       photos#reject
-           rotate_photo GET    /photos/:id/rotate(.:format)       photos#rotate
-            queue_photo GET    /photos/:id/queue(.:format)        photos#queue
-            next_photos GET    /photos/next(.:format)             photos#next
-        controls_photos GET    /photos/controls(.:format)         photos#controls
-         pending_photos GET    /photos/pending(.:format)          photos#pending
-        approved_photos GET    /photos/approved(.:format)         photos#approved
-          denied_photos GET    /photos/denied(.:format)           photos#denied
-          recent_photos GET    /photos/recent(.:format)           photos#recent
-            scan_photos GET    /photos/scan(.:format)             photos#scan
-reset_and_rescan_photos GET    /photos/reset_and_rescan(.:format) photos#reset_and_rescan
-    auto_approve_photos GET    /photos/auto_approve(.:format)     photos#auto_approve
-  copy_collected_photos GET    /photos/copy_collected(.:format)   photos#copy_collected
-                        POST   /photos/copy_collected(.:format)   photos#copy_collected
-                 photos GET    /photos(.:format)                  photos#index
-                        POST   /photos(.:format)                  photos#create
-              new_photo GET    /photos/new(.:format)              photos#new
-             edit_photo GET    /photos/:id/edit(.:format)         photos#edit
-                  photo GET    /photos/:id(.:format)              photos#show
-                        PATCH  /photos/:id(.:format)              photos#update
-                        PUT    /photos/:id(.:format)              photos#update
-                        DELETE /photos/:id(.:format)              photos#destroy
-         state_controls GET    /controls/state(.:format)          controls#state
-               controls GET    /controls(.:format)                controls#index
-                        POST   /controls(.:format)                controls#create
-            new_control GET    /controls/new(.:format)            controls#new
-           edit_control GET    /controls/:id/edit(.:format)       controls#edit
-                control GET    /controls/:id(.:format)            controls#show
-                        PATCH  /controls/:id(.:format)            controls#update
-                        PUT    /controls/:id(.:format)            controls#update
-                        DELETE /controls/:id(.:format)            controls#destroy
-                        GET    /                                  redirect(301, /slideshow)
+                      Prefix Verb   URI Pattern                             Controller#Action
+               approve_photo GET    /photos/:id/approve(.:format)           photos#approve
+                  deny_photo GET    /photos/:id/deny(.:format)              photos#deny
+              favorite_photo GET    /photos/:id/favorite(.:format)          photos#favorite
+                reject_photo GET    /photos/:id/reject(.:format)            photos#reject
+                rotate_photo GET    /photos/:id/rotate(.:format)            photos#rotate
+                 queue_photo GET    /photos/:id/queue(.:format)             photos#queue
+                 next_photos GET    /photos/next(.:format)                  photos#next
+             controls_photos GET    /photos/controls(.:format)              photos#controls
+              pending_photos GET    /photos/pending(.:format)               photos#pending
+             approved_photos GET    /photos/approved(.:format)              photos#approved
+               denied_photos GET    /photos/denied(.:format)                photos#denied
+               recent_photos GET    /photos/recent(.:format)                photos#recent
+                 scan_photos GET    /photos/scan(.:format)                  photos#scan
+     reset_and_rescan_photos GET    /photos/reset_and_rescan(.:format)      photos#reset_and_rescan
+         auto_approve_photos GET    /photos/auto_approve(.:format)          photos#auto_approve
+copy_collected_to_usb_photos GET    /photos/copy_collected_to_usb(.:format) photos#copy_collected_to_usb
+                             POST   /photos/copy_collected_to_usb(.:format) photos#copy_collected_to_usb
+           rename_usb_photos GET    /photos/rename_usb(.:format)            photos#rename_usb
+                             POST   /photos/rename_usb(.:format)            photos#rename_usb
+                      photos GET    /photos(.:format)                       photos#index
+                             POST   /photos(.:format)                       photos#create
+                   new_photo GET    /photos/new(.:format)                   photos#new
+                  edit_photo GET    /photos/:id/edit(.:format)              photos#edit
+                       photo GET    /photos/:id(.:format)                   photos#show
+                             PATCH  /photos/:id(.:format)                   photos#update
+                             PUT    /photos/:id(.:format)                   photos#update
+                             DELETE /photos/:id(.:format)                   photos#destroy
+              state_controls GET    /controls/state(.:format)               controls#state
+                    controls GET    /controls(.:format)                     controls#index
+                             POST   /controls(.:format)                     controls#create
+                 new_control GET    /controls/new(.:format)                 controls#new
+                edit_control GET    /controls/:id/edit(.:format)            controls#edit
+                     control GET    /controls/:id(.:format)                 controls#show
+                             PATCH  /controls/:id(.:format)                 controls#update
+                             PUT    /controls/:id(.:format)                 controls#update
+                             DELETE /controls/:id(.:format)                 controls#destroy
+                             GET    /                                       redirect(301, /slideshow)
