@@ -590,57 +590,31 @@ class Photo < ActiveRecord::Base
 	end
 
 
-	def collect_for_copying(detach_process = true)
+	def collect_for_copying
 		source_folder = 'public' + SOURCE_FOLDER
 		collection_folder = 'public' + COLLECTION_FOLDER
-		source = source_folder + self.path
-		destination = collection_folder + self.collection_path
+		source = Rails.root.join(source_folder + self.path).to_path
+		destination = Rails.root.join(collection_folder + self.collection_path).to_path
 
 		Dir.mkdir(collection_folder) unless Dir.exists?(collection_folder)
 
-		#logger.info("\"#{ENV['ProgramW6432']}\\TeraCopy\\TeraCopy.exe\" \"#{source}\" \"#{destination}\" /OverwriteOlder")
-
-		# TODO: Make get_os a global method
-		# possible solution: http://stackoverflow.com/questions/15289065/rails-universal-global-function
 		case get_os
 			when 'Linux'
 				`cp --update "#{source}" "#{destination}"`
-				pid = nil
 
 			when 'Windows'
-				# Specify full paths
-				source = Rails.root.join(source).to_s
-				destination = Rails.root.join(destination).to_s
-
 				# Use correct slashes
 				source.gsub!('/', '\\')
 				destination.gsub!('/', '\\')
 
-				unless File.exists(destination)
-					#command = "\"#{ENV['ProgramW6432']}\\TeraCopy\\TeraCopy.exe\" Copy \"#{source}\" \"#{destination}\" /OverwriteOlder"
-					#command = "echo f | xcopy \"#{source}\" \"#{destination}\" /Y"
+				unless File.exists?(destination)
 					command = "copy /y /z \"#{source}\" \"#{destination}\""
-					#logger.info(command)
-					#`#{command}`
-
-					# Using "spawn" to continue execution instead of waiting for copy process to complete
-					pid = spawn(command)
-				else
-					pid = nil
+					`#{command}`
 				end
 			
 			else
 				# Unknown OS
-				pid = nil
 		end
-
-		if pid && detach_process
-			logger.info("Detaching process #{pid}")
-			Process.detach(pid)
-			pid = nil
-		end
-
-		return pid
 	end
 
 

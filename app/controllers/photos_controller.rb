@@ -392,46 +392,29 @@ class PhotosController < ApplicationController
 	def copy_collected
 		camera_photos = Photo.from_cameras.not_rejected
 		camera_photos_count = camera_photos.count
-		pids = []
 		camera_photos.each_with_index do |photo, index|
 			logger.info("Photos#copy_collected - collect_for_copying #{index+1}/#{camera_photos_count}")
-			pids << photo.collect_for_copying(false)
-			
-			# Avoid running out of handles.  Hit limit of 256 on Win10 during testing.
-			if pids.count > 200
-				pids.compact!
-				pids.uniq!
-				# Clear out some of the pids.  No need to wait for them all to finish.
-				while pids.count > 100
-					# Work from front of array; these first processes have probably finished by now.
-					pid = pids.slice(0)
-					logger.info(pid)
-					Process.wait(pid)
-				end
-			end
-		end
-		pids.compact!
-		pids.uniq!
-		pids_count = pids.count
-		pids.each_with_index do |pid, index|
-			logger.info("Waiting for copy processes to complete - #{index + 1}/#{pids_count}")
-			Process.wait(pid)
+			photo.collect_for_copying
 		end
 
 		ssm_volumes = get_ssm_volumes
 
 		collected_photos = Dir.glob('public' + Photo::COLLECTION_FOLDER + '**/*.{JPG,PNG}', File::FNM_CASEFOLD)
 		collected_photos.sort!
+		start_time = Time.now
 		collected_photos.each_with_index do |collected_photo, index|
 			ssm_volumes.each do |ssm_volume|
-				#destination = "#{ssm_volume}/#{File.basename(collected_photo)}"
-				destination = "#{ssm_volume}/"
-				logger.info("Photos#copy_collected - copying #{index+1}/#{camera_photos_count} - #{destination} ")
+				destination = "#{ssm_volume}/#{File.basename(collected_photo)}"
+				logger.info("Photos#copy_collected - copying #{index+1}/#{camera_photos_count} - #{destination}")
 
-				FileUtils.cp collected_photo, destination, verbose: false
+				(FileUtils.cp collected_photo, destination, verbose: false) unless File.exists?(destination)
 				# TODO: replace FileUtils.cp with OS-specific calls for increased control over the copy processed
 			end
 		end
+		end_time = Time.now
+		logger.info("Start time: #{start_time}")
+		logger.info("End time: #{end_time}")
+		logger.info("Transfer time: #{Time.at(end_time - start_time).utc}")
 
 		respond_to do |format|
 			format.js { render( json: nil, status: :ok ) }
@@ -449,13 +432,13 @@ class PhotosController < ApplicationController
 			filenames = Dir.glob(ssm_volume + '/*.{JPG,PNG}', File::FNM_CASEFOLD)
 			filenames_count = filenames.count
 			filenames.sort!
-			logger.debug(filenames)
+			#logger.debug(filenames)
 			filenames.each_with_index do |filename, filename_index|
 				new_filename = "#{prefix} #{(filename_index + 1).to_s.rjust(4, '0')}#{File.extname(filename)}".gsub(/[^a-zA-Z0-9_\.\-]/, '_')
 				new_filename = "#{ssm_volume}/#{new_filename}"
 
 				logger.info("Photos#rename_usb - renaming #{filename_index+1}/#{filenames_count}")
-				logger.debug("#{filename} --> #{new_filename}")
+				#logger.debug("#{filename} --> #{new_filename}")
 				FileUtils.mv(filename, new_filename, verbose: true) unless ((filename == new_filename) || (filenames.include?(new_filename)))
 			end
 		end
