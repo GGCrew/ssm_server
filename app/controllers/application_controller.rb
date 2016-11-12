@@ -42,7 +42,6 @@ class ApplicationController < ActionController::Base
 				# Linux
 				volumes = `df -h`
 				volumes = volumes.split("\n")
-				logger.debug(volumes)
 				volumes.each do |volume|
 					# /dev/sdb1          7.7G   34M  7.6G   1% /media/randy/SNAPSHOW
 					regex_volume = volume.match(/\s(\S*\/SnapShow\d*)$/i)
@@ -58,7 +57,6 @@ class ApplicationController < ActionController::Base
 				volumes.collect!{|i| i.split(' ')}               # split "D:    SNAPSHOW     " into ["D:", "SNAPSHOW"]
 				volumes.select!{|i| i.count == 2}                # remove items without a volumename (eg ["C:"])
 				volumes.reject!{|i| (i[1] =~ /SnapShow/i).nil?}  # keep items with "SnapShow" volume name (case-insensitive)
-				logger.debug(volumes)
 				ssm_volumes = volumes.collect{|i| i[0]}				   # keep only the drive letters (eg ["D:", "E:"])
 		end
 

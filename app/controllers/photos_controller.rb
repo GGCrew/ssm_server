@@ -24,11 +24,11 @@ class PhotosController < ApplicationController
 	]
 
 
-	after_action :collect_for_copying, only: [
+	after_action :do_copy_action, only: [
 		:approve,
 		:deny,
 		:favorite
-	], if: -> { Control.last.collect_for_copying && @photo.from_camera?}
+	], if: -> { (Control.last.copy_action != Control::COPY_ACTIONS[0]) && @photo.from_camera?}
 
 
 	#..#
@@ -397,28 +397,27 @@ class PhotosController < ApplicationController
 			photo.collect_for_copying
 		end
 
+		source = Rails.root.join('public' + Photo::COLLECTION_FOLDER).to_path
+		logger.debug(source)
+
 		ssm_volumes = get_ssm_volumes
-		ssm_volume_count = ssm_volumes.count
+		ssm_volumes_count = ssm_volumes.count
 
 		case get_os
 			when 'Linux'
-				collected_photos = Dir.glob('public' + Photo::COLLECTION_FOLDER + '**/*.{JPG,PNG}', File::FNM_CASEFOLD)
-				collected_photos.sort!
-				collected_photos.each_with_index do |collected_photo, index|
-					ssm_volumes.each do |ssm_volume|
-						#destination = "#{ssm_volume}/#{File.basename(collected_photo)}"
-						destination = "#{ssm_volume}/"
-						logger.info("Photos#copy_collected_to_usb - copying #{index+1}/#{camera_photos_count} - #{destination} ")
-
-						FileUtils.cp collected_photo, destination, verbose: false
-						# TODO: replace FileUtils.cp with OS-specific calls for increased control over the copy process
-					end
+				ssm_volumes.each_with_index do |ssm_volume, ssm_volume_index|
+					logger.info("#{ssm_volume_index + 1}/#{ssm_volumes_count} - Copying from #{source} to #{ssm_volume}")
+					command = "cp --recursive --update \"#{source}.\" \"#{ssm_volume}\""
+					logger.info(command)
+					#`#{command}`
+					pid = Process.spawn(command)
+					Process.detach(pid)
 				end
 
 			when 'Windows'
 				source = Rails.root.join('public' + Photo::COLLECTION_FOLDER).to_path
 				ssm_volumes.each_with_index do |ssm_volume, ssm_volume_index|
-					logger.info("#{ssm_volume_index + 1}/#{ssm_volume_count} - Copying from #{source} to #{ssm_volume}")
+					logger.info("#{ssm_volume_index + 1}/#{ssm_volumes_count} - Copying from #{source} to #{ssm_volume}")
 					command = "robocopy \"#{source}\" \"#{ssm_volume}\" /R:5 /W:15 /XA:SH /Z /NP"
 					logger.info(command)
 					#`#{command}`
@@ -430,10 +429,6 @@ class PhotosController < ApplicationController
 				logger.info("Photos#copy_collected_to_usb - Unexpected OS!")
 
 		end
-		end_time = Time.now
-		logger.info("Start time: #{start_time}")
-		logger.info("End time: #{end_time}")
-		logger.info("Transfer time: #{Time.at(end_time - start_time).utc}")
 
 		respond_to do |format|
 			format.js { render( json: nil, status: :ok ) }
@@ -522,8 +517,27 @@ class PhotosController < ApplicationController
     end
 
 
-		def collect_for_copying
-			@photo.collect_for_copying
+		def do_copy_action
+			case Control.last.copy_action
+				when Control::COPY_ACTIONS[0]
+					# Do nothing
+
+				when Control::COPY_ACTIONS[1]
+					@photo.collect_for_copying
+
+				when Control::COPY_ACTIONS[2]
+					@photo.collect_for_copying
+
+					source = Rails.root.join('public' + Photo::COLLECTION_FOLDER, @photo.collection_path).to_path
+
+					ssm_volumes = get_ssm_volumes
+					ssm_volumes.each do |ssm_volume|
+						destination = "#{ssm_volume}/"
+
+						FileUtils.cp source, destination, verbose: true
+						# TODO: replace FileUtils.cp with OS-specific calls for increased control over the copy process
+					end
+			end
 		end
 
 end

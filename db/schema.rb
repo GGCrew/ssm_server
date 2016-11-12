@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20161105235101) do
+ActiveRecord::Schema.define(version: 20161112091428) do
 
   create_table "client_photo_queues", force: true do |t|
     t.integer  "client_id"
@@ -50,7 +50,7 @@ ActiveRecord::Schema.define(version: 20161105235101) do
     t.boolean  "color_mode_grayscale", default: false
     t.boolean  "color_mode_sepia",     default: false
     t.boolean  "effect_vignette",      default: false
-    t.boolean  "collect_for_copying",  default: false
+    t.string   "copy_action"
   end
 
   create_table "photos", force: true do |t|

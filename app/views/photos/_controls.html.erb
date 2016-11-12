@@ -72,18 +72,22 @@
 				Copy Options
 			</th>
 			<td>
-				<%= form_for(@control, remote: true) do |form| -%><%= form.check_box(:collect_for_copying, class: '', onclick: '$(this).submit();') -%><%= form.label(:collect_for_copying, 'Prep for copy'	) -%><%- end -%>
+				<%= form_for(@control, remote: true) do |form| -%>
+					<%- for copy_action in Control::COPY_ACTIONS -%>
+						<%= form.radio_button(:copy_action, copy_action, class: '', onclick: '$(this).submit();') -%><%= form.label("copy_action_#{copy_action}".parameterize.underscore.to_sym, copy_action) -%><br />
+					<%- end -%>
+				<%- end -%>
 			</td>
-			<td>
+			<td colspan="2">
 				<%= link_to(
-					'Copy to USB',
+					'Prep and copy all photos to USB',
 					copy_collected_to_usb_photos_path,
 					{method: :post,	remote: true, class: ''}
 				) -%>
 			</td>
 			<td>
 				<%= link_to(
-					'Rename USB files',
+					'Rename USB photos',
 					rename_usb_photos_path,
 					{method: :post, remote: true, class: ''}
 				) -%>
