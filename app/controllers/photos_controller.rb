@@ -393,7 +393,7 @@ class PhotosController < ApplicationController
 		camera_photos = Photo.from_cameras.not_rejected
 		camera_photos_count = camera_photos.count
 		camera_photos.each_with_index do |photo, index|
-			logger.info("Photos#copy_collected_to_usb - collect_for_copying #{index+1}/#{camera_photos_count}")
+			logger.info("#{index+1}/#{camera_photos_count} - Photos#copy_collected_to_usb - collect_for_copying")
 			photo.collect_for_copying
 		end
 
@@ -419,7 +419,8 @@ class PhotosController < ApplicationController
 				source = Rails.root.join('public' + Photo::COLLECTION_FOLDER).to_path
 				ssm_volumes.each_with_index do |ssm_volume, ssm_volume_index|
 					logger.info("#{ssm_volume_index + 1}/#{ssm_volume_count} - Copying from #{source} to #{ssm_volume}")
-					command = "robocopy \"#{source}\" \"#{ssm_volume}\" /R:5 /W:15 /MT:8 /XA:SH /Z"
+					command = "robocopy \"#{source}\" \"#{ssm_volume}\" /R:5 /W:15 /XA:SH /Z /NP"
+					logger.info(command)
 					#`#{command}`
 					pid = Process.spawn(command)
 					Process.detach(pid)
