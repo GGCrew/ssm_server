@@ -418,7 +418,7 @@ class PhotosController < ApplicationController
 				source = Rails.root.join('public' + Photo::COLLECTION_FOLDER).to_path
 				ssm_volumes.each_with_index do |ssm_volume, ssm_volume_index|
 					logger.info("#{ssm_volume_index + 1}/#{ssm_volumes_count} - Copying from #{source} to #{ssm_volume}")
-					command = "robocopy \"#{source}\" \"#{ssm_volume}\" /R:5 /W:15 /XA:SH /Z /NP"
+					command = "start \"Robocopy to #{ssm_volume}\" robocopy \"#{source}\" \"#{ssm_volume}\" /R:5 /W:15 /XA:SH /Z /NP"
 					logger.info(command)
 					#`#{command}`
 					pid = Process.spawn(command)
