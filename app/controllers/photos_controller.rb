@@ -393,7 +393,7 @@ class PhotosController < ApplicationController
 		camera_photos = Photo.from_cameras.not_rejected
 		camera_photos_count = camera_photos.count
 		camera_photos.each_with_index do |photo, index|
-			logger.info("#{index+1}/#{camera_photos_count} - Photos#copy_collected_to_usb - collect_for_copying")
+			logger.info("#{index+1}/#{camera_photos_count} - Photos#collect_all - collect_for_copying")
 			photo.collect_for_copying
 		end
 	end
@@ -405,34 +405,32 @@ class PhotosController < ApplicationController
 		source = Rails.root.join('public' + Photo::COLLECTION_FOLDER).to_path
 		logger.debug(source)
 
-		ssm_volumes = get_ssm_volumes
-		ssm_volumes_count = ssm_volumes.count
-
+		command_template = nil
 		case get_os
 			when 'Linux'
-				ssm_volumes.each_with_index do |ssm_volume, ssm_volume_index|
-					logger.info("#{ssm_volume_index + 1}/#{ssm_volumes_count} - Copying from #{source} to #{ssm_volume}")
-					command = "cp --recursive --update \"#{source}.\" \"#{ssm_volume}\""
-					logger.info(command)
-					#`#{command}`
-					pid = Process.spawn(command)
-					Process.detach(pid)
-				end
+				command_template = "cp --recursive --update \"%{source}.\" \"%{destination}\""
 
 			when 'Windows'
-				source = Rails.root.join('public' + Photo::COLLECTION_FOLDER).to_path
-				ssm_volumes.each_with_index do |ssm_volume, ssm_volume_index|
-					logger.info("#{ssm_volume_index + 1}/#{ssm_volumes_count} - Copying from #{source} to #{ssm_volume}")
-					command = "start \"Robocopy to #{ssm_volume}\" robocopy \"#{source}\" \"#{ssm_volume}\" /R:5 /W:15 /XA:SH /Z /NP"
-					logger.info(command)
-					#`#{command}`
-					pid = Process.spawn(command)
-					Process.detach(pid)
-				end
+				command_template = "start \"Robocopy to %{destination}\" robocopy \"%{source}\" \"%{destination}\" /R:5 /W:15 /XA:SH /Z /NP"
 
 			else
 				logger.info("Photos#copy_collected_to_usb - Unexpected OS!")
 
+		end
+
+		if command_template
+			destinations = get_ssm_volumes
+			local_folder = get_local_folder
+			(destinations << local_folder) if local_folder
+			logger.info "destinations: #{destinations}"
+			destinations_count = destinations.count
+			destinations.each_with_index do |destination, destination_index|
+				logger.info("#{destination_index + 1}/#{destinations_count} - Copying from #{source} to #{destination}")
+				command = command_template % {source: source, destination: destination}
+				logger.info(command)
+				pid = Process.spawn(command)
+				Process.detach(pid)
+			end
 		end
 
 		respond_to do |format|
@@ -446,21 +444,45 @@ class PhotosController < ApplicationController
 	def rename_usb
 		# TODO: prompt for prefix (eg Bride and Groom)
 		prefix = 'Harris and Yuki'
-		ssm_volumes = get_ssm_volumes
-		ssm_volumes_count = ssm_volumes.count
-		ssm_volumes.each_with_index do |ssm_volume, ssm_volume_index|
-			filenames = Dir.glob(ssm_volume + '/*.{JPG,PNG}', File::FNM_CASEFOLD)
+
+		case get_os
+			when 'Linux'
+				script_header = '#!/bin/bash'
+				script_filename_template = 'rename_%{index}.sh'
+				script_command_template = '"%{script_filename}"'
+				rename_command_template = 'mv --no-target-directory --update --verbose "%{filename}" "%{folder}/%{new_filename}"'
+
+			when 'Windows'
+				script_header = nil
+				script_filename_template = 'rename_%{index}.bat'
+				script_command_template = 'start "Renaming USB Files" "%{script_filename}"'
+				rename_command_template = 'ren "%{filename}" "%{new_filename}"'
+
+			else
+				logger.info("Photos#rename_usb - Unexpected OS!")
+
+		end
+
+		folders = get_ssm_volumes
+		local_folder = get_local_folder
+		(folders << local_folder) if local_folder
+		folders_count = folders.count
+		folders.each_with_index do |folder, folder_index|
+			filenames = Dir.glob(folder + '/*.{JPG,PNG}', File::FNM_CASEFOLD)
 			filenames_count = filenames.count
 			filenames.sort!
-			#logger.debug(filenames)
-			filenames.each_with_index do |filename, filename_index|
-				new_filename = "#{prefix} #{(filename_index + 1).to_s.rjust(4, '0')}#{File.extname(filename)}".gsub(/[^a-zA-Z0-9_\.\-]/, '_')
-				new_filename = "#{ssm_volume}/#{new_filename}"
 
-				logger.info("Photos#rename_usb - renaming #{filename_index+1}/#{filenames_count}")
-				#logger.debug("#{filename} --> #{new_filename}")
-				FileUtils.mv(filename, new_filename, verbose: true) unless ((filename == new_filename) || (filenames.include?(new_filename)))
+			script_filename = Rails.root.join('tmp', script_filename_template % {index: folder_index}).to_path
+			File.open(script_filename, 'w', 0755) do |script_file|
+				(script_file.puts script_header) if script_header
+				filenames.each_with_index do |filename, filename_index|
+					new_filename = "#{prefix} #{(filename_index + 1).to_s.rjust(4, '0')}#{File.extname(filename)}".gsub(/[^a-zA-Z0-9_\.\-]/, '_')
+
+					script_file.puts rename_command_template % {folder: folder, filename: filename, new_filename: new_filename}
+				end
 			end
+			pid = Process.spawn(script_command_template % {script_filename: script_filename})
+			Process.detach(pid)
 		end
 
 		respond_to do |format|
@@ -488,6 +510,7 @@ class PhotosController < ApplicationController
 	# This is redundantly repeated in photos_helper.  Best way to DRY?
 	# Thinking of crafting a nasty-looking scope to move this functionality to the Photo model
 	def get_recent_photos_count
+		# TODO: Adjust counts downward when a client goes offline
 		client_count = Client.count
 		photo_approved_count = Photo.approved.count
 

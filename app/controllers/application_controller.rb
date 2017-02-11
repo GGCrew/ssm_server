@@ -65,4 +65,29 @@ class ApplicationController < ActionController::Base
 		return ssm_volumes.sort
 	end
 
+
+	def get_local_folder
+		local_folder = nil
+
+		case get_os
+			when 'Linux'
+				# ~
+				user_folder = ENV['HOME']
+
+			when 'Windows'
+				# %USERPROFILE%\Desktop
+				user_folder = Win32::Registry::HKEY_CURRENT_USER.open('Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders')['Desktop']
+		end
+
+		if user_folder
+			# TODO: figure out a better folder than today's date
+			local_folder = File.join(user_folder, Date.today.strftime('%Y-%m-%d'))
+			Dir.mkdir(local_folder) unless Dir.exists?(local_folder)
+		else
+			logger.info('get_local_folder - No user folder set!!!')
+		end
+
+		return local_folder
+	end
+
 end
