@@ -445,7 +445,8 @@ class PhotosController < ApplicationController
 		# TODO: prompt for prefix (eg Bride and Groom)
 		prefix = 'Harris and Yuki'
 
-		case get_os
+		os = get_os
+		case os
 			when 'Linux'
 				script_header = '#!/bin/bash'
 				script_filename_template = 'rename_%{index}.sh'
@@ -453,9 +454,9 @@ class PhotosController < ApplicationController
 				rename_command_template = 'mv --no-target-directory --update --verbose "%{filename}" "%{folder}/%{new_filename}"'
 
 			when 'Windows'
-				script_header = nil
+				script_header = '@echo off'
 				script_filename_template = 'rename_%{index}.bat'
-				script_command_template = 'start "Renaming USB Files" "%{script_filename}"'
+				script_command_template = 'start "Renaming USB Files" CMD /C "%{script_filename}"'
 				rename_command_template = 'ren "%{filename}" "%{new_filename}"'
 
 			else
@@ -476,6 +477,7 @@ class PhotosController < ApplicationController
 			File.open(script_filename, 'w', 0755) do |script_file|
 				(script_file.puts script_header) if script_header
 				filenames.each_with_index do |filename, filename_index|
+					filename.gsub!('/', '\\\\') if os == 'Windows'
 					new_filename = "#{prefix} #{(filename_index + 1).to_s.rjust(4, '0')}#{File.extname(filename)}".gsub(/[^a-zA-Z0-9_\.\-]/, '_')
 
 					script_file.puts rename_command_template % {folder: folder, filename: filename, new_filename: new_filename}
