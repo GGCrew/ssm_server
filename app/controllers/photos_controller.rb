@@ -389,13 +389,18 @@ class PhotosController < ApplicationController
 	end
 
 
-	def copy_collected_to_usb
+	def collect_all
 		camera_photos = Photo.from_cameras.not_rejected
 		camera_photos_count = camera_photos.count
 		camera_photos.each_with_index do |photo, index|
 			logger.info("#{index+1}/#{camera_photos_count} - Photos#copy_collected_to_usb - collect_for_copying")
 			photo.collect_for_copying
 		end
+	end
+
+
+	def collect_all_and_copy_all_to_usb
+		collect_all
 
 		source = Rails.root.join('public' + Photo::COLLECTION_FOLDER).to_path
 		logger.debug(source)
@@ -439,7 +444,8 @@ class PhotosController < ApplicationController
 
 
 	def rename_usb
-		prefix = 'test'
+		# TODO: prompt for prefix (eg Bride and Groom)
+		prefix = 'Harris and Yuki'
 		ssm_volumes = get_ssm_volumes
 		ssm_volumes_count = ssm_volumes.count
 		ssm_volumes.each_with_index do |ssm_volume, ssm_volume_index|

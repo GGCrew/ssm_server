@@ -71,7 +71,7 @@
 			<th>
 				Copy Options
 			</th>
-			<td>
+			<td colspan="2">
 				<%= form_for(@control, remote: true) do |form| -%>
 					<%- for copy_action in Control::COPY_ACTIONS -%>
 						<%= form.radio_button(:copy_action, copy_action, class: '', onclick: '$(this).submit();') -%><%= form.label("copy_action_#{copy_action}".parameterize.underscore.to_sym, copy_action) -%><br />
@@ -80,12 +80,18 @@
 			</td>
 			<td colspan="2">
 				<%= link_to(
+					'Prep all for copying',
+					collect_all_photos_path,
+					{method: :post,	remote: true, class: ''}
+				) -%><br />
+				<%= link_to(
 					'Prep and copy all photos to USB',
-					copy_collected_to_usb_photos_path,
+					collect_all_and_copy_all_to_usb_photos_path,
 					{method: :post,	remote: true, class: ''}
 				) -%>
 			</td>
 			<td>
+				<%- # TODO: add JS warning "Can't be undone!" -%>
 				<%= link_to(
 					'Rename USB photos',
 					rename_usb_photos_path,

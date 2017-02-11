@@ -19,8 +19,10 @@ Rails.application.routes.draw do
 			get 'scan'
 			get 'reset_and_rescan'
 			get 'auto_approve'
-			get 'copy_collected_to_usb'
-			post 'copy_collected_to_usb'
+			get 'collect_all'
+			post 'collect_all'
+			get 'collect_all_and_copy_all_to_usb'
+			post 'collect_all_and_copy_all_to_usb'
 			get 'rename_usb'
 			post 'rename_usb'
 		end
