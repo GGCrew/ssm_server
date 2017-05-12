@@ -84,9 +84,9 @@ class Photo < ActiveRecord::Base
 		path = source_path.dup
 
 		# Strip superfluous folders from path
-		path.gsub!(/public#{SOURCE_FOLDER}/i, '')
+		photo_path = path.gsub(/public#{SOURCE_FOLDER}/i, '')
 
-		path_components = path.split('/')
+		path_components = photo_path.split('/')
 
 		case path_components.count
 			when 3
@@ -111,10 +111,10 @@ class Photo < ActiveRecord::Base
 
 			else
 				# Yikes!  Unexpected number of path components!
-				logger.info "!!!!! Photo.path_to_hash -- Unexpected number of path components: #{path_components.count} (#{path})"
+				logger.info "!!!!! Photo.path_to_hash -- Unexpected number of path components: #{path_components.count} (#{photo_path})"
 		end
 
-		hash.merge!(md5: Digest::MD5.file('public' + Photo::SOURCE_FOLDER + '/' + path).hexdigest) if generate_md5
+		hash.merge!(md5: Digest::MD5.file(path).hexdigest) if generate_md5
 
 		return hash
 	end
