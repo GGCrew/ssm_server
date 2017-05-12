@@ -535,11 +535,12 @@ class Photo < ActiveRecord::Base
 
 		# Load source
 		#FreeImage::Bitmap.open(source_folder + path, FreeImage::AbstractSource::Decoder::JPEG_EXIFROTATE) do |image|
-		logger.debug("\tLoading #{source_folder + path}")
+		source_path = Dir.glob(source_folder + path, File::FNM_CASEFOLD).first # Get path with correct capitalization
+		logger.debug("\tLoading #{source_path}")
 		FreeImage::Bitmap.new(
 			FreeImage.FreeImage_Load(
-				FreeImage::FreeImage_GetFIFFromFilename(source_folder + path),
-				source_folder + path,
+				FreeImage::FreeImage_GetFIFFromFilename(source_path),
+				source_path,
 				FreeImage::AbstractSource::Decoder::JPEG_EXIFROTATE
 			)
 		) do |rotated_image|
@@ -563,7 +564,8 @@ class Photo < ActiveRecord::Base
 				scaled_image = rotated_image.rescale(new_width, new_height, :bilinear)
 
 				# Save rotated & scaled copy
-				logger.debug("\tSaving #{resized_folder + path}")
+				resized_path = resized_folder + path
+				logger.debug("\tSaving #{resized_path}")
 				begin
 					scaled_image.save(resized_folder + path, :jpeg, save_flags)
 				rescue
@@ -576,7 +578,7 @@ class Photo < ActiveRecord::Base
 						save_folder << "/#{path_component}"
 						Dir.mkdir(save_folder) unless Dir.exists?(save_folder)
 					end
-					scaled_image.save(resized_folder + path, :jpeg, save_flags)
+					scaled_image.save(resized_path, :jpeg, save_flags)
 				end
 
 			rescue
