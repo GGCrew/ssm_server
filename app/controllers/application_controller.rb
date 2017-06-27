@@ -81,6 +81,7 @@ class ApplicationController < ActionController::Base
 
 		if user_folder
 			# TODO: figure out a better folder than today's date
+			user_folder = File.realdirpath(user_folder)
 			local_folder = File.join(user_folder, Date.today.strftime('%Y-%m-%d'))
 			Dir.mkdir(local_folder) unless Dir.exists?(local_folder)
 		else
