@@ -5,8 +5,8 @@ require File.expand_path('../application', __FILE__)
 def get_os
 	os = nil
 
-	case RUBY_PLATFORM
-		when /linux$/i
+	case RbConfig::CONFIG['host_os']
+		when /linux/i
 			#logger.info('get_os - Linux OS detected.')
 			os = 'Linux'
 
