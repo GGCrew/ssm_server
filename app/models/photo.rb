@@ -592,6 +592,35 @@ class Photo < ActiveRecord::Base
 	end
 
 
+	def self.collect_for_copying
+		source_folder = 'public' + SOURCE_FOLDER
+		collection_folder = 'public' + COLLECTION_FOLDER
+		source = Rails.root.join(source_folder + self.path).to_path
+		destination = Rails.root.join(collection_folder + self.collection_path).to_path
+
+		Dir.mkdir(collection_folder) unless Dir.exists?(collection_folder)
+
+		case get_os
+			when 'Linux', 'WSL'
+				#`cp --update "#{source}" "#{destination}"`
+				# Create & execute a Bash script to copy all the files in 1 process instead of each file individually
+
+			when 'Windows'
+				# Use correct slashes
+				source.gsub!('/', '\\')
+				destination.gsub!('/', '\\')
+
+				unless File.exists?(destination)
+					command = "copy /y /z \"#{source}\" \"#{destination}\""
+					`#{command}`
+				end
+			
+			else
+				# Unknown OS
+		end
+	end
+
+
 	def collect_for_copying
 		source_folder = 'public' + SOURCE_FOLDER
 		collection_folder = 'public' + COLLECTION_FOLDER
@@ -601,7 +630,7 @@ class Photo < ActiveRecord::Base
 		Dir.mkdir(collection_folder) unless Dir.exists?(collection_folder)
 
 		case get_os
-			when 'Linux'
+			when 'Linux', 'WSL'
 				`cp --update "#{source}" "#{destination}"`
 
 			when 'Windows'

@@ -407,7 +407,7 @@ class PhotosController < ApplicationController
 
 		command_template = nil
 		case get_os
-			when 'Linux'
+			when 'Linux', 'WSL'
 				command_template = "cp --recursive --update \"%{source}.\" \"%{destination}\""
 
 			when 'Windows'
@@ -447,7 +447,7 @@ class PhotosController < ApplicationController
 
 		os = get_os
 		case os
-			when 'Linux'
+			when 'Linux', 'WSL'
 				script_header = '#!/bin/bash'
 				script_filename_template = 'rename_%{index}.sh'
 				script_command_template = '"%{script_filename}"'

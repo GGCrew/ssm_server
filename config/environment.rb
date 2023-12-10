@@ -10,6 +10,10 @@ def get_os
 			#logger.info('get_os - Linux OS detected.')
 			os = 'Linux'
 
+			# Check if we're running via Windows Subsytem for Linux
+			osrelease = `cat /proc/sys/kernel/osrelease`.strip
+			os = 'WSL' if osrelease.match(/(?:Microsoft|WSL)/i)
+
 		when 'i386-mingw32'
 			#logger.info('get_os - Windows OS detected.')
 			os = 'Windows'
